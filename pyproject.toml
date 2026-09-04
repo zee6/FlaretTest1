@@ -14,6 +14,7 @@ dev = ["pytest>=8"]
 
 [project.scripts]
 football1-download-epl = "football1.ingest.football_data:main"
+football1-audit-data = "football1.audit:main"
 football1-build-db = "football1.build_db:main"
 
 [tool.setuptools.packages.find]
