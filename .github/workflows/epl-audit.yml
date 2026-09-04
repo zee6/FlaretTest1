@@ -112,10 +112,32 @@ jobs:
           print('MODEL OOS matches=', m['matches'], 'log_loss=', round(m['log_loss'], 6), 'brier=', round(m['brier'], 6), 'accuracy=', round(m['accuracy'], 6), 'ece=', round(m['top_label_ece'], 6))
           print('PAIRED matches=', p['matches'], 'model_LL=', round(p['model_log_loss'], 6), 'market_LL=', round(p['market_log_loss'], 6), 'LL_delta=', round(p['log_loss_delta_model_minus_market'], 6))
           print('PAIRED model_Brier=', round(p['model_brier'], 6), 'market_Brier=', round(p['market_brier'], 6), 'Brier_delta=', round(p['brier_delta_model_minus_market'], 6))
-          print('Season-by-season:')
           for s in report['seasons']:
               q = s['paired_comparison']
               print(s['test_season_start_year'], 'train=', s['train_matches'], 'test=', s['test_matches'], 'model_LL=', round(q['model_log_loss'], 6), 'market_LL=', round(q['market_log_loss'], 6), 'delta=', round(q['log_loss_delta_model_minus_market'], 6))
+          PY
+
+      - name: Run market-conditioned football slant model
+        run: |
+          football1-slant-model \
+            --database data/processed/football1.sqlite \
+            --output data/processed/slant_model.json
+          python - <<'PY'
+          import json
+          report = json.load(open('data/processed/slant_model.json'))
+          raw = report['overall_raw_market']
+          cal = report['overall_market_only_calibration']
+          slant = report['overall_market_plus_football_slant']
+          print('SLANT OOS matches=', raw['matches'])
+          print('raw_market LL=', round(raw['log_loss'], 6), 'Brier=', round(raw['brier'], 6), 'ECE=', round(raw['top_label_ece'], 6))
+          print('market_only LL=', round(cal['log_loss'], 6), 'delta_raw=', round(cal['log_loss_delta_vs_raw'], 6), 'Brier_delta=', round(cal['brier_delta_vs_raw'], 6))
+          print('market+football LL=', round(slant['log_loss'], 6), 'delta_raw=', round(slant['log_loss_delta_vs_raw'], 6), 'delta_market_only=', round(slant['log_loss_delta_vs_market_only'], 6))
+          print('market+football Brier=', round(slant['brier'], 6), 'delta_raw=', round(slant['brier_delta_vs_raw'], 6), 'delta_market_only=', round(slant['brier_delta_vs_market_only'], 6))
+          print('SLANT season-by-season:')
+          for s in report['seasons']:
+              x = s['market_plus_football_slant']
+              c = s['market_only_calibration']
+              print(s['test_season_start_year'], 'raw_LL=', round(s['raw_market']['log_loss'], 6), 'cal_LL=', round(c['log_loss'], 6), 'slant_LL=', round(x['log_loss'], 6), 'slant-v-raw=', round(x['log_loss_delta_vs_raw'], 6), 'slant-v-cal=', round(x['log_loss_delta_vs_market_only'], 6))
           PY
 
       - name: Upload audit outputs
@@ -126,6 +148,7 @@ jobs:
             data/processed/raw_audit.json
             data/processed/market_baseline.json
             data/processed/model_baseline.json
+            data/processed/slant_model.json
             data/processed/football1.sqlite
           if-no-files-found: error
           retention-days: 14
