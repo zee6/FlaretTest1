@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from football1.model_disagreement import DisagreementRow
 from football1.shadow_price_consensus import (
     _group_metrics,
@@ -59,8 +61,8 @@ def test_group_metrics_use_bookmaker_roi_and_market_calibration() -> None:
     assert metrics["observed_frequency"] == 1.0
     assert metrics["mean_market_probability"] == 0.50
     assert metrics["calibration_gap_observed_minus_market"] == 0.50
-    assert metrics["pnl_units"] == 0.90
-    assert metrics["roi"] == 0.90
+    assert metrics["pnl_units"] == pytest.approx(0.90)
+    assert metrics["roi"] == pytest.approx(0.90)
 
 
 def test_report_keeps_all_support_counts_and_zero_weight_status() -> None:
