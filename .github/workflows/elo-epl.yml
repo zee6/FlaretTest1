@@ -1,0 +1,74 @@
+name: EPL Elo Audit
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/elo.py'
+      - 'tests/test_elo.py'
+      - 'pyproject.toml'
+      - '.github/workflows/elo-epl.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/elo.py'
+      - 'tests/test_elo.py'
+      - 'pyproject.toml'
+      - '.github/workflows/elo-epl.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  elo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Download EPL history
+        run: football1-download-epl --from-season 2012 --to-season 2026
+
+      - name: Build canonical database
+        run: football1-build-db --input-dir data/raw/football-data --output data/processed/football1.sqlite
+
+      - name: Run walk-forward Elo audit
+        run: |
+          football1-elo --database data/processed/football1.sqlite --output data/processed/elo_report.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/elo_report.json'))
+          m = r['overall_model']
+          p = r['paired_overall']
+          print('ELO OOS matches=', m['matches'])
+          print('ELO LL=', round(m['log_loss'], 6), 'Brier=', round(m['brier'], 6), 'accuracy=', round(m['accuracy'], 6), 'ECE=', round(m['top_label_ece'], 6))
+          print('PAIRED matches=', p['matches'], 'Elo_LL=', round(p['elo_log_loss'], 6), 'Market_LL=', round(p['market_log_loss'], 6), 'LL_delta=', round(p['log_loss_delta_elo_minus_market'], 6))
+          print('Elo_Brier=', round(p['elo_brier'], 6), 'Market_Brier=', round(p['market_brier'], 6), 'Brier_delta=', round(p['brier_delta_elo_minus_market'], 6))
+          print('FINAL RATINGS TOP 10')
+          for row in r['final_ratings'][:10]:
+              print(row['team'], round(row['rating'], 2))
+          print('SEASON DELTAS')
+          for s in r['seasons']:
+              p2 = s['paired_b365_pre_closing']
+              print(s['test_season_start_year'], 'matches=', s['test_matches'], 'LL_delta=', round(p2['log_loss_delta_elo_minus_market'], 6))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-elo-report
+          path: data/processed/elo_report.json
+          if-no-files-found: error
+          retention-days: 14
