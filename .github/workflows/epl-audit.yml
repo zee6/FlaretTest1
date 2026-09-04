@@ -39,10 +39,7 @@ jobs:
         run: football1-download-epl --from-season 2012 --to-season 2026
 
       - name: Audit raw EPL files
-        run: |
-          football1-audit-data \
-            --input-dir data/raw/football-data \
-            --output data/processed/raw_audit.json
+        run: football1-audit-data --input-dir data/raw/football-data --output data/processed/raw_audit.json
 
       - name: Print audit summary
         run: |
@@ -62,10 +59,7 @@ jobs:
           PY
 
       - name: Build canonical SQLite database
-        run: |
-          football1-build-db \
-            --input-dir data/raw/football-data \
-            --output data/processed/football1.sqlite
+        run: football1-build-db --input-dir data/raw/football-data --output data/processed/football1.sqlite
 
       - name: Validate canonical row count
         run: |
@@ -82,82 +76,64 @@ jobs:
 
       - name: Score market probability baselines
         run: |
-          football1-market-baseline \
-            --database data/processed/football1.sqlite \
-            --output data/processed/market_baseline.json
+          football1-market-baseline --database data/processed/football1.sqlite --output data/processed/market_baseline.json
           python - <<'PY'
           import json
           report = json.load(open('data/processed/market_baseline.json'))
           for b in report['baselines']:
-              print(
-                  b['source'], b['phase'],
-                  'coverage=', round(b['coverage'], 6),
-                  'log_loss=', round(b['log_loss'], 6) if b['log_loss'] is not None else None,
-                  'brier=', round(b['brier'], 6) if b['brier'] is not None else None,
-                  'accuracy=', round(b['accuracy'], 6) if b['accuracy'] is not None else None,
-                  'mean_overround=', round(b['mean_overround'], 6) if b['mean_overround'] is not None else None,
-              )
+              print(b['source'], b['phase'], 'coverage=', round(b['coverage'], 6), 'log_loss=', round(b['log_loss'], 6) if b['log_loss'] is not None else None, 'brier=', round(b['brier'], 6) if b['brier'] is not None else None, 'accuracy=', round(b['accuracy'], 6) if b['accuracy'] is not None else None, 'mean_overround=', round(b['mean_overround'], 6) if b['mean_overround'] is not None else None)
           PY
 
       - name: Run football-only walk-forward model
         run: |
-          football1-model-baseline \
-            --database data/processed/football1.sqlite \
-            --output data/processed/model_baseline.json
+          football1-model-baseline --database data/processed/football1.sqlite --output data/processed/model_baseline.json
           python - <<'PY'
           import json
           report = json.load(open('data/processed/model_baseline.json'))
-          m = report['overall_model']
-          p = report['paired_overall']
+          m = report['overall_model']; p = report['paired_overall']
           print('MODEL OOS matches=', m['matches'], 'log_loss=', round(m['log_loss'], 6), 'brier=', round(m['brier'], 6), 'accuracy=', round(m['accuracy'], 6), 'ece=', round(m['top_label_ece'], 6))
           print('PAIRED matches=', p['matches'], 'model_LL=', round(p['model_log_loss'], 6), 'market_LL=', round(p['market_log_loss'], 6), 'LL_delta=', round(p['log_loss_delta_model_minus_market'], 6))
           print('PAIRED model_Brier=', round(p['model_brier'], 6), 'market_Brier=', round(p['market_brier'], 6), 'Brier_delta=', round(p['brier_delta_model_minus_market'], 6))
-          for s in report['seasons']:
-              q = s['paired_comparison']
-              print(s['test_season_start_year'], 'train=', s['train_matches'], 'test=', s['test_matches'], 'model_LL=', round(q['model_log_loss'], 6), 'market_LL=', round(q['market_log_loss'], 6), 'delta=', round(q['log_loss_delta_model_minus_market'], 6))
           PY
 
       - name: Run market-conditioned football slant model
         run: |
-          football1-slant-model \
-            --database data/processed/football1.sqlite \
-            --output data/processed/slant_model.json
+          football1-slant-model --database data/processed/football1.sqlite --output data/processed/slant_model.json
           python - <<'PY'
           import json
           report = json.load(open('data/processed/slant_model.json'))
-          raw = report['overall_raw_market']
-          cal = report['overall_market_only_calibration']
-          slant = report['overall_market_plus_football_slant']
+          raw = report['overall_raw_market']; cal = report['overall_market_only_calibration']; slant = report['overall_market_plus_football_slant']
           print('SLANT OOS matches=', raw['matches'])
           print('raw_market LL=', round(raw['log_loss'], 6), 'Brier=', round(raw['brier'], 6), 'ECE=', round(raw['top_label_ece'], 6))
-          print('market_only LL=', round(cal['log_loss'], 6), 'delta_raw=', round(cal['log_loss_delta_vs_raw'], 6), 'Brier_delta=', round(cal['brier_delta_vs_raw'], 6))
+          print('market_only LL=', round(cal['log_loss'], 6), 'delta_raw=', round(cal['log_loss_delta_vs_raw'], 6))
           print('market+football LL=', round(slant['log_loss'], 6), 'delta_raw=', round(slant['log_loss_delta_vs_raw'], 6), 'delta_market_only=', round(slant['log_loss_delta_vs_market_only'], 6))
-          print('market+football Brier=', round(slant['brier'], 6), 'delta_raw=', round(slant['brier_delta_vs_raw'], 6), 'delta_market_only=', round(slant['brier_delta_vs_market_only'], 6))
-          for s in report['seasons']:
-              x = s['market_plus_football_slant']
-              c = s['market_only_calibration']
-              print(s['test_season_start_year'], 'raw_LL=', round(s['raw_market']['log_loss'], 6), 'cal_LL=', round(c['log_loss'], 6), 'slant_LL=', round(x['log_loss'], 6), 'slant-v-raw=', round(x['log_loss_delta_vs_raw'], 6), 'slant-v-cal=', round(x['log_loss_delta_vs_market_only'], 6))
           PY
 
       - name: Run fixed-market residual slant model
         run: |
-          football1-offset-slant \
-            --database data/processed/football1.sqlite \
-            --output data/processed/offset_slant.json
+          football1-offset-slant --database data/processed/football1.sqlite --output data/processed/offset_slant.json
           python - <<'PY'
           import json
           report = json.load(open('data/processed/offset_slant.json'))
-          raw = report['overall_raw_market']
-          cal = report['overall_offset_calibration']
-          slant = report['overall_offset_football_slant']
+          raw = report['overall_raw_market']; cal = report['overall_offset_calibration']; slant = report['overall_offset_football_slant']
           print('OFFSET OOS matches=', raw['matches'], 'alpha=', report['alpha'])
           print('raw LL=', round(raw['log_loss'], 6), 'Brier=', round(raw['brier'], 6))
           print('offset-cal LL=', round(cal['log_loss'], 6), 'delta_raw=', round(cal['log_loss_delta_vs_raw'], 6))
           print('offset-football LL=', round(slant['log_loss'], 6), 'delta_raw=', round(slant['log_loss_delta_vs_raw'], 6), 'delta_cal=', round(slant['log_loss_delta_vs_calibration'], 6))
           print('offset-football Brier=', round(slant['brier'], 6), 'delta_raw=', round(slant['brier_delta_vs_raw'], 6), 'delta_cal=', round(slant['brier_delta_vs_calibration'], 6))
-          for s in report['seasons']:
-              x = s['offset_football_slant']
-              print(s['test_season_start_year'], 'raw_LL=', round(s['raw_market']['log_loss'], 6), 'offset_LL=', round(x['log_loss'], 6), 'delta=', round(x['log_loss_delta_vs_raw'], 6))
+          PY
+
+      - name: Run fixed-threshold mispricing tail backtest
+        run: |
+          football1-mispricing-backtest --database data/processed/football1.sqlite --output data/processed/mispricing_backtest.json
+          python - <<'PY'
+          import json
+          report = json.load(open('data/processed/mispricing_backtest.json'))
+          print('TAIL OOS matches=', report['oos_matches'], 'alpha=', report['alpha'])
+          for r in report['results']:
+              print('threshold=', r['threshold'], 'bets=', r['bets'], 'wins=', r['wins'], 'hit_rate=', round(r['hit_rate'], 6) if r['hit_rate'] is not None else None, 'mean_odds=', round(r['mean_odds'], 4) if r['mean_odds'] is not None else None, 'pred_EV=', round(r['mean_predicted_ev'], 6) if r['mean_predicted_ev'] is not None else None, 'PnL=', round(r['pnl_units'], 4), 'ROI=', round(r['roi'], 6) if r['roi'] is not None else None, 'maxDD=', round(r['max_drawdown_units'], 4))
+              print('  by_outcome=', r['by_outcome'])
+              print('  by_season=', r['by_season'])
           PY
 
       - name: Upload audit outputs
@@ -170,6 +146,7 @@ jobs:
             data/processed/model_baseline.json
             data/processed/slant_model.json
             data/processed/offset_slant.json
+            data/processed/mispricing_backtest.json
             data/processed/football1.sqlite
           if-no-files-found: error
           retention-days: 14
