@@ -1,0 +1,88 @@
+name: EPL Dixon-Coles Audit
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/dixon_coles.py'
+      - 'src/football1/dixon_coles_ablation.py'
+      - 'tests/test_dixon_coles.py'
+      - 'pyproject.toml'
+      - '.github/workflows/dixon-coles.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/dixon_coles.py'
+      - 'src/football1/dixon_coles_ablation.py'
+      - 'tests/test_dixon_coles.py'
+      - 'pyproject.toml'
+      - '.github/workflows/dixon-coles.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dixon-coles:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Download EPL history
+        run: football1-download-epl --from-season 2012 --to-season 2026
+
+      - name: Build canonical database
+        run: football1-build-db --input-dir data/raw/football-data --output data/processed/football1.sqlite
+
+      - name: Run Dixon-Coles audit
+        run: |
+          football1-dixon-coles --database data/processed/football1.sqlite --output data/processed/dixon_coles_report.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/dixon_coles_report.json'))
+          m = r['overall_model']
+          p = r['paired_overall']
+          print('DIXON-COLES OOS matches=', m['matches'])
+          print('LL=', round(m['log_loss'], 6), 'Brier=', round(m['brier'], 6), 'accuracy=', round(m['accuracy'], 6), 'ECE=', round(m['top_label_ece'], 6))
+          print('PAIRED matches=', p['matches'], 'DC_LL=', round(p['model_log_loss'], 6), 'Market_LL=', round(p['market_log_loss'], 6), 'LL_delta=', round(p['log_loss_delta_model_minus_market'], 6))
+          print('DC_Brier=', round(p['model_brier'], 6), 'Market_Brier=', round(p['market_brier'], 6), 'Brier_delta=', round(p['brier_delta_model_minus_market'], 6))
+          print('SEASON LL DELTAS')
+          for s in r['seasons']:
+              p2 = s['paired_b365_pre_closing']
+              print(s['test_season_start_year'], 'rho=', round(s['rho'], 4), 'LL_delta=', round(p2['log_loss_delta_model_minus_market'], 6))
+          PY
+
+      - name: Run market-anchored Dixon-Coles ablation
+        run: |
+          football1-dixon-coles-ablation --database data/processed/football1.sqlite --output data/processed/dixon_coles_ablation.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/dixon_coles_ablation.json'))
+          b = r['overall_variants']['frozen_residual_v1']
+          d = r['overall_variants']['frozen_residual_plus_dixon_coles_v1']
+          print('BASELINE LL=', round(b['log_loss'], 6), 'Brier=', round(b['brier'], 6))
+          print('+ DIXON-COLES LL=', round(d['log_loss'], 6), 'Brier=', round(d['brier'], 6))
+          print('INCREMENTAL=', r['incremental'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-dixon-coles-report
+          path: |
+            data/processed/dixon_coles_report.json
+            data/processed/dixon_coles_ablation.json
+          if-no-files-found: error
+          retention-days: 14
