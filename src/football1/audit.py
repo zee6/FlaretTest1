@@ -12,6 +12,16 @@ from football1.schema import AvailabilityClass, classify_column
 
 PINNACLE_SOURCES = {"PS", "P"}
 
+# Explicit 1X2 source stems prevent ambiguous parsing. In particular, VC is a
+# historical bookmaker abbreviation, so VCH/VCD/VCA are pre-closing VC odds,
+# not closing odds for an imaginary source "V". Closing fields add C after the
+# source stem (for example B365CH/B365CD/B365CA and VCCH/VCCD/VCCA).
+ONE_X_TWO_SOURCES = (
+    "1XB", "B365", "BF", "BFD", "BFE", "BMGM", "BS", "BV", "BW",
+    "CL", "GB", "IW", "LB", "P", "PP", "PS", "SB", "SJ", "SK",
+    "SKB", "SO", "SY", "VC", "WH", "BbAv", "BbMx", "Avg", "Max",
+)
+
 
 @dataclass(frozen=True)
 class OddsTripletAudit:
@@ -49,34 +59,20 @@ def find_1x2_triplets(columns: list[str]) -> list[tuple[str, str, tuple[str, str
     names = set(columns)
     triplets: list[tuple[str, str, tuple[str, str, str]]] = []
 
-    # Pre-closing/earlier 1X2 fields have source+H/D/A, e.g. B365H/B365D/B365A.
-    for home in sorted(c for c in names if c.endswith("H")):
-        source = home[:-1]
-        trio = (f"{source}H", f"{source}D", f"{source}A")
-        if all(c in names for c in trio) and all(
-            classify_column(c) is AvailabilityClass.MARKET for c in trio
+    for source in ONE_X_TWO_SOURCES:
+        pre = (f"{source}H", f"{source}D", f"{source}A")
+        if all(c in names for c in pre) and all(
+            classify_column(c) is AvailabilityClass.MARKET for c in pre
         ):
-            triplets.append((source, "pre_closing", trio))
+            triplets.append((source, "pre_closing", pre))
 
-    # Football-Data documents closing 1X2 fields with C before H/D/A,
-    # e.g. B365CH/B365CD/B365CA.
-    for home in sorted(c for c in names if c.endswith("CH")):
-        source = home[:-2]
-        trio = (f"{source}CH", f"{source}CD", f"{source}CA")
-        if all(c in names for c in trio) and all(
-            classify_column(c) is AvailabilityClass.MARKET for c in trio
+        closing = (f"{source}CH", f"{source}CD", f"{source}CA")
+        if all(c in names for c in closing) and all(
+            classify_column(c) is AvailabilityClass.MARKET for c in closing
         ):
-            triplets.append((source, "closing", trio))
+            triplets.append((source, "closing", closing))
 
-    # Deduplicate while preserving deterministic order.
-    seen: set[tuple[str, str]] = set()
-    unique: list[tuple[str, str, tuple[str, str, str]]] = []
-    for source, phase, trio in triplets:
-        key = (source, phase)
-        if key not in seen:
-            seen.add(key)
-            unique.append((source, phase, trio))
-    return unique
+    return triplets
 
 
 def audit_season_file(path: Path, season_start_year: int) -> SeasonAudit:
