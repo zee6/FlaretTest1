@@ -22,8 +22,11 @@ def _db(path: Path) -> Path:
                 match_id TEXT PRIMARY KEY,
                 season_start_year INTEGER NOT NULL,
                 match_date TEXT NOT NULL,
+                kickoff_time TEXT,
                 home_team TEXT NOT NULL,
                 away_team TEXT NOT NULL,
+                fthg INTEGER NOT NULL,
+                ftag INTEGER NOT NULL,
                 ftr TEXT NOT NULL,
                 raw_json TEXT NOT NULL
             )
@@ -56,7 +59,6 @@ def _db(path: Path) -> Path:
                     "B365H": "2.20",
                     "B365D": "3.40",
                     "B365A": "3.30",
-                    # Minimal legacy feature payload expected by build_feature_rows.
                     "FTR": result,
                 }
                 rows.append(
@@ -64,13 +66,18 @@ def _db(path: Path) -> Path:
                         f"{season}-{i}",
                         season,
                         f"{season}-08-{9+i:02d}",
+                        None,
                         home,
                         away,
+                        hg,
+                        ag,
                         result,
                         json.dumps(raw),
                     )
                 )
-        conn.executemany("INSERT INTO matches VALUES (?, ?, ?, ?, ?, ?, ?)", rows)
+        conn.executemany(
+            "INSERT INTO matches VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", rows
+        )
         conn.commit()
     finally:
         conn.close()
