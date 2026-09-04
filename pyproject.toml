@@ -16,6 +16,7 @@ dev = ["pytest>=8"]
 football1-download-epl = "football1.ingest.football_data:main"
 football1-audit-data = "football1.audit:main"
 football1-build-db = "football1.build_db:main"
+football1-market-baseline = "football1.market_baseline:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
