@@ -32,14 +32,6 @@ def build_elo_research_export(db_path: Path) -> dict[str, object]:
         {row.home_team for row in latest_rows} | {row.away_team for row in latest_rows}
     )
 
-    current_ratings = [
-        {"rank": rank, "team": team, "rating": float(final_ratings.get(team, BASE_RATING))}
-        for rank, team in enumerate(
-            sorted(current_teams, key=lambda name: (-final_ratings.get(name, BASE_RATING), name)),
-            start=1,
-        )
-    ]
-
     histories: dict[str, list[dict[str, object]]] = {team: [] for team in current_teams}
     for row in rows:
         if row.home_team in histories:
@@ -59,6 +51,35 @@ def build_elo_research_export(db_path: Path) -> dict[str, object]:
                 }
             )
 
+    ranked_teams = sorted(
+        current_teams,
+        key=lambda name: (-final_ratings.get(name, BASE_RATING), name),
+    )
+    current_ratings: list[dict[str, object]] = []
+    for rank, team in enumerate(ranked_teams, start=1):
+        current = float(final_ratings.get(team, BASE_RATING))
+        team_history = histories[team]
+        five_match_reference = (
+            float(team_history[-5]["rating"])
+            if len(team_history) >= 5
+            else float(team_history[0]["rating"])
+        )
+        season_points = [
+            point for point in team_history if point["season_start_year"] == latest_season
+        ]
+        season_reference = (
+            float(season_points[0]["rating"]) if season_points else current
+        )
+        current_ratings.append(
+            {
+                "rank": rank,
+                "team": team,
+                "rating": current,
+                "change_5_matches": current - five_match_reference,
+                "season_change": current - season_reference,
+            }
+        )
+
     return {
         "schema_version": 1,
         "model": "elo_1x2_v1",
@@ -73,6 +94,7 @@ def build_elo_research_export(db_path: Path) -> dict[str, object]:
         },
         "rating_policy": "Result-only EPL Elo; H=1, D=0.5, A=0; no goal-margin multiplier.",
         "history_policy": "Each plotted point is the team's leakage-safe pre-match rating. Same-day results are applied only after all fixtures on that date are frozen.",
+        "change_policy": "Five-match change compares the current post-result rating with the pre-match rating five EPL appearances back. Season change compares with the first pre-match rating of the latest EPL season.",
         "product_status": "CONTEXT_ONLY",
         "current_ratings": current_ratings,
         "histories": histories,
