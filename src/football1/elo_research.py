@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from datetime import date
 from pathlib import Path
 
 from football1.elo import (
@@ -14,15 +15,28 @@ from football1.elo import (
 )
 
 
+def _three_year_cutoff(latest_match_date: str) -> date:
+    latest = date.fromisoformat(latest_match_date)
+    try:
+        return latest.replace(year=latest.year - 3)
+    except ValueError:
+        # Feb 29 -> Feb 28 in a non-leap cutoff year.
+        return latest.replace(year=latest.year - 3, day=28)
+
+
 def _sample_history_for_app(
     points: list[dict[str, object]],
     *,
     latest_season: int,
+    cutoff: date,
 ) -> list[dict[str, object]]:
-    """Keep current-season detail and one exact pre-match point per older month."""
+    """Keep three years: current-season detail plus one exact point per older month."""
     sampled: list[dict[str, object]] = []
     older_by_month: dict[str, dict[str, object]] = {}
     for point in points:
+        point_date = date.fromisoformat(str(point["date"]))
+        if point_date < cutoff:
+            continue
         season = int(point["season_start_year"])
         if season == latest_season:
             sampled.append(point)
@@ -38,8 +52,9 @@ def build_elo_research_export(db_path: Path) -> dict[str, object]:
 
     The table contains only clubs present in the latest EPL season in the
     canonical database. Every exported history point is an exact pre-match Elo
-    state already frozen by ``build_elo_history``; older seasons are sampled to
-    one point per calendar month only to keep the mobile download compact.
+    state already frozen by ``build_elo_history``. The mobile graph covers the
+    latest three years; current-season matches are kept individually and older
+    months keep their final exact pre-match snapshot.
     """
     rows, final_ratings = build_elo_history(db_path)
     if not rows:
@@ -47,6 +62,8 @@ def build_elo_research_export(db_path: Path) -> dict[str, object]:
 
     latest_season = max(row.season_start_year for row in rows)
     latest_rows = [row for row in rows if row.season_start_year == latest_season]
+    latest_match_date = max(row.match_date for row in latest_rows)
+    history_cutoff = _three_year_cutoff(latest_match_date)
     current_teams = sorted(
         {row.home_team for row in latest_rows} | {row.away_team for row in latest_rows}
     )
@@ -102,7 +119,11 @@ def build_elo_research_export(db_path: Path) -> dict[str, object]:
         )
 
     histories = {
-        team: _sample_history_for_app(points, latest_season=latest_season)
+        team: _sample_history_for_app(
+            points,
+            latest_season=latest_season,
+            cutoff=history_cutoff,
+        )
         for team, points in full_histories.items()
     }
 
@@ -110,7 +131,8 @@ def build_elo_research_export(db_path: Path) -> dict[str, object]:
         "schema_version": 1,
         "model": "elo_1x2_v1",
         "latest_season_start_year": latest_season,
-        "latest_match_date": max(row.match_date for row in latest_rows),
+        "latest_match_date": latest_match_date,
+        "history_start_date": history_cutoff.isoformat(),
         "parameters": {
             "base_rating": BASE_RATING,
             "scale": ELO_SCALE,
@@ -119,7 +141,7 @@ def build_elo_research_export(db_path: Path) -> dict[str, object]:
             "season_carry": SEASON_CARRY,
         },
         "rating_policy": "Result-only EPL Elo; H=1, D=0.5, A=0; no goal-margin multiplier.",
-        "history_policy": "Every plotted value is an exact leakage-safe pre-match rating. Current-season matches are kept individually; older seasons keep the final pre-match snapshot in each calendar month. Same-day results are applied only after all fixtures on that date are frozen.",
+        "history_policy": "Every plotted value is an exact leakage-safe pre-match rating. The graph covers the latest three years. Current-season matches are kept individually; earlier months keep the final pre-match snapshot in each calendar month. Same-day results are applied only after all fixtures on that date are frozen.",
         "change_policy": "Five-match change compares the current post-result rating with the pre-match rating five EPL appearances back. Season change compares with the first pre-match rating of the latest EPL season.",
         "product_status": "CONTEXT_ONLY",
         "current_ratings": current_ratings,
