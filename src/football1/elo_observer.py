@@ -138,13 +138,6 @@ def build_elo_observer_report(
 
             odds_triplet = b365_odds.get(row.match_id)
             picked_odds = float(odds_triplet[idx]) if odds_triplet is not None else None
-            profit = (
-                picked_odds - 1.0 if correct else -1.0
-                if picked_odds is not None
-                else None
-            )
-            # The conditional expression above is intentionally expanded below
-            # to avoid ambiguity when no bookmaker price exists.
             if picked_odds is None:
                 profit = None
             elif correct:
