@@ -1,0 +1,85 @@
+name: EPL Market Regime Movement Audit
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/market_regime_movement.py'
+      - 'src/football1/market_regime_audit.py'
+      - 'src/football1/closing_movement_rf.py'
+      - 'src/football1/historical_closing_line.py'
+      - 'tests/test_market_regime_movement.py'
+      - 'pyproject.toml'
+      - '.github/workflows/market-regime-movement.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/market_regime_movement.py'
+      - 'src/football1/market_regime_audit.py'
+      - 'src/football1/closing_movement_rf.py'
+      - 'src/football1/historical_closing_line.py'
+      - 'tests/test_market_regime_movement.py'
+      - 'pyproject.toml'
+      - '.github/workflows/market-regime-movement.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  market-regime-movement:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Download EPL history
+        run: football1-download-epl --from-season 2012 --to-season 2026
+
+      - name: Build canonical database
+        run: football1-build-db --input-dir data/raw/football-data --output data/processed/football1.sqlite
+
+      - name: Run market-regime movement audit
+        run: |
+          football1-market-regime-movement \
+            --database data/processed/football1.sqlite \
+            --output data/processed/market_regime_movement_report.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/market_regime_movement_report.json'))
+          print('STATUS', r['status'])
+          print('MATCHES', r['matches'])
+          print('TEST_SEASONS', r['test_seasons'])
+          for name, block in r['overall_regimes'].items():
+              rf = block['closing_movement_forecast']['random_forest']
+              timing = block['closing_movement_forecast']['price_timing']
+              close = block['actual_closing_market']
+              print(name.upper(), {
+                  'matches': block['matches'],
+                  'closing_ll_delta_vs_opening': close.get('log_loss_delta_vs_opening'),
+                  'rf_mae_delta_vs_zero': rf.get('mae_delta_vs_no_movement'),
+                  'rf_rmse_delta_vs_zero': rf.get('rmse_delta_vs_no_movement'),
+                  'rf_direction_accuracy': rf.get('direction_accuracy_nonzero_predictions'),
+                  'selected_shortened': timing.get('fraction_selected_outcome_actually_shortened'),
+                  'opening_vs_closing_price_ratio': timing.get('mean_opening_vs_closing_decimal_price_ratio'),
+              })
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-market-regime-movement-report
+          path: data/processed/market_regime_movement_report.json
+          if-no-files-found: error
+          retention-days: 14
