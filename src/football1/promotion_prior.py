@@ -52,11 +52,7 @@ def empirical_promoted_prior(
     base_rating: float = BASE_RATING,
     min_samples: int = MIN_COHORT_SAMPLES,
 ) -> float:
-    """Return the mean completed-cohort terminal rating or the neutral fallback.
-
-    The caller is responsible for supplying only samples from seasons completed
-    before the season being initialized.
-    """
+    """Return the mean prior-completed cohort rating or neutral fallback."""
     if min_samples < 1:
         raise ValueError("min_samples must be at least 1")
     if len(samples) < min_samples:
@@ -180,11 +176,11 @@ def build_promotion_prior_history(
 
     * baseline: existing EPL-only Elo policy; unseen teams enter at neutral 1500.
     * adjusted: first-time EPL entrants use an empirical prior learned only from
-      completed entrant cohorts; returning clubs keep their decayed last-known
-      EPL rating.
-    * reference: every detected entrant is reset to neutral at season start.
-      Its terminal ratings form future empirical cohort samples, preventing the
-      adjusted system from recursively learning from its own prior choices.
+      earlier entrant cohorts; returning clubs keep their decayed last-known EPL
+      rating.
+    * reference: every detected entrant is reset to neutral at season start. Its
+      terminal rating becomes a cohort sample only when a later season begins,
+      which avoids treating the current partial season as completed evidence.
 
     All fixtures on the same date are snapshotted before any same-date result is
     applied in every system.
@@ -198,7 +194,6 @@ def build_promotion_prior_history(
 
     team_sets = season_team_sets(records)
     entrants_map = entrants_by_season(records)
-    seasons = sorted(team_sets)
 
     baseline_ratings: dict[str, float] = {}
     adjusted_ratings: dict[str, float] = {}
@@ -264,13 +259,9 @@ def build_promotion_prior_history(
                 min_samples=min_cohort_samples,
             )
 
-            # The reference system deliberately neutralizes every entrant so
-            # terminal ratings are comparable across promoted cohorts.
             for team in current_entrants:
                 reference_ratings[team] = float(base_rating)
 
-            # Only first-time archive entrants lack usable EPL history. Clubs
-            # returning after relegation retain their decayed previous rating.
             for team in current_first_time:
                 adjusted_ratings[team] = float(current_prior)
 
@@ -381,9 +372,6 @@ def build_promotion_prior_history(
         )
         i = j
 
-    if current_season is not None:
-        finalize_reference_cohort(current_season, current_entrants)
-
     return {
         "baseline_rows": baseline_rows,
         "adjusted_rows": adjusted_rows,
@@ -417,6 +405,54 @@ def _delta(a: object, b: object) -> float | None:
     if a is None or b is None:
         return None
     return float(a) - float(b)
+
+
+def _comparison_block(
+    baseline_items: list[tuple[tuple[float, float, float], str, str]],
+    adjusted_items: list[tuple[tuple[float, float, float], str, str]],
+    market_items: list[tuple[tuple[float, float, float], str, str]],
+    meta_by_match: dict[str, PromotionMatchMeta],
+) -> dict[str, object]:
+    baseline = _metrics([(p, r) for p, r, _ in baseline_items])
+    adjusted = _metrics([(p, r) for p, r, _ in adjusted_items])
+    market = _metrics([(p, r) for p, r, _ in market_items])
+    entrants_baseline = _subset_metrics(baseline_items, meta_by_match, first_time_only=False)
+    entrants_adjusted = _subset_metrics(adjusted_items, meta_by_match, first_time_only=False)
+    first_time_baseline = _subset_metrics(baseline_items, meta_by_match, first_time_only=True)
+    first_time_adjusted = _subset_metrics(adjusted_items, meta_by_match, first_time_only=True)
+    return {
+        "baseline_neutral_entry_elo": baseline,
+        "empirical_promotion_prior_elo": adjusted,
+        "paired_b365_pre_closing": market,
+        "promotion_prior_minus_baseline": {
+            "log_loss": _delta(adjusted["log_loss"], baseline["log_loss"]),
+            "brier": _delta(adjusted["brier"], baseline["brier"]),
+        },
+        "promotion_prior_minus_market": {
+            "log_loss": _delta(adjusted["log_loss"], market["log_loss"]),
+            "brier": _delta(adjusted["brier"], market["brier"]),
+        },
+        "entrant_involved_matches": {
+            "baseline": entrants_baseline,
+            "promotion_prior": entrants_adjusted,
+            "log_loss_delta": _delta(
+                entrants_adjusted["log_loss"], entrants_baseline["log_loss"]
+            ),
+            "brier_delta": _delta(
+                entrants_adjusted["brier"], entrants_baseline["brier"]
+            ),
+        },
+        "first_time_archive_entrant_matches": {
+            "baseline": first_time_baseline,
+            "promotion_prior": first_time_adjusted,
+            "log_loss_delta": _delta(
+                first_time_adjusted["log_loss"], first_time_baseline["log_loss"]
+            ),
+            "brier_delta": _delta(
+                first_time_adjusted["brier"], first_time_baseline["brier"]
+            ),
+        },
+    }
 
 
 def walk_forward_promotion_prior(
@@ -482,72 +518,41 @@ def walk_forward_promotion_prior(
         all_adjusted.extend(adjusted_items)
         all_market.extend(market_items)
 
-        baseline_m = _metrics([(p, r) for p, r, _ in baseline_items])
-        adjusted_m = _metrics([(p, r) for p, r, _ in adjusted_items])
-        market_m = _metrics([(p, r) for p, r, _ in market_items])
-        entrants_baseline = _subset_metrics(
+        block = _comparison_block(
             baseline_items,
-            meta_by_match,
-            first_time_only=False,
-        )
-        entrants_adjusted = _subset_metrics(
             adjusted_items,
+            market_items,
             meta_by_match,
-            first_time_only=False,
         )
-        first_time_baseline = _subset_metrics(
-            baseline_items,
-            meta_by_match,
-            first_time_only=True,
-        )
-        first_time_adjusted = _subset_metrics(
-            adjusted_items,
-            meta_by_match,
-            first_time_only=True,
-        )
-
         reports.append(
             {
                 "test_season_start_year": test_season,
                 "train_matches": len(train_baseline),
                 "test_matches": len(test_baseline),
-                "baseline_neutral_entry_elo": baseline_m,
-                "empirical_promotion_prior_elo": adjusted_m,
-                "paired_b365_pre_closing": market_m,
-                "promotion_prior_minus_baseline": {
-                    "log_loss": _delta(adjusted_m["log_loss"], baseline_m["log_loss"]),
-                    "brier": _delta(adjusted_m["brier"], baseline_m["brier"]),
-                },
-                "entrant_involved_matches": {
-                    "baseline": entrants_baseline,
-                    "promotion_prior": entrants_adjusted,
-                    "log_loss_delta": _delta(
-                        entrants_adjusted["log_loss"], entrants_baseline["log_loss"]
-                    ),
-                    "brier_delta": _delta(
-                        entrants_adjusted["brier"], entrants_baseline["brier"]
-                    ),
-                },
-                "first_time_archive_entrant_matches": {
-                    "baseline": first_time_baseline,
-                    "promotion_prior": first_time_adjusted,
-                    "log_loss_delta": _delta(
-                        first_time_adjusted["log_loss"], first_time_baseline["log_loss"]
-                    ),
-                    "brier_delta": _delta(
-                        first_time_adjusted["brier"], first_time_baseline["brier"]
-                    ),
-                },
+                **block,
             }
         )
 
-    overall_baseline = _metrics([(p, r) for p, r, _ in all_baseline])
-    overall_adjusted = _metrics([(p, r) for p, r, _ in all_adjusted])
-    overall_market = _metrics([(p, r) for p, r, _ in all_market])
-    entrants_baseline = _subset_metrics(all_baseline, meta_by_match, first_time_only=False)
-    entrants_adjusted = _subset_metrics(all_adjusted, meta_by_match, first_time_only=False)
-    first_time_baseline = _subset_metrics(all_baseline, meta_by_match, first_time_only=True)
-    first_time_adjusted = _subset_metrics(all_adjusted, meta_by_match, first_time_only=True)
+    overall = _comparison_block(all_baseline, all_adjusted, all_market, meta_by_match)
+    latest_season = seasons[-1]
+    pre_latest_baseline = [
+        item for item in all_baseline
+        if meta_by_match[item[2]].season_start_year < latest_season
+    ]
+    pre_latest_adjusted = [
+        item for item in all_adjusted
+        if meta_by_match[item[2]].season_start_year < latest_season
+    ]
+    pre_latest_market = [
+        item for item in all_market
+        if meta_by_match[item[2]].season_start_year < latest_season
+    ]
+    robustness = _comparison_block(
+        pre_latest_baseline,
+        pre_latest_adjusted,
+        pre_latest_market,
+        meta_by_match,
+    )
 
     cohort_samples = history["cohort_samples"]
     season_policy = history["season_policy"]
@@ -565,8 +570,8 @@ def walk_forward_promotion_prior(
         "entry_definition": "team present in current EPL season but absent from immediately previous EPL season",
         "first_time_definition": "detected entrant with no earlier EPL appearance in the available archive",
         "returning_team_policy": "retain decayed last-known EPL Elo; do not overwrite known EPL evidence with the cohort prior",
-        "new_team_policy": "first-time archive entrants receive the arithmetic mean terminal neutral-reference Elo of completed earlier entrant cohorts once at least three samples exist; otherwise neutral 1500",
-        "cohort_reference_policy": "parallel Elo resets every detected entrant to neutral at season start; terminal season rating becomes a sample only for future seasons",
+        "new_team_policy": "first-time archive entrants receive the arithmetic mean terminal neutral-reference Elo of earlier entrant cohorts once at least three samples exist; otherwise neutral 1500",
+        "cohort_reference_policy": "parallel Elo resets every detected entrant to neutral at season start; a terminal rating is added only when a later EPL season begins, so the latest partial season is never treated as completed cohort evidence",
         "same_day_policy": "all systems freeze every fixture on a date before any same-date result update",
         "season_regression": season_carry,
         "elo_parameters": {
@@ -576,38 +581,11 @@ def walk_forward_promotion_prior(
             "min_cohort_samples": min_cohort_samples,
         },
         "hyperparameter_policy": "all v1 rules fixed before held-out scoring; no held-out season tuning",
-        "overall": {
-            "baseline_neutral_entry_elo": overall_baseline,
-            "empirical_promotion_prior_elo": overall_adjusted,
-            "paired_b365_pre_closing": overall_market,
-            "promotion_prior_minus_baseline": {
-                "log_loss": _delta(overall_adjusted["log_loss"], overall_baseline["log_loss"]),
-                "brier": _delta(overall_adjusted["brier"], overall_baseline["brier"]),
-            },
-            "promotion_prior_minus_market": {
-                "log_loss": _delta(overall_adjusted["log_loss"], overall_market["log_loss"]),
-                "brier": _delta(overall_adjusted["brier"], overall_market["brier"]),
-            },
-            "entrant_involved_matches": {
-                "baseline": entrants_baseline,
-                "promotion_prior": entrants_adjusted,
-                "log_loss_delta": _delta(
-                    entrants_adjusted["log_loss"], entrants_baseline["log_loss"]
-                ),
-                "brier_delta": _delta(
-                    entrants_adjusted["brier"], entrants_baseline["brier"]
-                ),
-            },
-            "first_time_archive_entrant_matches": {
-                "baseline": first_time_baseline,
-                "promotion_prior": first_time_adjusted,
-                "log_loss_delta": _delta(
-                    first_time_adjusted["log_loss"], first_time_baseline["log_loss"]
-                ),
-                "brier_delta": _delta(
-                    first_time_adjusted["brier"], first_time_baseline["brier"]
-                ),
-            },
+        "overall": overall,
+        "robustness_excluding_latest_season": {
+            "excluded_season_start_year": latest_season,
+            "reason": "latest season may be partial; this robustness view prevents a small current sample from dominating interpretation",
+            **robustness,
         },
         "season_policy": season_policy,
         "cohort_samples": [
