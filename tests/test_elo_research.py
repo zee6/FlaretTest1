@@ -63,11 +63,22 @@ def test_elo_research_export_contains_latest_teams_table_and_histories(tmp_path:
     assert histories["Promoted"][0]["rating"] == 1500.0
 
 
-def test_elo_research_history_points_are_pre_match_states(tmp_path: Path) -> None:
+def test_elo_research_keeps_current_season_detail_and_samples_older_months(tmp_path: Path) -> None:
     report = build_elo_research_export(_db(tmp_path / "elo_research.sqlite"))
     alpha = report["histories"]["Alpha"]
 
-    # Alpha's very first plotted state must be neutral because history points
-    # are frozen before that match result is applied.
-    assert alpha[0]["date"] == "2024-08-10"
-    assert alpha[0]["rating"] == 1500.0
+    older = [point for point in alpha if point["season_start_year"] == 2024]
+    current = [point for point in alpha if point["season_start_year"] == 2025]
+
+    # Both 2024 Alpha matches fall in August, so the mobile export keeps the
+    # final exact pre-match snapshot for that older month.
+    assert len(older) == 1
+    assert older[0]["date"] == "2024-08-17"
+
+    # Current-season points are not thinned, preserving the recent trajectory.
+    assert [point["date"] for point in current] == [
+        "2025-08-10",
+        "2025-08-17",
+        "2025-08-18",
+        "2025-08-24",
+    ]
