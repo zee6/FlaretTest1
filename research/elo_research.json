@@ -1,0 +1,2727 @@
+{
+  "change_policy": "Five-match change compares the current post-result rating with the pre-match rating five EPL appearances back. Season change compares with the first pre-match rating of the latest EPL season.",
+  "current_ratings": [
+    {
+      "change_5_matches": -21.05784112488118,
+      "rank": 1,
+      "rating": 1663.4020200831137,
+      "season_change": 13.721978879131257,
+      "team": "Arsenal"
+    },
+    {
+      "change_5_matches": -41.883454218356974,
+      "rank": 2,
+      "rating": 1645.0427346683873,
+      "season_change": 14.046479443313274,
+      "team": "Man City"
+    },
+    {
+      "change_5_matches": -17.497859517947745,
+      "rank": 3,
+      "rating": 1578.328759647909,
+      "season_change": -5.68164857077636,
+      "team": "Man United"
+    },
+    {
+      "change_5_matches": -42.855122537417174,
+      "rank": 4,
+      "rating": 1565.0251810286634,
+      "season_change": -3.318756338856474,
+      "team": "Liverpool"
+    },
+    {
+      "change_5_matches": -17.3294069991141,
+      "rank": 5,
+      "rating": 1551.2821433217273,
+      "season_change": -9.266620779791538,
+      "team": "Bournemouth"
+    },
+    {
+      "change_5_matches": -20.460321936558103,
+      "rank": 6,
+      "rating": 1549.2663230738199,
+      "season_change": -18.311778973005858,
+      "team": "Aston Villa"
+    },
+    {
+      "change_5_matches": 12.734633269799133,
+      "rank": 7,
+      "rating": 1544.7446306490367,
+      "season_change": 19.79831839431222,
+      "team": "Chelsea"
+    },
+    {
+      "change_5_matches": -5.031853859730745,
+      "rank": 8,
+      "rating": 1535.7809763158803,
+      "season_change": 7.977659484176229,
+      "team": "Brentford"
+    },
+    {
+      "change_5_matches": -25.490368280658913,
+      "rank": 9,
+      "rating": 1532.0425513440832,
+      "season_change": 0.9324694290003208,
+      "team": "Brighton"
+    },
+    {
+      "change_5_matches": 4.75482988707904,
+      "rank": 10,
+      "rating": 1526.05793837123,
+      "season_change": 9.925947721787452,
+      "team": "Newcastle"
+    },
+    {
+      "change_5_matches": 74.64059505142859,
+      "rank": 11,
+      "rating": 1517.5565528390946,
+      "season_change": 22.24297783016914,
+      "team": "Hull"
+    },
+    {
+      "change_5_matches": 12.666495817777786,
+      "rank": 12,
+      "rating": 1517.0197591498913,
+      "season_change": -2.619707607670989,
+      "team": "Sunderland"
+    },
+    {
+      "change_5_matches": 8.875636834727175,
+      "rank": 13,
+      "rating": 1517.016445874082,
+      "season_change": 10.525474768518961,
+      "team": "Leeds"
+    },
+    {
+      "change_5_matches": -12.0885503155057,
+      "rank": 14,
+      "rating": 1516.5600157047793,
+      "season_change": 10.929749897197325,
+      "team": "Everton"
+    },
+    {
+      "change_5_matches": -19.915934498534398,
+      "rank": 15,
+      "rating": 1501.8679092807567,
+      "season_change": -8.251538324021794,
+      "team": "Nott'm Forest"
+    },
+    {
+      "change_5_matches": -28.108519291234188,
+      "rank": 16,
+      "rating": 1494.916450873833,
+      "season_change": -19.52557288325829,
+      "team": "Fulham"
+    },
+    {
+      "change_5_matches": -16.15464044439318,
+      "rank": 17,
+      "rating": 1483.8453595556068,
+      "season_change": -16.15464044439318,
+      "team": "Coventry"
+    },
+    {
+      "change_5_matches": -23.154484332653965,
+      "rank": 18,
+      "rating": 1483.751492130197,
+      "season_change": -15.709608560719062,
+      "team": "Crystal Palace"
+    },
+    {
+      "change_5_matches": -2.212409572364095,
+      "rank": 19,
+      "rating": 1450.1014749187898,
+      "season_change": -16.858787311604374,
+      "team": "Tottenham"
+    },
+    {
+      "change_5_matches": 30.103394775949482,
+      "rank": 20,
+      "rating": 1439.4638866349605,
+      "season_change": 5.597603946491745,
+      "team": "Ipswich"
+    }
+  ],
+  "histories": {
+    "Arsenal": [
+      {
+        "date": "2023-09-30",
+        "rating": 1633.3030547539897,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-10-28",
+        "rating": 1647.3537335171832,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-11-25",
+        "rating": 1643.4487146002134,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-12-31",
+        "rating": 1645.4103163274667,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-01-30",
+        "rating": 1636.7512827907942,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-02-24",
+        "rating": 1666.1897208509715,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-03-31",
+        "rating": 1679.2415276765507,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-04-28",
+        "rating": 1689.634394031858,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-05-19",
+        "rating": 1710.7342034830529,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-08-31",
+        "rating": 1673.6884502165121,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-09-28",
+        "rating": 1679.829201704437,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-10-27",
+        "rating": 1671.5499783235575,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-11-30",
+        "rating": 1661.8664623474926,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-12-27",
+        "rating": 1673.2885111238984,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-01-25",
+        "rating": 1679.8872597636616,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-02-26",
+        "rating": 1680.083635387136,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-03-16",
+        "rating": 1675.8250515012653,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-04-23",
+        "rating": 1681.5030211432002,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-05-25",
+        "rating": 1669.8296353108094,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-08-31",
+        "rating": 1642.1268610122286,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-09-28",
+        "rating": 1636.9962963218525,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-10-26",
+        "rating": 1658.8363762884321,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-11-30",
+        "rating": 1671.984527464452,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-12-30",
+        "rating": 1682.1284927178413,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-01-31",
+        "rating": 1672.7730857057074,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-02-22",
+        "rating": 1676.5732039499271,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-03-14",
+        "rating": 1696.0694652116044,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-04-25",
+        "rating": 1676.111514167875,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-05-24",
+        "rating": 1692.6767645751431,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-08-21",
+        "rating": 1649.6800412039825,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-31",
+        "rating": 1653.9857262662101,
+        "season_start_year": 2026
+      }
+    ],
+    "Aston Villa": [
+      {
+        "date": "2023-09-30",
+        "rating": 1567.773973560769,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-10-29",
+        "rating": 1581.353822332991,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-11-26",
+        "rating": 1580.6962732523436,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-12-30",
+        "rating": 1604.5882234566564,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-01-30",
+        "rating": 1606.5609873773367,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-02-24",
+        "rating": 1595.857909291406,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-03-30",
+        "rating": 1595.2654251384986,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-04-27",
+        "rating": 1610.2962435451443,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-05-19",
+        "rating": 1595.8049165095927,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-08-31",
+        "rating": 1564.8894502215596,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-09-29",
+        "rating": 1584.1290265945627,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-10-26",
+        "rating": 1590.5356498308697,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-11-23",
+        "rating": 1571.5214510964472,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-12-30",
+        "rating": 1562.3041717712742,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-01-26",
+        "rating": 1578.1460551765347,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-02-25",
+        "rating": 1566.9071691555114,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-03-08",
+        "rating": 1557.854578791606,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-04-22",
+        "rating": 1601.532086280782,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-05-25",
+        "rating": 1616.0086393650174,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-08-31",
+        "rating": 1566.196560310859,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-09-28",
+        "rating": 1555.603360289981,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-10-26",
+        "rating": 1577.3797824396984,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-11-30",
+        "rating": 1595.296748130227,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-12-30",
+        "rating": 1644.2257474892465,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-01-25",
+        "rating": 1625.3402689318352,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-02-27",
+        "rating": 1620.5365948618976,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-03-22",
+        "rating": 1585.0595652075444,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-04-25",
+        "rating": 1595.4989151420289,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-05-24",
+        "rating": 1575.1333202756393,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-08-23",
+        "rating": 1567.5781020468257,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-31",
+        "rating": 1558.6826168907235,
+        "season_start_year": 2026
+      }
+    ],
+    "Bournemouth": [
+      {
+        "date": "2023-09-30",
+        "rating": 1439.508092428356,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-10-28",
+        "rating": 1414.384555670194,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-11-25",
+        "rating": 1433.2545871273505,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-12-31",
+        "rating": 1494.3444587037873,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-01-21",
+        "rating": 1488.6808041796558,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-02-24",
+        "rating": 1478.2979869274882,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-03-30",
+        "rating": 1484.1153432010124,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-04-28",
+        "rating": 1496.4290638630591,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-05-19",
+        "rating": 1488.6421593040034,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-08-31",
+        "rating": 1488.367824887976,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-09-30",
+        "rating": 1485.4035046921274,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-10-26",
+        "rating": 1495.6940038781877,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-11-30",
+        "rating": 1494.2442136672728,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-12-29",
+        "rating": 1531.7572170642889,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-01-25",
+        "rating": 1557.4007393655477,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-02-25",
+        "rating": 1548.2595369439562,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-03-15",
+        "rating": 1541.4794862257384,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-04-27",
+        "rating": 1525.3779670438305,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-05-25",
+        "rating": 1523.2672989543457,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-08-30",
+        "rating": 1522.680600101504,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-09-27",
+        "rating": 1540.5833550151815,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-10-26",
+        "rating": 1550.5785177562993,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-11-29",
+        "rating": 1539.4668874864517,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-12-30",
+        "rating": 1507.9737265184992,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-01-31",
+        "rating": 1526.345875075227,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-02-28",
+        "rating": 1546.8899143238636,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-03-20",
+        "rating": 1539.473684709807,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-04-22",
+        "rating": 1565.8369315794307,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-05-24",
+        "rating": 1580.4947115423263,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-08-23",
+        "rating": 1560.5487641015188,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-29",
+        "rating": 1554.5065335484333,
+        "season_start_year": 2026
+      }
+    ],
+    "Brentford": [
+      {
+        "date": "2023-09-23",
+        "rating": 1539.0859357204122,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-10-28",
+        "rating": 1524.2422985110225,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-11-25",
+        "rating": 1537.2061067221105,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-12-30",
+        "rating": 1492.840024011231,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-01-31",
+        "rating": 1491.419320826966,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-02-26",
+        "rating": 1482.3825665408697,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-03-30",
+        "rating": 1460.659622614833,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-04-27",
+        "rating": 1484.290674782601,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-05-19",
+        "rating": 1487.3933592979763,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-08-31",
+        "rating": 1487.4936873309694,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-09-28",
+        "rating": 1483.7855959642188,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-10-26",
+        "rating": 1482.259498247948,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-11-30",
+        "rating": 1492.7384415176134,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-12-27",
+        "rating": 1486.1140210769404,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-01-26",
+        "rating": 1486.7518201194318,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-02-26",
+        "rating": 1508.9407202339423,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-03-15",
+        "rating": 1496.0489049691798,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-04-19",
+        "rating": 1509.6578989772152,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-05-25",
+        "rating": 1534.1399086225588,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-08-30",
+        "rating": 1527.7230526035823,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-09-27",
+        "rating": 1510.8142624468044,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-10-25",
+        "rating": 1519.867514435052,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-11-29",
+        "rating": 1525.1781366881112,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-12-27",
+        "rating": 1521.3947530807882,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-01-25",
+        "rating": 1538.9716628727695,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-02-28",
+        "rating": 1541.2830886022812,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-03-21",
+        "rating": 1545.9809840893536,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-04-27",
+        "rating": 1541.1175790177417,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-05-24",
+        "rating": 1533.3318913304263,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-08-22",
+        "rating": 1527.803316831704,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-30",
+        "rating": 1534.081202449113,
+        "season_start_year": 2026
+      }
+    ],
+    "Brighton": [
+      {
+        "date": "2023-09-30",
+        "rating": 1572.8219159582761,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-10-29",
+        "rating": 1559.74759717947,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-11-25",
+        "rating": 1549.3823200125478,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-12-28",
+        "rating": 1546.5280374413476,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-01-30",
+        "rating": 1553.7250136768778,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-02-24",
+        "rating": 1550.3368234944346,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-03-31",
+        "rating": 1542.27255782257,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-04-28",
+        "rating": 1521.5218291541385,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-05-19",
+        "rating": 1515.886381139567,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-08-31",
+        "rating": 1525.05832238816,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-09-28",
+        "rating": 1524.0380605191597,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-10-26",
+        "rating": 1539.9060930983164,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-11-29",
+        "rating": 1554.154555109283,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-12-30",
+        "rating": 1523.462805526078,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-01-25",
+        "rating": 1550.871017816888,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-02-25",
+        "rating": 1545.7031577397897,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-03-15",
+        "rating": 1561.100070243334,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-04-26",
+        "rating": 1530.0368279391425,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-05-25",
+        "rating": 1559.2911387117986,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-08-31",
+        "rating": 1539.4983854826787,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-09-27",
+        "rating": 1537.8049652507616,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-10-25",
+        "rating": 1558.356299396835,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-11-30",
+        "rating": 1564.447458372963,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-12-30",
+        "rating": 1544.8351844098656,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-01-31",
+        "rating": 1541.4747015210003,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-02-21",
+        "rating": 1520.7641680553847,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-03-21",
+        "rating": 1544.0208390829434,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-04-21",
+        "rating": 1559.262729859961,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-05-24",
+        "rating": 1552.225844940185,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-08-23",
+        "rating": 1531.110081915083,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-30",
+        "rating": 1540.0055670711852,
+        "season_start_year": 2026
+      }
+    ],
+    "Chelsea": [
+      {
+        "date": "2023-09-24",
+        "rating": 1491.3465777122462,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-10-28",
+        "rating": 1506.603899112892,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-11-25",
+        "rating": 1513.2110342135281,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-12-30",
+        "rating": 1505.6450611886767,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-01-31",
+        "rating": 1523.5792009025931,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-02-17",
+        "rating": 1517.7097547082155,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-03-30",
+        "rating": 1533.6977711440284,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-04-27",
+        "rating": 1537.2450524464239,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-05-19",
+        "rating": 1576.7048763420369,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-08-25",
+        "rating": 1553.2474759112124,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-09-28",
+        "rating": 1579.7222735311386,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-10-27",
+        "rating": 1575.2357168993353,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-11-23",
+        "rating": 1583.5072234529114,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-12-30",
+        "rating": 1604.526151431774,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-01-25",
+        "rating": 1592.4655807996814,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-02-25",
+        "rating": 1573.4982275438674,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-03-16",
+        "rating": 1580.049029102769,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-04-26",
+        "rating": 1585.397792589097,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-05-25",
+        "rating": 1600.0005352463677,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-08-30",
+        "rating": 1589.0341178117365,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-09-27",
+        "rating": 1584.0357844423165,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-10-25",
+        "rating": 1591.0498778214046,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-11-30",
+        "rating": 1598.3785805226605,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-12-30",
+        "rating": 1582.8415189446762,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-01-31",
+        "rating": 1591.211832668891,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-02-21",
+        "rating": 1596.8552687884014,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-03-21",
+        "rating": 1583.697826376739,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-04-21",
+        "rating": 1552.8091758193636,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-05-24",
+        "rating": 1541.8091084586301,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-08-24",
+        "rating": 1524.9463122547245,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-30",
+        "rating": 1536.7816149219348,
+        "season_start_year": 2026
+      }
+    ],
+    "Coventry": [
+      {
+        "date": "2026-08-21",
+        "rating": 1500.0,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-29",
+        "rating": 1495.6943149377723,
+        "season_start_year": 2026
+      }
+    ],
+    "Crystal Palace": [
+      {
+        "date": "2023-09-30",
+        "rating": 1500.4760719917895,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-10-27",
+        "rating": 1505.6377305536507,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-11-25",
+        "rating": 1492.9150656621316,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-12-30",
+        "rating": 1466.0085394631153,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-01-30",
+        "rating": 1470.4843843323304,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-02-24",
+        "rating": 1461.8397384876114,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-03-30",
+        "rating": 1460.0998722260288,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-04-27",
+        "rating": 1486.4138692520985,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-05-19",
+        "rating": 1510.6199438050553,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-08-24",
+        "rating": 1506.8976579583302,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-09-28",
+        "rating": 1494.4951645455596,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-10-27",
+        "rating": 1470.3065326677977,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-11-30",
+        "rating": 1474.9370141565603,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-12-29",
+        "rating": 1499.0345761001838,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-01-26",
+        "rating": 1525.5936292922397,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-02-25",
+        "rating": 1524.922569303694,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-03-08",
+        "rating": 1533.9751596675994,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-04-23",
+        "rating": 1529.4906140783542,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-05-25",
+        "rating": 1550.1703487904304,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-08-31",
+        "rating": 1542.7455742067787,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-09-27",
+        "rating": 1561.5979441642148,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-10-26",
+        "rating": 1560.8217910477479,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-11-30",
+        "rating": 1568.2854287230075,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-12-28",
+        "rating": 1552.4172210590561,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-01-25",
+        "rating": 1521.4049266728111,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-02-22",
+        "rating": 1510.1467829779265,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-03-15",
+        "rating": 1519.068281655169,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-04-25",
+        "rating": 1520.6706998753666,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-05-24",
+        "rating": 1506.1780912847214,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-08-22",
+        "rating": 1499.461100690916,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-28",
+        "rating": 1491.7557410204247,
+        "season_start_year": 2026
+      }
+    ],
+    "Everton": [
+      {
+        "date": "2023-09-30",
+        "rating": 1447.4376393336595,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-10-29",
+        "rating": 1440.0501928757017,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-11-26",
+        "rating": 1468.1685562810958,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-12-30",
+        "rating": 1488.872903587294,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-01-30",
+        "rating": 1482.666671476369,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-02-24",
+        "rating": 1479.6694048121703,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-03-30",
+        "rating": 1467.304417136142,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-04-27",
+        "rating": 1485.463308343595,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-05-19",
+        "rating": 1497.589660693576,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-08-31",
+        "rating": 1477.7909637090133,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-09-28",
+        "rating": 1462.8354570897234,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-10-26",
+        "rating": 1484.593760481617,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-11-23",
+        "rating": 1474.8951301669626,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-12-29",
+        "rating": 1488.8078922427012,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-01-25",
+        "rating": 1471.2453457813133,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-02-26",
+        "rating": 1506.0317071622298,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-03-15",
+        "rating": 1508.424229831005,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-04-26",
+        "rating": 1510.7264934727727,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-05-25",
+        "rating": 1516.541363776929,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-08-30",
+        "rating": 1522.4246764021898,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-09-29",
+        "rating": 1526.837470772306,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-10-26",
+        "rating": 1526.801331494608,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-11-29",
+        "rating": 1535.7987769305769,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-12-30",
+        "rating": 1526.8199072148914,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-01-31",
+        "rating": 1531.5355134221563,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-02-28",
+        "rating": 1522.204310112461,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-03-21",
+        "rating": 1535.1155656482877,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-04-25",
+        "rating": 1535.9260716116119,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-05-24",
+        "rating": 1517.4019664920663,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-08-22",
+        "rating": 1505.630265807582,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-29",
+        "rating": 1513.3356254780733,
+        "season_start_year": 2026
+      }
+    ],
+    "Fulham": [
+      {
+        "date": "2023-09-23",
+        "rating": 1499.5162940287064,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-10-29",
+        "rating": 1489.730866430352,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-11-27",
+        "rating": 1478.265077044294,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-12-31",
+        "rating": 1470.2480892342664,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-01-30",
+        "rating": 1476.0802246563228,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-02-24",
+        "rating": 1473.1265100525652,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-03-30",
+        "rating": 1501.487085015597,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-04-27",
+        "rating": 1486.449765899003,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-05-19",
+        "rating": 1480.900247480802,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-08-31",
+        "rating": 1494.503133015255,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-09-28",
+        "rating": 1504.5219545958707,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-10-26",
+        "rating": 1502.2760449259692,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-11-23",
+        "rating": 1522.6929002888673,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-12-29",
+        "rating": 1537.6509222618413,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-01-26",
+        "rating": 1531.1793729634428,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-02-25",
+        "rating": 1528.2424637432568,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-03-16",
+        "rating": 1530.686182792237,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-04-26",
+        "rating": 1526.7393556078694,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-05-25",
+        "rating": 1527.2363105739064,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-08-30",
+        "rating": 1514.3050976635109,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-09-28",
+        "rating": 1523.1651396231505,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-10-25",
+        "rating": 1500.85371330271,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-11-29",
+        "rating": 1501.7318980790606,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-12-27",
+        "rating": 1511.7726501437985,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-01-24",
+        "rating": 1525.1793138545174,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-02-22",
+        "rating": 1510.0341603140769,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-03-21",
+        "rating": 1515.3265059082303,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-04-25",
+        "rating": 1517.1716320426535,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-05-24",
+        "rating": 1510.8523242493136,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-08-24",
+        "rating": 1514.4420237570912,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-30",
+        "rating": 1502.606721089881,
+        "season_start_year": 2026
+      }
+    ],
+    "Hull": [
+      {
+        "date": "2026-08-22",
+        "rating": 1495.3135750089255,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-29",
+        "rating": 1505.707597456929,
+        "season_start_year": 2026
+      }
+    ],
+    "Ipswich": [
+      {
+        "date": "2024-08-31",
+        "rating": 1488.3186284343392,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-09-29",
+        "rating": 1489.273584432189,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-10-26",
+        "rating": 1469.5927733303483,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-11-30",
+        "rating": 1474.3859305702758,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-12-30",
+        "rating": 1443.9403708629256,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-01-25",
+        "rating": 1443.617249256803,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-02-26",
+        "rating": 1421.6569286501815,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-03-15",
+        "rating": 1411.0326972577548,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-04-26",
+        "rating": 1408.3080429064062,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-05-25",
+        "rating": 1392.4386263057427,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2026-08-22",
+        "rating": 1433.8662826884688,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-30",
+        "rating": 1444.1762605121878,
+        "season_start_year": 2026
+      }
+    ],
+    "Leeds": [
+      {
+        "date": "2025-08-30",
+        "rating": 1468.7068170756538,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-09-27",
+        "rating": 1474.0885676396592,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-10-24",
+        "rating": 1453.0805281327366,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-11-29",
+        "rating": 1439.9562983626072,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-12-28",
+        "rating": 1466.0925051830823,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-01-31",
+        "rating": 1482.8001085856981,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-02-28",
+        "rating": 1495.0632404975725,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-03-21",
+        "rating": 1479.3818927431369,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-04-22",
+        "rating": 1499.624240547964,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-05-24",
+        "rating": 1518.056818624279,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-08-22",
+        "rating": 1506.490971105563,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-30",
+        "rating": 1518.716219740849,
+        "season_start_year": 2026
+      }
+    ],
+    "Liverpool": [
+      {
+        "date": "2023-09-30",
+        "rating": 1646.2149084672794,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-10-29",
+        "rating": 1640.1473917467636,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-11-25",
+        "rating": 1646.3854044625527,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-12-26",
+        "rating": 1659.3583954837388,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-01-31",
+        "rating": 1677.020590755947,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-02-21",
+        "rating": 1681.7357197622177,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-03-31",
+        "rating": 1688.6905434210696,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-04-27",
+        "rating": 1669.8600888279718,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-05-19",
+        "rating": 1672.6536555848004,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-08-25",
+        "rating": 1640.396020542841,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-09-28",
+        "rating": 1642.2066188091837,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-10-27",
+        "rating": 1662.4006162189146,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-11-24",
+        "rating": 1675.005432699704,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-12-29",
+        "rating": 1690.4584230993207,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-01-25",
+        "rating": 1696.0258934604235,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-02-26",
+        "rating": 1714.2977502820718,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-03-08",
+        "rating": 1718.804842380435,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-04-27",
+        "rating": 1716.722189905584,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-05-25",
+        "rating": 1692.2755056740216,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-08-31",
+        "rating": 1654.9300354049099,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-09-27",
+        "rating": 1672.8706639267587,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-10-25",
+        "rating": 1635.6452070337536,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-11-30",
+        "rating": 1608.1754622619221,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-12-27",
+        "rating": 1624.1073320836992,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-01-31",
+        "rating": 1606.5422608209733,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-02-28",
+        "rating": 1620.300423133679,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-03-21",
+        "rating": 1604.0165646608814,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-04-25",
+        "rating": 1611.0059497682325,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-05-24",
+        "rating": 1594.8644476018721,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-08-23",
+        "rating": 1568.3439373675199,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-29",
+        "rating": 1568.9988913399277,
+        "season_start_year": 2026
+      }
+    ],
+    "Man City": [
+      {
+        "date": "2023-09-30",
+        "rating": 1705.9203855270969,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-10-29",
+        "rating": 1687.079886495664,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-11-25",
+        "rating": 1695.4453071160606,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-12-30",
+        "rating": 1682.4852827681764,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-01-31",
+        "rating": 1693.0360874147248,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-02-24",
+        "rating": 1701.5216436382595,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-03-31",
+        "rating": 1713.9975177885365,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-04-28",
+        "rating": 1730.0404604382784,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-05-19",
+        "rating": 1749.6804199964395,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-08-31",
+        "rating": 1701.1095358597383,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-09-28",
+        "rating": 1707.8485573899559,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-10-26",
+        "rating": 1714.3668371581364,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-11-23",
+        "rating": 1689.560879110461,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-12-29",
+        "rating": 1635.4127288895854,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-01-25",
+        "rating": 1650.6913788704057,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-02-26",
+        "rating": 1645.0283410372895,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-03-15",
+        "rating": 1642.5165209555719,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-04-22",
+        "rating": 1653.4431453992988,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-05-25",
+        "rating": 1662.111751091453,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-08-31",
+        "rating": 1619.7715105923005,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-09-27",
+        "rating": 1617.4203578742706,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-10-26",
+        "rating": 1635.6203305272454,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-11-29",
+        "rating": 1629.3040530416533,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-12-27",
+        "rating": 1660.1360834798465,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-01-24",
+        "rating": 1645.1029072274623,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-02-28",
+        "rating": 1665.541306381557,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-03-14",
+        "rating": 1666.281108094704,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-04-22",
+        "rating": 1680.6143313024227,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-05-24",
+        "rating": 1689.632489420227,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-08-23",
+        "rating": 1630.996255225074,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-28",
+        "rating": 1637.0384857781596,
+        "season_start_year": 2026
+      }
+    ],
+    "Man United": [
+      {
+        "date": "2023-09-30",
+        "rating": 1582.6202645054077,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-10-29",
+        "rating": 1582.500506217199,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-11-26",
+        "rating": 1587.9653291727461,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-12-30",
+        "rating": 1582.753906823089,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-01-14",
+        "rating": 1571.0401168948313,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-02-24",
+        "rating": 1606.810499112807,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-03-30",
+        "rating": 1591.4779250061035,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-04-27",
+        "rating": 1584.0613902426767,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-05-19",
+        "rating": 1567.339233074459,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-08-24",
+        "rating": 1564.6802237959635,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-09-29",
+        "rating": 1554.5405925484913,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-10-27",
+        "rating": 1551.840515401487,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-11-24",
+        "rating": 1547.1119337448047,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-12-30",
+        "rating": 1526.2088650899427,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-01-26",
+        "rating": 1513.7898817047985,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-02-26",
+        "rating": 1507.7099991664286,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-03-16",
+        "rating": 1515.9136774645203,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-04-27",
+        "rating": 1499.9046547084972,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-05-25",
+        "rating": 1477.5792648824258,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-08-30",
+        "rating": 1486.8539465152357,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-09-27",
+        "rating": 1499.415192228695,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-10-25",
+        "rating": 1516.0443563405363,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-11-30",
+        "rating": 1515.1127247320455,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-12-30",
+        "rating": 1533.6983023082503,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-01-25",
+        "rating": 1538.1482708658675,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-02-23",
+        "rating": 1565.6686610007491,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-03-20",
+        "rating": 1582.079428266096,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-04-27",
+        "rating": 1580.3033983745097,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-05-24",
+        "rating": 1601.2681419048392,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-08-22",
+        "rating": 1584.0104082186854,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-30",
+        "rating": 1573.6163857706817,
+        "season_start_year": 2026
+      }
+    ],
+    "Newcastle": [
+      {
+        "date": "2023-09-30",
+        "rating": 1579.2116000146225,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-10-28",
+        "rating": 1589.8236616452073,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-11-25",
+        "rating": 1585.788352839236,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-12-26",
+        "rating": 1573.6185848229281,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-01-30",
+        "rating": 1544.5044129159724,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-02-24",
+        "rating": 1558.4813199497712,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-03-30",
+        "rating": 1551.3129744100197,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-04-27",
+        "rating": 1562.2706987227143,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-05-19",
+        "rating": 1561.873820691726,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-08-25",
+        "rating": 1558.7725418185958,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-09-28",
+        "rating": 1565.7789929706632,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-10-27",
+        "rating": 1553.8755628876838,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-11-30",
+        "rating": 1554.4213811667826,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-12-30",
+        "rating": 1569.2984468744323,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-01-25",
+        "rating": 1581.4641073994421,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-02-26",
+        "rating": 1574.8031476333938,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-03-10",
+        "rating": 1570.2960555350305,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-04-26",
+        "rating": 1596.7569797762144,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-05-25",
+        "rating": 1602.1796535862443,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-08-30",
+        "rating": 1558.401386805429,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-09-28",
+        "rating": 1564.8053699787258,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-10-25",
+        "rating": 1553.2106933209545,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-11-29",
+        "rating": 1550.5841455101295,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-12-30",
+        "rating": 1543.6626132827316,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-01-31",
+        "rating": 1551.8169776408843,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-02-28",
+        "rating": 1538.388504002455,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-03-22",
+        "rating": 1549.0684814876845,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-04-25",
+        "rating": 1515.9816126856076,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-05-24",
+        "rating": 1529.9130282927313,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-08-23",
+        "rating": 1516.1319906494425,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-29",
+        "rating": 1515.4770366770347,
+        "season_start_year": 2026
+      }
+    ],
+    "Nott'm Forest": [
+      {
+        "date": "2023-09-23",
+        "rating": 1483.2503241921336,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-10-29",
+        "rating": 1479.4576837298457,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-11-25",
+        "rating": 1478.4929415208524,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-12-30",
+        "rating": 1447.617310052216,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-01-30",
+        "rating": 1452.1293895389654,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-02-24",
+        "rating": 1449.3116041390665,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-03-30",
+        "rating": 1436.026984879637,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-04-28",
+        "rating": 1432.316428270015,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-05-19",
+        "rating": 1429.40150327438,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-08-31",
+        "rating": 1465.6753663309305,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-09-28",
+        "rating": 1483.2793138799782,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-10-25",
+        "rating": 1484.6283835087227,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-11-30",
+        "rating": 1489.7630557428029,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-12-29",
+        "rating": 1536.131060698956,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-01-25",
+        "rating": 1561.2099731396677,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-02-26",
+        "rating": 1544.5388748092962,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-03-15",
+        "rating": 1557.1875240263944,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-04-21",
+        "rating": 1550.6449454240671,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-05-25",
+        "rating": 1553.5669868805935,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-08-31",
+        "rating": 1542.036027285751,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-09-27",
+        "rating": 1522.1875201592325,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-10-26",
+        "rating": 1492.902812488279,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-11-30",
+        "rating": 1507.878212890618,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-12-30",
+        "rating": 1491.7490025744223,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-01-25",
+        "rating": 1490.9186536650436,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-02-22",
+        "rating": 1488.7693435196345,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-03-22",
+        "rating": 1479.0832637905908,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-04-24",
+        "rating": 1495.956102681196,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-05-24",
+        "rating": 1513.729570732737,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-08-22",
+        "rating": 1510.1194476047785,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-29",
+        "rating": 1497.8941989694924,
+        "season_start_year": 2026
+      }
+    ],
+    "Sunderland": [
+      {
+        "date": "2025-08-30",
+        "rating": 1488.6135747931935,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-09-27",
+        "rating": 1500.6230690940545,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-10-25",
+        "rating": 1511.107070569324,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-11-29",
+        "rating": 1516.137114764564,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-12-28",
+        "rating": 1535.6378524077434,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-01-24",
+        "rating": 1534.5575788235665,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-02-28",
+        "rating": 1502.1929275577534,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-03-22",
+        "rating": 1505.4355240425784,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-04-24",
+        "rating": 1518.1299098244774,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-05-24",
+        "rating": 1517.6385968910854,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-08-22",
+        "rating": 1519.6394667575623,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-30",
+        "rating": 1509.3294889338433,
+        "season_start_year": 2026
+      }
+    ],
+    "Tottenham": [
+      {
+        "date": "2023-09-30",
+        "rating": 1582.2072708694095,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-10-27",
+        "rating": 1605.5739782000228,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-11-26",
+        "rating": 1588.4667071812812,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2023-12-31",
+        "rating": 1580.6811402890612,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-01-31",
+        "rating": 1588.0462541928787,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-02-17",
+        "rating": 1599.2203853361368,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-03-30",
+        "rating": 1591.0651012407611,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-04-28",
+        "rating": 1590.3545603940247,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-05-19",
+        "rating": 1563.4104619884893,
+        "season_start_year": 2023
+      },
+      {
+        "date": "2024-08-24",
+        "rating": 1551.9440363482463,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-09-29",
+        "rating": 1547.9419374942474,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-10-27",
+        "rating": 1557.653945481442,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-11-23",
+        "rating": 1541.6898913146144,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2024-12-29",
+        "rating": 1525.7120145840988,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-01-26",
+        "rating": 1497.9434204731913,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-02-26",
+        "rating": 1514.371772715921,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-03-16",
+        "rating": 1504.7955788595054,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-04-27",
+        "rating": 1476.8892591704096,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-05-25",
+        "rating": 1461.113905189259,
+        "season_start_year": 2024
+      },
+      {
+        "date": "2025-08-30",
+        "rating": 1487.0003421791591,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-09-27",
+        "rating": 1491.6472068677065,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-10-26",
+        "rating": 1489.619204017829,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-11-29",
+        "rating": 1487.7203016097958,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2025-12-28",
+        "rating": 1473.5603623654083,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-01-24",
+        "rating": 1468.8428113780728,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-02-22",
+        "rating": 1456.0169984776483,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-03-22",
+        "rating": 1439.8799306418011,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-04-25",
+        "rating": 1425.0593015873603,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-05-24",
+        "rating": 1446.052070891902,
+        "season_start_year": 2025
+      },
+      {
+        "date": "2026-08-22",
+        "rating": 1466.9602622303942,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-08-29",
+        "rating": 1460.682376612985,
+        "season_start_year": 2026
+      }
+    ]
+  },
+  "history_policy": "Every plotted value is an exact leakage-safe pre-match rating. The graph covers the latest three years. Current-season matches are kept individually; earlier months keep the final pre-match snapshot in each calendar month. Same-day results are applied only after all fixtures on that date are frozen.",
+  "history_start_date": "2023-08-31",
+  "latest_match_date": "2026-08-31",
+  "latest_season_start_year": 2026,
+  "model": "elo_1x2_v1",
+  "parameters": {
+    "base_rating": 1500.0,
+    "home_advantage": 75.0,
+    "k_factor": 20.0,
+    "scale": 400.0,
+    "season_carry": 0.75
+  },
+  "product_status": "CONTEXT_ONLY",
+  "rating_policy": "Result-only EPL Elo; H=1, D=0.5, A=0; no goal-margin multiplier.",
+  "schema_version": 1
+}
