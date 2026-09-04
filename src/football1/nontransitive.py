@@ -14,6 +14,7 @@ MIN_MEETINGS = 4
 PRIOR_MATCHES = 4.0
 EDGE_THRESHOLD = 0.04
 WINDOWS = (3, 5, 10)
+NULL_CYCLIC_SHARE = 0.25
 
 
 def _score_for_team(match: MatchRecord, team: str) -> tuple[float, float] | None:
@@ -79,6 +80,18 @@ def _directed_scores(rows: list[dict[str, object]]) -> dict[tuple[str, str], flo
     return scores
 
 
+def _binomial_normal_test(k: int, n: int, p0: float) -> tuple[float | None, float | None]:
+    if n <= 0:
+        return None, None
+    variance = n * p0 * (1.0 - p0)
+    if variance <= 0.0:
+        return None, None
+    z = (k - n * p0) / math.sqrt(variance)
+    # Two-sided normal approximation; descriptive only because triangles are not independent.
+    p_value = math.erfc(abs(z) / math.sqrt(2.0))
+    return z, p_value
+
+
 def cycle_audit(rows: list[dict[str, object]]) -> dict[str, object]:
     scores = _directed_scores(rows)
     teams = sorted({team for pair in scores for team in pair})
@@ -110,12 +123,19 @@ def cycle_audit(rows: list[dict[str, object]]) -> dict[str, object]:
             transitive_triangles += 1
 
     cycles.sort(key=lambda x: -float(x["cycle_strength"]))
+    cyclic_share = cyclic_triangles / complete_triangles if complete_triangles else None
+    z, p_value = _binomial_normal_test(cyclic_triangles, complete_triangles, NULL_CYCLIC_SHARE)
     return {
         "significant_directed_edges": len(scores) // 2,
         "complete_significant_triangles": complete_triangles,
         "cyclic_triangles": cyclic_triangles,
         "transitive_triangles": transitive_triangles,
-        "cyclic_share": (cyclic_triangles / complete_triangles if complete_triangles else None),
+        "cyclic_share": cyclic_share,
+        "random_sign_null_cyclic_share": NULL_CYCLIC_SHARE,
+        "cyclic_share_minus_null": (cyclic_share - NULL_CYCLIC_SHARE if cyclic_share is not None else None),
+        "descriptive_normal_z_vs_null": z,
+        "descriptive_two_sided_p_vs_null": p_value,
+        "null_warning": "The 25% sign-null is a simple orientation benchmark only; overlapping triangles are not independent, so the p-value is descriptive rather than confirmatory.",
         "strongest_cycles": cycles[:20],
     }
 
