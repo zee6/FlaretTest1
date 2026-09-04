@@ -9,7 +9,7 @@ permissions:
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Check out repository
@@ -49,13 +49,20 @@ jobs:
             --snapshot data/live/epl_odds_snapshot.json \
             --archive prospective/odds_snapshots.jsonl
 
-      - name: Append locked predictions
+      - name: Append locked result predictions
         run: |
           football1-prospective \
             --database data/processed/football1.sqlite \
             --snapshot data/live/epl_odds_snapshot.json \
             --ledger prospective/ledger.jsonl \
             --alpha 0.10
+
+      - name: Append locked consensus-movement forecasts
+        run: |
+          football1-prospective-consensus-movement-lock \
+            --database data/processed/football1.sqlite \
+            --snapshot data/live/epl_odds_snapshot.json \
+            --ledger prospective/movement_predictions.jsonl
 
       - name: Verify prospective records
         run: |
@@ -65,6 +72,7 @@ jobs:
           from pathlib import Path
           from football1.odds_archive import odds_record_hash
           from football1.prospective import prediction_content_hash
+          from football1.prospective_consensus_movement import movement_forecast_content_hash
 
           prediction_path = Path('prospective/ledger.jsonl')
           predictions = [json.loads(line) for line in prediction_path.read_text().splitlines() if line.strip()]
@@ -77,6 +85,19 @@ jobs:
               snap = datetime.fromisoformat(row['snapshot_retrieved_at_utc'].replace('Z', '+00:00'))
               kick = datetime.fromisoformat(row['commence_time_utc'].replace('Z', '+00:00'))
               assert snap < kick, f'non-prospective prediction line {i}'
+
+          movement_path = Path('prospective/movement_predictions.jsonl')
+          movement_rows = [json.loads(line) for line in movement_path.read_text().splitlines() if line.strip()]
+          assert movement_rows, 'prospective movement ledger is empty'
+          for i, row in enumerate(movement_rows, start=1):
+              stored = row['content_sha256']
+              unsigned = dict(row)
+              unsigned.pop('content_sha256')
+              assert stored == movement_forecast_content_hash(unsigned), f'movement hash failure on line {i}'
+              assert row['decision_weight'] == 0.0, f'nonzero movement decision weight on line {i}'
+              snap = datetime.fromisoformat(row['snapshot_retrieved_at_utc'].replace('Z', '+00:00'))
+              kick = datetime.fromisoformat(row['commence_time_utc'].replace('Z', '+00:00'))
+              assert snap < kick, f'non-prospective movement forecast line {i}'
 
           odds_path = Path('prospective/odds_snapshots.jsonl')
           odds_rows = [json.loads(line) for line in odds_path.read_text().splitlines() if line.strip()]
@@ -92,12 +113,14 @@ jobs:
               assert row['complete_h2h_bookmaker_count'] == len(row['bookmakers'])
 
           print('prediction_records=', len(predictions))
+          print('movement_forecast_records=', len(movement_rows))
           print('odds_event_snapshots=', len(odds_rows))
           print('latest_prediction_snapshot=', predictions[-1]['snapshot_retrieved_at_utc'])
+          print('latest_movement_snapshot=', movement_rows[-1]['snapshot_retrieved_at_utc'])
           print('latest_odds_snapshot=', odds_rows[-1]['retrieved_at_utc'])
           PY
 
-      - name: Build prospective market movement observer report
+      - name: Build prospective result-model market movement observer report
         run: |
           football1-market-movement \
             --ledger prospective/ledger.jsonl \
@@ -113,18 +136,36 @@ jobs:
           print('OVERALL', r['overall'])
           PY
 
+      - name: Build prospective consensus-movement forecast report
+        run: |
+          football1-prospective-consensus-movement-report \
+            --ledger prospective/movement_predictions.jsonl \
+            --odds-archive prospective/odds_snapshots.jsonl \
+            --min-common-bookmakers 2 \
+            --output data/processed/prospective_consensus_movement_report.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/prospective_consensus_movement_report.json'))
+          print('STATUS', r['status'])
+          print('LOCKED_FORECASTS', r['locked_forecasts'])
+          print('MATCHES_SCORED', r['matches_scored'])
+          print('COVERAGE', r['coverage_rate'])
+          print('SKIPPED_COMMON_BOOKS', r['skipped_insufficient_common_bookmakers'])
+          print('OVERALL', r['overall'])
+          PY
+
       - name: Commit normalized prospective records
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add prospective/ledger.jsonl
+          git add prospective/ledger.jsonl prospective/movement_predictions.jsonl
           if [ -f prospective/odds_snapshots.jsonl ]; then
             git add prospective/odds_snapshots.jsonl
           fi
           if git diff --cached --quiet; then
             echo 'No new prospective records to commit'
           else
-            git commit -m "Record prospective EPL prediction and odds snapshot"
+            git commit -m "Record prospective EPL prediction, movement forecast and odds snapshot"
             git push origin HEAD:master
           fi
 
@@ -136,7 +177,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      - name: Upload prospective market movement report
+      - name: Upload prospective result-model market movement report
         uses: actions/upload-artifact@v4
         with:
           name: prospective-market-movement-report
@@ -144,7 +185,16 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Upload prospective consensus-movement forecast report
+        uses: actions/upload-artifact@v4
+        with:
+          name: prospective-consensus-movement-report
+          path: data/processed/prospective_consensus_movement_report.json
+          if-no-files-found: error
+          retention-days: 14
+
 # Manual-only: each run makes one UK-region x h2h request to The Odds API.
-# Raw API responses remain short-lived artifacts. Only hash-verified normalized
-# predictions and bookmaker quote snapshots are committed for prospective study.
-# The movement observer reuses the same snapshot and consumes no additional API request.
+# The same snapshot feeds both immutable result and price-movement locks, so the
+# new observer consumes no additional API request. Historical movement models are
+# retrained only on rows strictly before the snapshot UTC date and receive zero
+# decision weight. Later scoring uses only bookmakers present in both snapshots.
