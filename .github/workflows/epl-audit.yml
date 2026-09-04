@@ -99,6 +99,25 @@ jobs:
               )
           PY
 
+      - name: Run football-only walk-forward model
+        run: |
+          football1-model-baseline \
+            --database data/processed/football1.sqlite \
+            --output data/processed/model_baseline.json
+          python - <<'PY'
+          import json
+          report = json.load(open('data/processed/model_baseline.json'))
+          m = report['overall_model']
+          p = report['paired_overall']
+          print('MODEL OOS matches=', m['matches'], 'log_loss=', round(m['log_loss'], 6), 'brier=', round(m['brier'], 6), 'accuracy=', round(m['accuracy'], 6), 'ece=', round(m['top_label_ece'], 6))
+          print('PAIRED matches=', p['matches'], 'model_LL=', round(p['model_log_loss'], 6), 'market_LL=', round(p['market_log_loss'], 6), 'LL_delta=', round(p['log_loss_delta_model_minus_market'], 6))
+          print('PAIRED model_Brier=', round(p['model_brier'], 6), 'market_Brier=', round(p['market_brier'], 6), 'Brier_delta=', round(p['brier_delta_model_minus_market'], 6))
+          print('Season-by-season:')
+          for s in report['seasons']:
+              q = s['paired_comparison']
+              print(s['test_season_start_year'], 'train=', s['train_matches'], 'test=', s['test_matches'], 'model_LL=', round(q['model_log_loss'], 6), 'market_LL=', round(q['market_log_loss'], 6), 'delta=', round(q['log_loss_delta_model_minus_market'], 6))
+          PY
+
       - name: Upload audit outputs
         uses: actions/upload-artifact@v4
         with:
@@ -106,6 +125,7 @@ jobs:
           path: |
             data/processed/raw_audit.json
             data/processed/market_baseline.json
+            data/processed/model_baseline.json
             data/processed/football1.sqlite
           if-no-files-found: error
           retention-days: 14
