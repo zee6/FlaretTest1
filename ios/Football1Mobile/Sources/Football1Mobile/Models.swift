@@ -10,6 +10,7 @@ struct MobileOutcome: Identifiable, Hashable, Sendable {
     let odds: Double
 
     var breakEven: Double { 1.0 / odds }
+    var fairOdds: Double { 1.0 / football1 }
     var ev: Double { football1 * odds - 1.0 }
     var edge: Double { football1 - market }
 }
@@ -24,9 +25,17 @@ struct MobileFixture: Identifiable, Hashable, Sendable {
     let snapshotRetrievedAt: String?
     let outcomes: [MobileOutcome]
 
-    var strongestOutcome: MobileOutcome {
+    var mostLikelyOutcome: MobileOutcome {
+        outcomes.max { $0.football1 < $1.football1 } ?? outcomes[0]
+    }
+
+    var bestPriceOutcome: MobileOutcome {
         outcomes.max { $0.ev < $1.ev } ?? outcomes[0]
     }
+
+    // Kept as a compatibility alias for older views while the interface migrates
+    // to the clearer `bestPriceOutcome` name.
+    var strongestOutcome: MobileOutcome { bestPriceOutcome }
 }
 
 enum MobileLiveData {
