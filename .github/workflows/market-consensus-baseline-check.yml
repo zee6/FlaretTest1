@@ -7,6 +7,7 @@ on:
       - 'src/football1/market_consensus_baseline_check.py'
       - 'tests/test_market_consensus_movement.py'
       - 'tests/test_market_consensus_baseline_check.py'
+      - 'pyproject.toml'
       - '.github/workflows/market-consensus-baseline-check.yml'
   push:
     branches: [master]
@@ -15,6 +16,7 @@ on:
       - 'src/football1/market_consensus_baseline_check.py'
       - 'tests/test_market_consensus_movement.py'
       - 'tests/test_market_consensus_baseline_check.py'
+      - 'pyproject.toml'
       - '.github/workflows/market-consensus-baseline-check.yml'
   workflow_dispatch:
 
@@ -49,7 +51,7 @@ jobs:
 
       - name: Run mean-movement control
         run: |
-          python -m football1.market_consensus_baseline_check \
+          football1-market-consensus-baseline-check \
             --database data/processed/football1.sqlite \
             --output data/processed/market_consensus_baseline_check.json
           python - <<'PY'
