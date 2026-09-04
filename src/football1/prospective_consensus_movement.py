@@ -21,6 +21,7 @@ from football1.market_consensus_movement import (
     DEFAULT_N_ESTIMATORS,
     DEFAULT_RANDOM_STATE,
     _fit,
+    actual_movement,
     best_price_premium,
     build_market_consensus_observations,
 )
@@ -206,7 +207,7 @@ def build_prospective_movement_forecasts(
 
     base_model = _fit(historical, augmented=False)
     augmented_model = _fit(historical, augmented=True)
-    training_mean = mean_movement(historical)
+    training_mean = mean_movement([actual_movement(obs) for obs in historical])
     states, historical_cutoff = _states_as_of(db_path, cutoff_date)
     normalized = normalize_snapshot(snapshot)
 
