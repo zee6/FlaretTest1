@@ -2,6 +2,10 @@ name: Record Prospective EPL Snapshot
 
 on:
   workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.github/prospective-live-once-20260904'
 
 permissions:
   contents: write
@@ -193,7 +197,8 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-# Manual-only: each run makes one UK-region x h2h request to The Odds API.
+# Normally manual-only: each run makes one UK-region x h2h request to The Odds API.
+# A one-time push trigger is temporarily enabled for the 2026-09-04 first real prospective lock.
 # The same snapshot feeds both immutable result and price-movement locks, so the
 # new observer consumes no additional API request. Historical movement models are
 # retrained only on rows strictly before the snapshot UTC date and receive zero
