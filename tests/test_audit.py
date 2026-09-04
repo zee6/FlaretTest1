@@ -11,14 +11,27 @@ def _write_csv(path: Path, fieldnames: list[str], rows: list[dict[str, object]])
         writer.writerows(rows)
 
 
-def test_finds_preclosing_and_closing_1x2_triplets():
+def test_finds_preclosing_and_closing_1x2_triplets_without_double_counting():
     columns = [
         "Date", "HomeTeam", "AwayTeam", "FTR",
         "B365H", "B365D", "B365A",
         "B365CH", "B365CD", "B365CA",
     ]
-    assert ("B365", "pre_closing", ("B365H", "B365D", "B365A")) in find_1x2_triplets(columns)
-    assert ("B365", "closing", ("B365CH", "B365CD", "B365CA")) in find_1x2_triplets(columns)
+    triplets = find_1x2_triplets(columns)
+    assert triplets == [
+        ("B365", "pre_closing", ("B365H", "B365D", "B365A")),
+        ("B365", "closing", ("B365CH", "B365CD", "B365CA")),
+    ]
+
+
+def test_vc_bookmaker_abbreviation_is_not_mistaken_for_closing_source_v():
+    columns = ["VCH", "VCD", "VCA", "VCCH", "VCCD", "VCCA"]
+    triplets = find_1x2_triplets(columns)
+    assert triplets == [
+        ("VC", "pre_closing", ("VCH", "VCD", "VCA")),
+        ("VC", "closing", ("VCCH", "VCCD", "VCCA")),
+    ]
+    assert not any(source == "V" for source, _, _ in triplets)
 
 
 def test_audit_counts_coverage_and_completed_rows(tmp_path: Path):
