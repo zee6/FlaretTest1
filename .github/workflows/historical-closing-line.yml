@@ -1,0 +1,73 @@
+name: EPL Historical Closing Line Observer
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/historical_closing_line.py'
+      - 'src/football1/features.py'
+      - 'src/football1/offset_slant.py'
+      - 'src/football1/market_baseline.py'
+      - 'tests/test_historical_closing_line.py'
+      - 'pyproject.toml'
+      - '.github/workflows/historical-closing-line.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/historical_closing_line.py'
+      - 'src/football1/features.py'
+      - 'src/football1/offset_slant.py'
+      - 'src/football1/market_baseline.py'
+      - 'tests/test_historical_closing_line.py'
+      - 'pyproject.toml'
+      - '.github/workflows/historical-closing-line.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  historical-closing-line:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Download EPL history
+        run: football1-download-epl --from-season 2012 --to-season 2026
+
+      - name: Build canonical database
+        run: football1-build-db --input-dir data/raw/football-data --output data/processed/football1.sqlite
+
+      - name: Run historical closing-line observer
+        run: |
+          football1-historical-closing-line \
+            --database data/processed/football1.sqlite \
+            --output data/processed/historical_closing_line_report.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/historical_closing_line_report.json'))
+          print('STATUS', r['status'])
+          print('MATCHES', r['matches'])
+          print('TEST_SEASONS', r.get('test_seasons'))
+          print('OVERALL', r.get('overall'))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-historical-closing-line-report
+          path: data/processed/historical_closing_line_report.json
+          if-no-files-found: error
+          retention-days: 14
