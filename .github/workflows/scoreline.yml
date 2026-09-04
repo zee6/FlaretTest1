@@ -4,14 +4,18 @@ on:
   pull_request:
     paths:
       - 'src/football1/scoreline.py'
+      - 'src/football1/scoreline_ablation.py'
       - 'tests/test_scoreline.py'
+      - 'tests/test_scoreline_ablation.py'
       - 'pyproject.toml'
       - '.github/workflows/scoreline.yml'
   push:
     branches: [master]
     paths:
       - 'src/football1/scoreline.py'
+      - 'src/football1/scoreline_ablation.py'
       - 'tests/test_scoreline.py'
+      - 'tests/test_scoreline_ablation.py'
       - 'pyproject.toml'
       - '.github/workflows/scoreline.yml'
   workflow_dispatch:
@@ -66,9 +70,43 @@ jobs:
               print(x['date'], x['home_team'], 'vs', x['away_team'], 'xG-like=', round(x['expected_home_goals'], 2), '-', round(x['expected_away_goals'], 2), 'HDA=', tuple(round(x[k], 3) for k in ('home_prob','draw_prob','away_prob')), 'mode=', x['modal_score'])
           PY
 
+      - name: Run fixed-market Poisson ablation
+        run: |
+          football1-scoreline-ablation --database data/processed/football1.sqlite --output data/processed/scoreline_ablation.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/scoreline_ablation.json'))
+          raw = r['overall_raw_market']
+          print('RAW LL=', round(raw['log_loss'], 6), 'Brier=', round(raw['brier'], 6))
+          for name, v in r['overall_variants'].items():
+              print(name, 'matches=', v['matches'], 'LL=', round(v['log_loss'], 6), 'delta_raw=', round(v['log_loss_delta_vs_raw'], 6), 'Brier=', round(v['brier'], 6), 'Brier_delta_raw=', round(v['brier_delta_vs_raw'], 6), 'ECE=', round(v['top_label_ece'], 6))
+          print('INCREMENTAL')
+          for k, v in r['incremental'].items():
+              print(k, round(v, 6))
+          print('SEASON PLUS-POISSON MINUS BASELINE LL')
+          for s in r['seasons']:
+              b = s['variants']['frozen_residual_v1']['log_loss']
+              p = s['variants']['frozen_residual_plus_poisson_v1']['log_loss']
+              print(s['test_season_start_year'], round(p - b, 6))
+          print('LATEST STANDARDIZED POISSON WEIGHTS')
+          w = r['latest_standardized_weights']['frozen_residual_plus_poisson_v1']
+          for side in ('home_vs_draw', 'away_vs_draw'):
+              print(side)
+              for k, v in w[side].items():
+                  if k.startswith('scoreline__'):
+                      print(k, round(v, 6))
+          PY
+
       - uses: actions/upload-artifact@v4
         with:
           name: epl-poisson-scoreline-report
           path: data/processed/scoreline.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-poisson-ablation-report
+          path: data/processed/scoreline_ablation.json
           if-no-files-found: error
           retention-days: 14
