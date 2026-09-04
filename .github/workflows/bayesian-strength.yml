@@ -1,0 +1,96 @@
+name: EPL Bayesian Strength Audit
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/bayesian_strength.py'
+      - 'src/football1/bayesian_strength_ablation.py'
+      - 'tests/test_bayesian_strength.py'
+      - 'tests/test_bayesian_strength_ablation.py'
+      - 'pyproject.toml'
+      - '.github/workflows/bayesian-strength.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/bayesian_strength.py'
+      - 'src/football1/bayesian_strength_ablation.py'
+      - 'tests/test_bayesian_strength.py'
+      - 'tests/test_bayesian_strength_ablation.py'
+      - 'pyproject.toml'
+      - '.github/workflows/bayesian-strength.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bayesian-strength:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Download EPL history
+        run: football1-download-epl --from-season 2012 --to-season 2026
+
+      - name: Build canonical database
+        run: football1-build-db --input-dir data/raw/football-data --output data/processed/football1.sqlite
+
+      - name: Run dynamic Bayesian strength audit
+        run: |
+          football1-bayesian-strength --database data/processed/football1.sqlite --output data/processed/bayesian_strength_report.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/bayesian_strength_report.json'))
+          for key in ('bayesian_strength', 'bayesian_strength_plus_regime'):
+              m = r[key]['overall_model']
+              p = r[key]['paired_overall']
+              print('\n', key.upper())
+              print('OOS matches=', m['matches'])
+              print('LL=', round(m['log_loss'], 6), 'Brier=', round(m['brier'], 6), 'accuracy=', round(m['accuracy'], 6), 'ECE=', round(m['top_label_ece'], 6))
+              print('PAIRED matches=', p['matches'], 'model_LL=', round(p['model_log_loss'], 6), 'market_LL=', round(p['market_log_loss'], 6), 'LL_delta=', round(p['log_loss_delta_model_minus_market'], 6))
+              print('model_Brier=', round(p['model_brier'], 6), 'market_Brier=', round(p['market_brier'], 6), 'Brier_delta=', round(p['brier_delta_model_minus_market'], 6))
+          print('\nFINAL BAYESIAN STRENGTH TOP 10')
+          for row in r['final_strengths'][:10]:
+              print(row['team'], 'mean=', round(row['mean_strength_goals'], 3), 'sd=', round(row['posterior_sd'], 3), 'regime=', round(row['regime_surprise'], 3))
+          print('\nSEASON LL DELTAS VS MARKET')
+          for s in r['seasons']:
+              a = s['paired_b365_pre_closing']['bayesian_strength']
+              b = s['paired_b365_pre_closing']['bayesian_strength_plus_regime']
+              print(s['test_season_start_year'], 'strength=', round(a['log_loss_delta_model_minus_market'], 6), 'plus_regime=', round(b['log_loss_delta_model_minus_market'], 6))
+          PY
+
+      - name: Run market-anchored Bayesian residual ablation
+        run: |
+          football1-bayesian-strength-ablation --database data/processed/football1.sqlite --output data/processed/bayesian_strength_ablation.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/bayesian_strength_ablation.json'))
+          print('\nBAYESIAN RESIDUAL ABLATION')
+          print('raw market LL=', round(r['overall_raw_market']['log_loss'], 6), 'Brier=', round(r['overall_raw_market']['brier'], 6))
+          for name, row in r['overall_variants'].items():
+              print(name, 'LL=', round(row['log_loss'], 6), 'Brier=', round(row['brier'], 6), 'ECE=', round(row['top_label_ece'], 6), 'LL_delta_vs_raw=', round(row['log_loss_delta_vs_raw'], 6))
+          print('incremental=', r['incremental_comparisons'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-bayesian-strength-report
+          path: |
+            data/processed/bayesian_strength_report.json
+            data/processed/bayesian_strength_ablation.json
+          if-no-files-found: error
+          retention-days: 14
