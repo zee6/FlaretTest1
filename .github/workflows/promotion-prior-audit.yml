@@ -1,0 +1,98 @@
+name: EPL Promotion Prior Audit
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/promotion_prior.py'
+      - 'tests/test_promotion_prior.py'
+      - 'pyproject.toml'
+      - '.github/workflows/promotion-prior-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  promotion-prior:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run focused promotion-prior tests
+        run: pytest -q tests/test_promotion_prior.py
+
+      - name: Verify CLI is installed
+        run: football1-promotion-prior --help
+
+      - name: Download EPL history
+        run: football1-download-epl --from-season 2012 --to-season 2026
+
+      - name: Build canonical database
+        run: football1-build-db --input-dir data/raw/football-data --output data/processed/football1.sqlite
+
+      - name: Run historical promotion-prior audit
+        run: |
+          football1-promotion-prior \
+            --database data/processed/football1.sqlite \
+            --output data/processed/promotion_prior_report.json
+
+      - name: Audit leakage and report invariants
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p = Path('data/processed/promotion_prior_report.json')
+          r = json.loads(p.read_text())
+          assert r['decision_weight'] == 0.0
+          assert r['status'] == 'historical_structural_audit_zero_decision_weight'
+          assert r['data_scope'].startswith('EPL only')
+
+          latest = max(row['season_start_year'] for row in r['season_policy'])
+          for row in r['season_policy']:
+              season = row['season_start_year']
+              assert all(source < season for source in row['prior_source_seasons'])
+              assert row['prior_sample_count'] >= len(row['prior_source_seasons'])
+              assert set(row['first_time_archive_entrants']).isdisjoint(row['returning_entrants'])
+          assert all(sample['season_start_year'] < latest for sample in r['cohort_samples'])
+
+          robustness = r['robustness_excluding_latest_season']
+          assert robustness['excluded_season_start_year'] == latest
+          assert robustness['baseline_neutral_entry_elo']['matches'] < r['overall']['baseline_neutral_entry_elo']['matches']
+
+          overall = r['overall']
+          print('STATUS', r['status'])
+          print('SEASONS', len(r['seasons']))
+          print('COHORT_SAMPLES', len(r['cohort_samples']))
+          print('BASELINE', overall['baseline_neutral_entry_elo'])
+          print('PROMOTION_PRIOR', overall['empirical_promotion_prior_elo'])
+          print('MARKET', overall['paired_b365_pre_closing'])
+          print('DELTA_PRIOR_MINUS_BASELINE', overall['promotion_prior_minus_baseline'])
+          print('ENTRANT_SUBSET', overall['entrant_involved_matches'])
+          print('FIRST_TIME_SUBSET', overall['first_time_archive_entrant_matches'])
+          print('ROBUSTNESS_EXCLUDING_LATEST', robustness)
+          PY
+
+      - name: Run full repository tests
+        run: pytest -q
+
+      - name: Upload promotion-prior report
+        uses: actions/upload-artifact@v4
+        with:
+          name: epl-promotion-prior-report
+          path: data/processed/promotion_prior_report.json
+          if-no-files-found: error
+          retention-days: 14
