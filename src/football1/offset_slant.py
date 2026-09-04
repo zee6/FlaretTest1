@@ -26,8 +26,23 @@ class OffsetSlantModel:
     coef_a: np.ndarray
     alpha: float
 
-    def predict(self, row: FeatureRow) -> tuple[float, float, float]:
-        base = np.asarray(_market_probs(row), dtype=float)
+    def predict_with_base(
+        self,
+        row: FeatureRow,
+        base_probability: tuple[float, float, float],
+    ) -> tuple[float, float, float]:
+        """Apply the frozen football residual to an explicit market baseline.
+
+        Historical evaluation passes de-vigged Bet365 probabilities. Prospective
+        evaluation may pass a separately documented live market consensus. The
+        caller is responsible for recording that anchor-source change.
+        """
+        base = np.asarray(base_probability, dtype=float)
+        if base.shape != (3,) or not np.all(np.isfinite(base)) or np.any(base <= 0):
+            raise ValueError("base_probability must contain three positive finite values")
+        total = float(base.sum())
+        if abs(total - 1.0) > 1e-9:
+            raise ValueError("base_probability must sum to 1")
         x = self.scaler.transform([feature_vector(row)])[0]
         logits = np.log(base)
         logits[0] += self.intercept_h + float(x @ self.coef_h)
@@ -36,6 +51,9 @@ class OffsetSlantModel:
         exp = np.exp(logits)
         probs = exp / exp.sum()
         return (float(probs[0]), float(probs[1]), float(probs[2]))
+
+    def predict(self, row: FeatureRow) -> tuple[float, float, float]:
+        return self.predict_with_base(row, _market_probs(row))
 
 
 @dataclass
