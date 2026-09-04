@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'src/football1/elo.py'
+      - 'src/football1/elo_research.py'
       - 'src/football1/elo_observer.py'
       - 'tests/test_elo.py'
       - 'tests/test_elo_observer.py'
@@ -13,6 +14,7 @@ on:
     branches: [master]
     paths:
       - 'src/football1/elo.py'
+      - 'src/football1/elo_research.py'
       - 'src/football1/elo_observer.py'
       - 'tests/test_elo.py'
       - 'tests/test_elo_observer.py'
@@ -70,6 +72,18 @@ jobs:
               print(s['test_season_start_year'], 'matches=', s['test_matches'], 'LL_delta=', round(p2['log_loss_delta_elo_minus_market'], 6))
           PY
 
+      - name: Export app-facing Elo table and histories
+        run: |
+          football1-elo-research --database data/processed/football1.sqlite --output data/processed/elo_research.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/elo_research.json'))
+          print('ELO RESEARCH current teams=', len(r['current_ratings']))
+          print('latest match date=', r['latest_match_date'])
+          for row in r['current_ratings'][:10]:
+              print(row['rank'], row['team'], round(row['rating'], 2))
+          PY
+
       - name: Run Elo observer diagnostics
         run: |
           football1-elo-observer --database data/processed/football1.sqlite --output data/processed/elo_observer.json
@@ -98,6 +112,13 @@ jobs:
         with:
           name: epl-elo-report
           path: data/processed/elo_report.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-elo-research
+          path: data/processed/elo_research.json
           if-no-files-found: error
           retention-days: 14
 
