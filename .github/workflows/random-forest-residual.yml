@@ -1,0 +1,70 @@
+name: EPL Random Forest Residual Audit
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/random_forest_residual.py'
+      - 'src/football1/features.py'
+      - 'tests/test_random_forest_residual.py'
+      - 'pyproject.toml'
+      - '.github/workflows/random-forest-residual.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/random_forest_residual.py'
+      - 'src/football1/features.py'
+      - 'tests/test_random_forest_residual.py'
+      - 'pyproject.toml'
+      - '.github/workflows/random-forest-residual.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  random-forest-residual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Download EPL history
+        run: football1-download-epl --from-season 2012 --to-season 2026
+
+      - name: Build canonical database
+        run: football1-build-db --input-dir data/raw/football-data --output data/processed/football1.sqlite
+
+      - name: Run Random Forest residual audit
+        run: |
+          football1-random-forest-residual --database data/processed/football1.sqlite --output data/processed/random_forest_residual_report.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/random_forest_residual_report.json'))
+          o = r['overall']
+          print('STATUS', r['status'])
+          print('MARKET', o['raw_market'])
+          print('RF', o['random_forest_standalone'])
+          print('MARKET_PLUS_RF', o['market_plus_fixed_rf_residual'])
+          print('ECONOMICS', r['economics'])
+          print('IMPORTANCE', r['latest_training_impurity_importance'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-random-forest-residual-report
+          path: data/processed/random_forest_residual_report.json
+          if-no-files-found: error
+          retention-days: 14
