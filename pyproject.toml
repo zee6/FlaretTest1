@@ -18,6 +18,7 @@ football1-audit-data = "football1.audit:main"
 football1-build-db = "football1.build_db:main"
 football1-market-baseline = "football1.market_baseline:main"
 football1-model-baseline = "football1.model_baseline:main"
+football1-slant-model = "football1.slant_model:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
