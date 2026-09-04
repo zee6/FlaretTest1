@@ -5,6 +5,7 @@ __pycache__/
 .DS_Store
 data/raw/
 data/processed/
+data/live/
 *.sqlite
 *.sqlite3
 .env

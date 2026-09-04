@@ -1,0 +1,63 @@
+name: Live EPL Odds Smoke Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-odds:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run unit tests
+        run: pytest -q
+
+      - name: Fetch one EPL 1X2 snapshot
+        env:
+          THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
+        run: |
+          test -n "$THE_ODDS_API_KEY" || (echo 'THE_ODDS_API_KEY secret is missing' && exit 1)
+          football1-live-odds --regions uk --markets h2h --odds-format decimal --output data/live/epl_odds_snapshot.json
+
+      - name: Validate snapshot
+        run: |
+          python - <<'PY'
+          import json
+          p = json.load(open('data/live/epl_odds_snapshot.json'))
+          assert p['provider'] == 'the-odds-api'
+          assert p['sport_key'] == 'soccer_epl'
+          assert p['request'] == {'regions': 'uk', 'markets': 'h2h', 'odds_format': 'decimal'}
+          assert 'apiKey' not in p['request']
+          print('event_count=', p['event_count'])
+          print('usage=', p['usage'])
+          for e in p['summary']:
+              print(e['commence_time'], e['home_team'], 'vs', e['away_team'], 'books=', e['complete_h2h_bookmaker_count'])
+              print('  consensus=', e['consensus_fair_probability'])
+              print('  best_odds=', e['best_decimal_odds'])
+          PY
+
+      - name: Upload live snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-epl-odds-snapshot
+          path: data/live/epl_odds_snapshot.json
+          if-no-files-found: error
+          retention-days: 7
+
+# Manual-only by design: one UK region x one h2h market should cost one usage credit.
