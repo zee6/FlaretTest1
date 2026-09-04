@@ -61,11 +61,17 @@ jobs:
           assert r['status'] == 'historical_structural_audit_zero_decision_weight'
           assert r['data_scope'].startswith('EPL only')
 
+          latest = max(row['season_start_year'] for row in r['season_policy'])
           for row in r['season_policy']:
               season = row['season_start_year']
               assert all(source < season for source in row['prior_source_seasons'])
               assert row['prior_sample_count'] >= len(row['prior_source_seasons'])
               assert set(row['first_time_archive_entrants']).isdisjoint(row['returning_entrants'])
+          assert all(sample['season_start_year'] < latest for sample in r['cohort_samples'])
+
+          robustness = r['robustness_excluding_latest_season']
+          assert robustness['excluded_season_start_year'] == latest
+          assert robustness['baseline_neutral_entry_elo']['matches'] < r['overall']['baseline_neutral_entry_elo']['matches']
 
           overall = r['overall']
           print('STATUS', r['status'])
@@ -77,6 +83,7 @@ jobs:
           print('DELTA_PRIOR_MINUS_BASELINE', overall['promotion_prior_minus_baseline'])
           print('ENTRANT_SUBSET', overall['entrant_involved_matches'])
           print('FIRST_TIME_SUBSET', overall['first_time_archive_entrant_matches'])
+          print('ROBUSTNESS_EXCLUDING_LATEST', robustness)
           PY
 
       - name: Run full repository tests
