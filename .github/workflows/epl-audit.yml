@@ -48,25 +48,14 @@ jobs:
         run: |
           python - <<'PY'
           import json
-          from pathlib import Path
-
-          p = Path('data/processed/raw_audit.json')
-          report = json.loads(p.read_text())
+          report = json.load(open('data/processed/raw_audit.json'))
           print('season_count=', report['season_count'])
           print('total_rows=', report['total_rows'])
           print('total_completed_rows=', report['total_completed_rows'])
           print('schema_union_count=', len(report['schema_union']))
           print('schema_intersection_count=', len(report['schema_intersection']))
-          print('\nSeason summary:')
           for s in report['seasons']:
-              print(
-                  s['season_start_year'],
-                  'rows=', s['row_count'],
-                  'completed=', s['completed_rows'],
-                  'columns=', s['column_count'],
-                  'unknown=', len(s['unknown_columns']),
-                  'triplets=', len(s['odds_triplets']),
-              )
+              print(s['season_start_year'], 'rows=', s['row_count'], 'completed=', s['completed_rows'], 'columns=', s['column_count'], 'unknown=', len(s['unknown_columns']), 'triplets=', len(s['odds_triplets']))
               for t in s['odds_triplets']:
                   if t.get('warning'):
                       print('  WARNING', t['source'], t['phase'], t['warning'])
@@ -91,12 +80,32 @@ jobs:
               raise SystemExit(f'row-count mismatch: canonical={n}, completed={audit["total_completed_rows"]}')
           PY
 
+      - name: Score market probability baselines
+        run: |
+          football1-market-baseline \
+            --database data/processed/football1.sqlite \
+            --output data/processed/market_baseline.json
+          python - <<'PY'
+          import json
+          report = json.load(open('data/processed/market_baseline.json'))
+          for b in report['baselines']:
+              print(
+                  b['source'], b['phase'],
+                  'coverage=', round(b['coverage'], 6),
+                  'log_loss=', round(b['log_loss'], 6) if b['log_loss'] is not None else None,
+                  'brier=', round(b['brier'], 6) if b['brier'] is not None else None,
+                  'accuracy=', round(b['accuracy'], 6) if b['accuracy'] is not None else None,
+                  'mean_overround=', round(b['mean_overround'], 6) if b['mean_overround'] is not None else None,
+              )
+          PY
+
       - name: Upload audit outputs
         uses: actions/upload-artifact@v4
         with:
           name: epl-audit-output
           path: |
             data/processed/raw_audit.json
+            data/processed/market_baseline.json
             data/processed/football1.sqlite
           if-no-files-found: error
           retention-days: 14
