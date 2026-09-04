@@ -1,0 +1,58 @@
+name: Settle Prospective EPL Predictions
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  settle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run unit tests
+        run: pytest -q
+
+      - name: Settle completed provider events
+        env:
+          THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
+        run: |
+          test -n "$THE_ODDS_API_KEY" || (echo 'THE_ODDS_API_KEY secret is missing' && exit 1)
+          football1-settle \
+            --ledger prospective/ledger.jsonl \
+            --settlements prospective/settlements.jsonl \
+            --days-from 3
+
+      - name: Commit settlement ledger if changed
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if [ -f prospective/settlements.jsonl ]; then
+            git add prospective/settlements.jsonl
+          fi
+          if git diff --cached --quiet; then
+            echo 'No new settlements to commit'
+          else
+            git commit -m "Settle prospective EPL prediction records"
+            git push origin HEAD:master
+          fi
+
+# Manual-only. If unresolved predictions exist, daysFrom=3 currently costs
+# 2 Odds API usage credits. The command makes no API call when all records are settled.

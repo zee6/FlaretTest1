@@ -23,6 +23,7 @@ football1-offset-slant = "football1.offset_slant:main"
 football1-mispricing-backtest = "football1.mispricing_backtest:main"
 football1-live-odds = "football1.live_odds:main"
 football1-prospective = "football1.prospective:main"
+football1-settle = "football1.settlement:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
