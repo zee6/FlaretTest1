@@ -142,7 +142,7 @@ struct EloResearchDashboard: View {
                     .frame(height: 260)
                 }
 
-                Text("The lines show the rating Football 1 had immediately before each EPL match. Gaps can occur when a club was outside the Premier League.")
+                Text("The lines show exact pre-match Elo ratings. The 3-year view keeps monthly snapshots outside the current season, so it stays readable and lightweight.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -242,21 +242,11 @@ struct EloResearchDashboard: View {
     }
 
     private func chartPoints(document: EloResearchDocument, home: String, away: String) -> [EloChartPoint] {
-        let latestDate = EloDateParser.date(document.latestMatchDate)
-        let cutoff = latestDate.flatMap {
-            Calendar.current.date(byAdding: .year, value: -3, to: $0)
-        }
-
         func filtered(team: String) -> [EloChartPoint] {
             (document.histories[team] ?? []).compactMap { point in
                 guard let date = EloDateParser.date(point.date) else { return nil }
-                switch horizon {
-                case .season:
-                    guard point.seasonStartYear == document.latestSeasonStartYear else { return nil }
-                case .threeYears:
-                    if let cutoff, date < cutoff { return nil }
-                case .all:
-                    break
+                if horizon == .season && point.seasonStartYear != document.latestSeasonStartYear {
+                    return nil
                 }
                 return EloChartPoint(team: displayTeamName(team), date: date, rating: point.rating)
             }
@@ -304,7 +294,6 @@ private struct EvidenceRow: View {
 private enum EloHorizon: String, CaseIterable, Identifiable {
     case season = "Season"
     case threeYears = "3 years"
-    case all = "All"
 
     var id: String { rawValue }
 }
