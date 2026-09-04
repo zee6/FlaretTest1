@@ -1,0 +1,71 @@
+name: EPL Head To Head Audit
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/head_to_head.py'
+      - 'tests/test_head_to_head.py'
+      - 'pyproject.toml'
+      - '.github/workflows/head-to-head.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/head_to_head.py'
+      - 'tests/test_head_to_head.py'
+      - 'pyproject.toml'
+      - '.github/workflows/head-to-head.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  h2h:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Download EPL history
+        run: football1-download-epl --from-season 2012 --to-season 2026
+
+      - name: Build canonical database
+        run: football1-build-db --input-dir data/raw/football-data --output data/processed/football1.sqlite
+
+      - name: Run walk-forward head-to-head audit
+        run: |
+          football1-head-to-head --database data/processed/football1.sqlite --output data/processed/head_to_head.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/head_to_head.json'))
+          m = r['overall_model']
+          p = r['paired_overall']
+          print('H2H OOS matches=', m['matches'])
+          print('H2H LL=', round(m['log_loss'], 6), 'Brier=', round(m['brier'], 6), 'accuracy=', round(m['accuracy'], 6), 'ECE=', round(m['top_label_ece'], 6))
+          print('PAIRED matches=', p['matches'], 'Model_LL=', round(p['model_log_loss'], 6), 'Market_LL=', round(p['market_log_loss'], 6), 'LL_delta=', round(p['log_loss_delta_model_minus_market'], 6))
+          print('Model_Brier=', round(p['model_brier'], 6), 'Market_Brier=', round(p['market_brier'], 6), 'Brier_delta=', round(p['brier_delta_model_minus_market'], 6))
+          print('SEASON DELTAS')
+          for s in r['seasons']:
+              q = s['paired_b365_pre_closing']
+              print(s['test_season_start_year'], 'matches=', s['test_matches'], 'LL_delta=', round(q['log_loss_delta_model_minus_market'], 6))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-head-to-head-report
+          path: data/processed/head_to_head.json
+          if-no-files-found: error
+          retention-days: 14
