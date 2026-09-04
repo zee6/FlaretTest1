@@ -2,10 +2,6 @@ name: Live EPL Odds Smoke Test
 
 on:
   workflow_dispatch:
-  push:
-    branches: [master]
-    paths:
-      - '.github/live-odds.trigger'
 
 permissions:
   contents: read
@@ -64,4 +60,4 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-# Push trigger is temporary and scoped to one inert trigger file.
+# Manual-only by design: one UK region x one h2h market should cost one usage credit.
