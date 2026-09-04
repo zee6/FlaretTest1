@@ -4,14 +4,18 @@ on:
   pull_request:
     paths:
       - 'src/football1/bayesian_strength.py'
+      - 'src/football1/bayesian_strength_ablation.py'
       - 'tests/test_bayesian_strength.py'
+      - 'tests/test_bayesian_strength_ablation.py'
       - 'pyproject.toml'
       - '.github/workflows/bayesian-strength.yml'
   push:
     branches: [master]
     paths:
       - 'src/football1/bayesian_strength.py'
+      - 'src/football1/bayesian_strength_ablation.py'
       - 'tests/test_bayesian_strength.py'
+      - 'tests/test_bayesian_strength_ablation.py'
       - 'pyproject.toml'
       - '.github/workflows/bayesian-strength.yml'
   workflow_dispatch:
@@ -69,9 +73,24 @@ jobs:
               print(s['test_season_start_year'], 'strength=', round(a['log_loss_delta_model_minus_market'], 6), 'plus_regime=', round(b['log_loss_delta_model_minus_market'], 6))
           PY
 
+      - name: Run market-anchored Bayesian residual ablation
+        run: |
+          football1-bayesian-strength-ablation --database data/processed/football1.sqlite --output data/processed/bayesian_strength_ablation.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/bayesian_strength_ablation.json'))
+          print('\nBAYESIAN RESIDUAL ABLATION')
+          print('raw market LL=', round(r['overall_raw_market']['log_loss'], 6), 'Brier=', round(r['overall_raw_market']['brier'], 6))
+          for name, row in r['overall_variants'].items():
+              print(name, 'LL=', round(row['log_loss'], 6), 'Brier=', round(row['brier'], 6), 'ECE=', round(row['top_label_ece'], 6), 'LL_delta_vs_raw=', round(row['log_loss_delta_vs_raw'], 6))
+          print('incremental=', r['incremental_comparisons'])
+          PY
+
       - uses: actions/upload-artifact@v4
         with:
           name: epl-bayesian-strength-report
-          path: data/processed/bayesian_strength_report.json
+          path: |
+            data/processed/bayesian_strength_report.json
+            data/processed/bayesian_strength_ablation.json
           if-no-files-found: error
           retention-days: 14
