@@ -20,8 +20,24 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Swift version
-        run: swift --version
-      - name: Build Football 1 macOS app
+      - name: Xcode version
+        run: xcodebuild -version
+      - name: Inspect Football 1 project
         working-directory: macos/Football1App
-        run: swift build
+        run: xcodebuild -project Football1.xcodeproj -scheme Football1 -showBuildSettings | grep -E 'PRODUCT_BUNDLE_IDENTIFIER|PRODUCT_NAME|WRAPPER_EXTENSION'
+      - name: Build Football 1 macOS app bundle
+        working-directory: macos/Football1App
+        run: |
+          xcodebuild \
+            -project Football1.xcodeproj \
+            -scheme Football1 \
+            -configuration Debug \
+            -derivedDataPath .derivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+      - name: Verify app bundle
+        working-directory: macos/Football1App
+        run: |
+          test -d '.derivedData/Build/Products/Debug/Football 1.app'
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' '.derivedData/Build/Products/Debug/Football 1.app/Contents/Info.plist'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' '.derivedData/Build/Products/Debug/Football 1.app/Contents/Info.plist')" = 'com.riskbrain.Football1'
