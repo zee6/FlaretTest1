@@ -1,0 +1,99 @@
+name: EPL Data Audit
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/epl-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install package and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run unit tests
+        run: pytest -q
+
+      - name: Download EPL seasons 2012/13 through 2026/27
+        run: football1-download-epl --from-season 2012 --to-season 2026
+
+      - name: Audit raw EPL files
+        run: |
+          football1-audit-data \
+            --input-dir data/raw/football-data \
+            --output data/processed/raw_audit.json
+
+      - name: Print audit summary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p = Path('data/processed/raw_audit.json')
+          report = json.loads(p.read_text())
+          print('season_count=', report['season_count'])
+          print('total_rows=', report['total_rows'])
+          print('total_completed_rows=', report['total_completed_rows'])
+          print('schema_union_count=', len(report['schema_union']))
+          print('schema_intersection_count=', len(report['schema_intersection']))
+          print('\nSeason summary:')
+          for s in report['seasons']:
+              print(
+                  s['season_start_year'],
+                  'rows=', s['row_count'],
+                  'completed=', s['completed_rows'],
+                  'columns=', s['column_count'],
+                  'unknown=', len(s['unknown_columns']),
+                  'triplets=', len(s['odds_triplets']),
+              )
+              for t in s['odds_triplets']:
+                  if t.get('warning'):
+                      print('  WARNING', t['source'], t['phase'], t['warning'])
+          PY
+
+      - name: Build canonical SQLite database
+        run: |
+          football1-build-db \
+            --input-dir data/raw/football-data \
+            --output data/processed/football1.sqlite
+
+      - name: Validate canonical row count
+        run: |
+          python - <<'PY'
+          import json, sqlite3
+          audit = json.load(open('data/processed/raw_audit.json'))
+          con = sqlite3.connect('data/processed/football1.sqlite')
+          n = con.execute('select count(*) from matches').fetchone()[0]
+          print('canonical_matches=', n)
+          print('audited_completed_rows=', audit['total_completed_rows'])
+          if n != audit['total_completed_rows']:
+              raise SystemExit(f'row-count mismatch: canonical={n}, completed={audit["total_completed_rows"]}')
+          PY
+
+      - name: Upload audit outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: epl-audit-output
+          path: |
+            data/processed/raw_audit.json
+            data/processed/football1.sqlite
+          if-no-files-found: error
+          retention-days: 14
