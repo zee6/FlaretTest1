@@ -2,6 +2,9 @@ import json
 
 import pytest
 
+import football1.prospective_consensus_movement as pcm
+from football1.features import FeatureRow
+from football1.market_consensus_movement import MarketConsensusObservation
 from football1.prospective_consensus_movement import (
     append_movement_forecast_records,
     bookmaker_market_shape,
@@ -28,6 +31,43 @@ def snapshot(event_id: str, retrieved: str, bookmakers: list[dict]) -> dict:
         "retrieved_at_utc": retrieved,
         "bookmakers": bookmakers,
     }
+
+
+def feature_row(season: int) -> FeatureRow:
+    return FeatureRow(
+        match_id=f"m-{season}",
+        season_start_year=season,
+        match_date=f"{season + 1}-05-01",
+        home_team="Home",
+        away_team="Away",
+        result="H",
+        elo_diff=0.0,
+        ppg5_diff=0.0,
+        gf5_diff=0.0,
+        ga5_diff=0.0,
+        shots5_diff=0.0,
+        shots_allowed5_diff=0.0,
+        sot5_diff=0.0,
+        sot_allowed5_diff=0.0,
+        ppg10_diff=0.0,
+        gf10_diff=0.0,
+        ga10_diff=0.0,
+        rest_days_diff=0.0,
+        log_prior_games_home=1.0,
+        log_prior_games_away=1.0,
+        b365_home=None,
+        b365_draw=None,
+        b365_away=None,
+    )
+
+
+def historical_observation(season: int, closing_home: float) -> MarketConsensusObservation:
+    return MarketConsensusObservation(
+        base=feature_row(season),
+        opening_average_odds=(2.20, 3.40, 3.20),
+        closing_average_odds=(closing_home, 3.45, 3.30),
+        opening_maximum_odds=(2.30, 3.55, 3.35),
+    )
 
 
 def movement_lock() -> dict:
@@ -73,6 +113,36 @@ def test_bookmaker_market_shape_uses_arithmetic_avg_and_max():
     )
     assert sum(shape["average_odds_devigged_probability"].values()) == pytest.approx(1.0)
     assert shape["best_price_premium"]["home"] == pytest.approx(2.4 / 2.2 - 1.0)
+
+
+def test_builder_passes_movement_triples_to_training_mean(monkeypatch, tmp_path):
+    observations = [
+        historical_observation(2022, 2.10),
+        historical_observation(2023, 2.05),
+        historical_observation(2024, 2.00),
+    ]
+    captured: dict[str, object] = {}
+
+    def capture_mean(rows):
+        captured["rows"] = rows
+        assert len(rows) == 3
+        assert all(isinstance(row, tuple) and len(row) == 3 for row in rows)
+        assert all(sum(row) == pytest.approx(0.0) for row in rows)
+        return (0.0, 0.0, 0.0)
+
+    monkeypatch.setattr(pcm, "build_market_consensus_observations", lambda _: observations)
+    monkeypatch.setattr(pcm, "_fit", lambda rows, *, augmented: object())
+    monkeypatch.setattr(pcm, "mean_movement", capture_mean)
+    monkeypatch.setattr(pcm, "_states_as_of", lambda *_: ({}, "2025-05-01"))
+    monkeypatch.setattr(pcm, "normalize_snapshot", lambda _: [])
+
+    records, metadata = pcm.build_prospective_movement_forecasts(
+        tmp_path / "unused.sqlite",
+        {"retrieved_at_utc": "2026-09-04T12:00:00+00:00"},
+    )
+    assert records == []
+    assert metadata["training_matches"] == 3
+    assert captured["rows"] is not None
 
 
 def test_common_book_pair_blocks_bookmaker_composition_drift():
