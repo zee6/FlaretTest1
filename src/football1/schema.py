@@ -17,17 +17,19 @@ OUTCOME_COLUMNS = {"FTHG", "HG", "FTAG", "AG", "FTR", "Res", "HTHG", "HTAG", "HT
 POST_MATCH_COLUMNS = {
     "Attendance", "Referee", "HS", "AS", "HST", "AST", "HHW", "AHW",
     "HC", "AC", "HF", "AF", "HFKC", "AFKC", "HO", "AO", "HY", "AY",
-    "HR", "AR", "HBP", "ABP",
+    "HR", "AR", "HBP", "ABP", "HxG", "AxG",
 }
 
 FIXTURE_COLUMNS = {"Div", "Date", "Time", "HomeTeam", "AwayTeam"}
 
-# Prefixes documented in Football-Data's notes.txt. Historical bookmaker names are
-# retained because old seasons remain part of the research universe.
+# Prefixes documented in Football-Data's notes.txt plus currently observed fields.
+# Historical bookmaker names are retained because old seasons remain part of the
+# research universe. Closing total-goals / Asian-handicap columns add C to the
+# relevant market abbreviation (for example PC>2.5, PCAHH, AHCh).
 MARKET_PREFIXES = (
     "1XB", "B365", "BF", "BFD", "BMGM", "BV", "BS", "BW", "CL", "GB", "IW",
     "LB", "PP", "PS", "PH", "PD", "PA", "SK", "SO", "SB", "SJ", "SY", "VC",
-    "WH", "Bb", "Max", "Avg", "BFE", "P>", "P<", "AHh",
+    "WH", "Bb", "Max", "Avg", "BFE", "P>", "P<", "PC", "AHh", "AHC",
 )
 
 
