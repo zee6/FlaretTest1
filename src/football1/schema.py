@@ -12,48 +12,22 @@ class AvailabilityClass(str, Enum):
     UNKNOWN = "unknown"
 
 
-OUTCOME_COLUMNS = {
-    "FTHG",
-    "FTAG",
-    "FTR",
-    "HTHG",
-    "HTAG",
-    "HTR",
-}
+OUTCOME_COLUMNS = {"FTHG", "HG", "FTAG", "AG", "FTR", "Res", "HTHG", "HTAG", "HTR"}
 
 POST_MATCH_COLUMNS = {
-    "HS",
-    "AS",
-    "HST",
-    "AST",
-    "HF",
-    "AF",
-    "HC",
-    "AC",
-    "HY",
-    "AY",
-    "HR",
-    "AR",
+    "Attendance", "Referee", "HS", "AS", "HST", "AST", "HHW", "AHW",
+    "HC", "AC", "HF", "AF", "HFKC", "AFKC", "HO", "AO", "HY", "AY",
+    "HR", "AR", "HBP", "ABP",
 }
 
-FIXTURE_COLUMNS = {
-    "Div",
-    "Date",
-    "Time",
-    "HomeTeam",
-    "AwayTeam",
-}
+FIXTURE_COLUMNS = {"Div", "Date", "Time", "HomeTeam", "AwayTeam"}
 
+# Prefixes documented in Football-Data's notes.txt. Historical bookmaker names are
+# retained because old seasons remain part of the research universe.
 MARKET_PREFIXES = (
-    "B365",
-    "BW",
-    "IW",
-    "PS",
-    "WH",
-    "VC",
-    "Max",
-    "Avg",
-    "Bb",
+    "1XB", "B365", "BF", "BFD", "BMGM", "BV", "BS", "BW", "CL", "GB", "IW",
+    "LB", "PP", "PS", "PH", "PD", "PA", "SK", "SO", "SB", "SJ", "SY", "VC",
+    "WH", "Bb", "Max", "Avg", "BFE", "P>", "P<", "AHh",
 )
 
 
