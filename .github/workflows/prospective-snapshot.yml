@@ -97,6 +97,22 @@ jobs:
           print('latest_odds_snapshot=', odds_rows[-1]['retrieved_at_utc'])
           PY
 
+      - name: Build prospective market movement observer report
+        run: |
+          football1-market-movement \
+            --ledger prospective/ledger.jsonl \
+            --odds-archive prospective/odds_snapshots.jsonl \
+            --output data/processed/prospective_market_movement_report.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/prospective_market_movement_report.json'))
+          print('STATUS', r['status'])
+          print('LOCKED_PREDICTIONS', r['locked_predictions'])
+          print('MATCHES_WITH_LATER_MARKET_SNAPSHOT', r['matches_with_later_market_snapshot'])
+          print('COVERAGE', r['coverage_rate'])
+          print('OVERALL', r['overall'])
+          PY
+
       - name: Commit normalized prospective records
         run: |
           git config user.name 'github-actions[bot]'
@@ -120,6 +136,15 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+      - name: Upload prospective market movement report
+        uses: actions/upload-artifact@v4
+        with:
+          name: prospective-market-movement-report
+          path: data/processed/prospective_market_movement_report.json
+          if-no-files-found: error
+          retention-days: 14
+
 # Manual-only: each run makes one UK-region x h2h request to The Odds API.
 # Raw API responses remain short-lived artifacts. Only hash-verified normalized
 # predictions and bookmaker quote snapshots are committed for prospective study.
+# The movement observer reuses the same snapshot and consumes no additional API request.

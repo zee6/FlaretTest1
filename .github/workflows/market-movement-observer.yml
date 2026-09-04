@@ -1,0 +1,69 @@
+name: EPL Prospective Market Movement Observer
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/market_movement_observer.py'
+      - 'src/football1/odds_archive.py'
+      - 'src/football1/prospective.py'
+      - 'tests/test_market_movement_observer.py'
+      - 'pyproject.toml'
+      - '.github/workflows/market-movement-observer.yml'
+      - '.github/workflows/prospective-snapshot.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/market_movement_observer.py'
+      - 'src/football1/odds_archive.py'
+      - 'src/football1/prospective.py'
+      - 'tests/test_market_movement_observer.py'
+      - 'pyproject.toml'
+      - '.github/workflows/market-movement-observer.yml'
+      - '.github/workflows/prospective-snapshot.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  market-movement-observer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run market movement observer tests
+        run: pytest -q tests/test_market_movement_observer.py tests/test_odds_archive.py tests/test_prospective.py
+
+      - name: Build current prospective movement report
+        run: |
+          football1-market-movement \
+            --ledger prospective/ledger.jsonl \
+            --odds-archive prospective/odds_snapshots.jsonl \
+            --output data/processed/prospective_market_movement_report.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/prospective_market_movement_report.json'))
+          print('STATUS', r['status'])
+          print('LOCKED_PREDICTIONS', r['locked_predictions'])
+          print('MATCHES_WITH_LATER_MARKET_SNAPSHOT', r['matches_with_later_market_snapshot'])
+          print('COVERAGE', r['coverage_rate'])
+          print('OVERALL', r['overall'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-prospective-market-movement-report
+          path: data/processed/prospective_market_movement_report.json
+          if-no-files-found: error
+          retention-days: 14
