@@ -1,0 +1,73 @@
+name: EPL Home Away Residual Ablation
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/home_away_ablation.py'
+      - 'tests/test_home_away_ablation.py'
+      - 'pyproject.toml'
+      - '.github/workflows/home-away-ablation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ablation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Download EPL history
+        run: football1-download-epl --from-season 2012 --to-season 2026
+
+      - name: Build canonical database
+        run: football1-build-db --input-dir data/raw/football-data --output data/processed/football1.sqlite
+
+      - name: Run fixed-market home-away ablation
+        run: |
+          football1-home-away-ablation --database data/processed/football1.sqlite --output data/processed/home_away_ablation.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/home_away_ablation.json'))
+          raw = r['overall_raw_market']
+          print('RAW', 'LL=', round(raw['log_loss'], 6), 'Brier=', round(raw['brier'], 6))
+          for name, v in r['overall_variants'].items():
+              print(name, 'matches=', v['matches'], 'LL=', round(v['log_loss'], 6), 'delta_raw=', round(v['log_loss_delta_vs_raw'], 6), 'Brier=', round(v['brier'], 6), 'Brier_delta_raw=', round(v['brier_delta_vs_raw'], 6), 'ECE=', round(v['top_label_ece'], 6))
+          print('INCREMENTAL')
+          for k, v in r['incremental'].items():
+              print(k, round(v, 6))
+          print('SEASON PLUS-VENUE MINUS BASELINE LL')
+          for s in r['seasons']:
+              b = s['variants']['frozen_residual_v1']['log_loss']
+              p = s['variants']['frozen_residual_plus_home_away_v1']['log_loss']
+              print(s['test_season_start_year'], round(p - b, 6))
+          print('LATEST STANDARDIZED VENUE WEIGHTS')
+          w = r['latest_standardized_weights']['frozen_residual_plus_home_away_v1']
+          for side in ('home_vs_draw', 'away_vs_draw'):
+              print(side)
+              for k, v in w[side].items():
+                  if k.startswith('home_away__'):
+                      print(k, round(v, 6))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-home-away-ablation
+          path: data/processed/home_away_ablation.json
+          if-no-files-found: error
+          retention-days: 14
