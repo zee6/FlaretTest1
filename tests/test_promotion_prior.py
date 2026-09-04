@@ -95,14 +95,15 @@ def test_returner_keeps_epl_history_but_first_time_team_gets_prior(tmp_path: Pat
     baseline = {row.match_id: row for row in history["baseline_rows"]}
     adjusted = {row.match_id: row for row in history["adjusted_rows"]}
 
-    # Returning B retains its decayed historical EPL rating, so the promotion
-    # prior does not overwrite known evidence.
     assert adjusted["s22"].away_rating == pytest.approx(baseline["s22"].away_rating)
-
-    # First-time D has no EPL evidence and therefore receives the historical
-    # promoted cohort prior rather than neutral 1500.
     assert baseline["s23"].away_rating == pytest.approx(1500.0)
     assert adjusted["s23"].away_rating == pytest.approx(policy[2023]["empirical_prior_rating"])
+
+    # The latest season has not been followed by a later season, so its
+    # terminal reference rating is not treated as completed cohort evidence.
+    samples = history["cohort_samples"]
+    assert all(sample.season_start_year < 2023 for sample in samples)
+    assert [sample.season_start_year for sample in samples] == [2021, 2022]
 
 
 def test_parallel_baseline_matches_existing_elo_policy(tmp_path: Path) -> None:
