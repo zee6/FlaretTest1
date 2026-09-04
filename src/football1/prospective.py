@@ -151,6 +151,15 @@ def prediction_content_hash(record_without_hash: dict[str, Any]) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+def _prediction_lock_key(record: dict[str, Any]) -> tuple[str, str]:
+    event_id = str(record.get("event_id") or "")
+    model = record.get("model")
+    model_id = str(model.get("id") or "") if isinstance(model, dict) else ""
+    if not event_id or not model_id:
+        raise ValueError("Prediction record must contain event_id and model.id")
+    return event_id, model_id
+
+
 def make_prediction_record(
     *,
     event: dict[str, Any],
@@ -229,8 +238,15 @@ def make_prediction_record(
 
 
 def append_prediction_records(ledger_path: Path, records: list[dict[str, Any]]) -> int:
+    """Append immutable prospective locks, at most once per event and model.
+
+    Repeated market observations belong in the odds snapshot archive. A later
+    quote must not silently rewrite or duplicate the original Football 1 call.
+    A genuinely different model ID may create its own separate lock.
+    """
     ledger_path.parent.mkdir(parents=True, exist_ok=True)
     existing_ids: set[str] = set()
+    existing_locks: set[tuple[str, str]] = set()
     if ledger_path.exists():
         for line_number, line in enumerate(ledger_path.read_text(encoding="utf-8").splitlines(), start=1):
             if not line.strip():
@@ -245,8 +261,27 @@ def append_prediction_records(ledger_path: Path, records: list[dict[str, Any]]) 
             if stored_hash != prediction_content_hash(unsigned):
                 raise ValueError(f"Ledger line {line_number} failed content hash verification")
             existing_ids.add(record_id)
+            existing_locks.add(_prediction_lock_key(item))
 
-    new_records = [r for r in records if r["record_id"] not in existing_ids]
+    new_records: list[dict[str, Any]] = []
+    pending_locks: set[tuple[str, str]] = set()
+    for record in records:
+        record_id = str(record.get("record_id") or "")
+        if not record_id:
+            raise ValueError("New prediction record has no record_id")
+        stored_hash = record.get("content_sha256")
+        unsigned = dict(record)
+        unsigned.pop("content_sha256", None)
+        if stored_hash != prediction_content_hash(unsigned):
+            raise ValueError("New prediction record failed content hash verification")
+        if record_id in existing_ids:
+            continue
+        lock_key = _prediction_lock_key(record)
+        if lock_key in existing_locks or lock_key in pending_locks:
+            continue
+        pending_locks.add(lock_key)
+        new_records.append(record)
+
     if not new_records:
         return 0
     with ledger_path.open("a", encoding="utf-8") as handle:

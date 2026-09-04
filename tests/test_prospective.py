@@ -108,3 +108,28 @@ def test_append_is_idempotent_and_verifies_existing_hash(tmp_path: Path):
     ledger.write_text(json.dumps(tampered) + "\n", encoding="utf-8")
     with pytest.raises(ValueError, match="hash verification"):
         append_prediction_records(ledger, [])
+
+
+def test_later_market_snapshot_does_not_duplicate_same_model_lock(tmp_path: Path):
+    ledger = tmp_path / "ledger.jsonl"
+    first = make_prediction_record(
+        event=_event(),
+        snapshot_retrieved_at_utc="2026-09-04T09:00:00+00:00",
+        model_probability=(0.31, 0.24, 0.45),
+        feature_row=_feature_row(),
+        training_matches=5000,
+        historical_data_cutoff="2026-08-31",
+    )
+    later = make_prediction_record(
+        event=_event(),
+        snapshot_retrieved_at_utc="2026-09-04T10:00:00+00:00",
+        model_probability=(0.32, 0.23, 0.45),
+        feature_row=_feature_row(),
+        training_matches=5000,
+        historical_data_cutoff="2026-08-31",
+    )
+    assert first["record_id"] != later["record_id"]
+    assert append_prediction_records(ledger, [first]) == 1
+    locked = ledger.read_text(encoding="utf-8")
+    assert append_prediction_records(ledger, [later]) == 0
+    assert ledger.read_text(encoding="utf-8") == locked
