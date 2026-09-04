@@ -1,0 +1,67 @@
+name: Web and iPhone UI Build
+
+on:
+  pull_request:
+    paths:
+      - 'web/**'
+      - 'ios/Football1Mobile/**'
+      - '.github/workflows/interface-ui.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'web/**'
+      - 'ios/Football1Mobile/**'
+      - '.github/workflows/interface-ui.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check JavaScript syntax
+        run: node --check web/app.js
+      - name: Check static interface contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          html = Path('web/index.html').read_text()
+          css = Path('web/styles.css').read_text()
+          assert 'Winning is an outcome.' in html
+          assert 'Eyes Wide Open' in html
+          assert 'INTERFACE PREVIEW' in html
+          assert 'viewport' in html
+          assert '@media(max-width:620px)' in css
+          print('web interface contract OK')
+          PY
+
+  iphone:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode version
+        run: xcodebuild -version
+      - name: Inspect iPhone project
+        working-directory: ios/Football1Mobile
+        run: xcodebuild -project Football1Mobile.xcodeproj -scheme Football1Mobile -sdk iphonesimulator -showBuildSettings | grep -E 'PRODUCT_BUNDLE_IDENTIFIER|PRODUCT_NAME|IPHONEOS_DEPLOYMENT_TARGET'
+      - name: Build iPhone simulator app
+        working-directory: ios/Football1Mobile
+        run: |
+          xcodebuild \
+            -project Football1Mobile.xcodeproj \
+            -scheme Football1Mobile \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug \
+            -derivedDataPath .derivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+      - name: Verify iPhone app bundle
+        working-directory: ios/Football1Mobile
+        run: |
+          test -d '.derivedData/Build/Products/Debug-iphonesimulator/Football 1.app'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' '.derivedData/Build/Products/Debug-iphonesimulator/Football 1.app/Info.plist')" = 'com.riskbrain.Football1Mobile'

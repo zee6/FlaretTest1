@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1018">
+  <title>Football 1 — Eyes Wide Open</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-lockup">
+        <div class="mark">F1</div>
+        <div>
+          <div class="brand">Football 1</div>
+          <div class="subbrand">Decision intelligence for football</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <span class="badge preview">INTERFACE PREVIEW</span>
+        <button class="ghost" id="aboutButton">Why this exists</button>
+      </div>
+    </header>
+
+    <section class="principle">
+      <span class="eyebrow">FOUNDING PRINCIPLE</span>
+      <h1>Winning is an outcome. <span>Making money is a relationship between probability and price.</span></h1>
+    </section>
+
+    <nav class="tabs" aria-label="Football 1 sections">
+      <button class="tab active" data-tab="live">Live</button>
+      <button class="tab" data-tab="reality">Eyes Wide Open</button>
+      <button class="tab" data-tab="models">Models</button>
+      <button class="tab" data-tab="ledger">Ledger</button>
+    </nav>
+
+    <main>
+      <section class="panel active" id="livePanel">
+        <div class="desktop-grid">
+          <aside class="fixture-column">
+            <div class="section-head">
+              <div>
+                <span class="eyebrow">UPCOMING EPL</span>
+                <h2>Where should I look?</h2>
+              </div>
+              <span class="muted">5 shown</span>
+            </div>
+            <div id="fixtureList" class="fixture-list"></div>
+          </aside>
+
+          <section class="analysis-column">
+            <div class="match-head">
+              <div>
+                <span class="eyebrow" id="kickoffLabel">SAT · 11:30 UTC</span>
+                <h2 id="fixtureTitle">Newcastle United <span>vs</span> Bournemouth</h2>
+                <div class="muted" id="bookmakerLabel">21 complete UK books · preview model layer</div>
+              </div>
+              <span class="badge preview">PREVIEW</span>
+            </div>
+
+            <div class="reality-card" id="realityCard">
+              <div class="reality-copy">
+                <span class="eyebrow">EYES WIDE OPEN</span>
+                <h3 id="realityTitle">Strongest price candidate: Newcastle</h3>
+                <p id="realityText">The model view is slightly more positive than the market, but the edge is small. This is a candidate to inspect, not an instruction to bet.</p>
+              </div>
+              <div class="decision" id="decisionBadge">CAUTION</div>
+            </div>
+
+            <div class="outcome-grid" id="outcomeGrid"></div>
+
+            <div class="split-grid">
+              <article class="card">
+                <div class="card-title"><span>Model room</span><span class="muted">independent views</span></div>
+                <div id="modelRoom" class="model-room"></div>
+              </article>
+              <article class="card">
+                <div class="card-title"><span>Price reality</span><span class="muted">selected outcome</span></div>
+                <div id="priceReality" class="price-reality"></div>
+              </article>
+            </div>
+
+            <div class="explain-card">
+              <span class="eyebrow">WHY FOOTBALL 1 SAYS THIS</span>
+              <p id="explanation">Newcastle are the most likely winner in this preview. The important question is not whether Newcastle can win, but whether 2.18 pays enough for the risk that they do not.</p>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="panel" id="realityPanel">
+        <div class="content-width">
+          <span class="eyebrow">DECISION QUALITY</span>
+          <h2>Prediction and bet quality are deliberately separated.</h2>
+          <div class="lesson-grid">
+            <article class="lesson good"><span>87% LIKELY WINNER</span><strong>BAD PRICE — PASS</strong><p>A high strike rate can still lose money when the market demands too high a break-even probability.</p></article>
+            <article class="lesson interesting"><span>18% CHANCE OF WINNING</span><strong>PRICE MAY BE ATTRACTIVE</strong><p>A low-probability outcome can still be interesting if the price more than compensates for frequent losses.</p></article>
+            <article class="lesson neutral"><span>RESULT ≠ PROCESS</span><strong>Judge the decision at kickoff</strong><p>A good bet can lose. A bad bet can win. The ledger preserves what was knowable before the match.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="modelsPanel">
+        <div class="content-width">
+          <span class="eyebrow">MODULAR RESEARCH</span>
+          <h2>Every model gets an opinion. Not every model earns weight.</h2>
+          <div class="model-table">
+            <div class="model-row header"><span>Module</span><span>Role</span><span>Status</span></div>
+            <div class="model-row"><span>Elo</span><span>Underlying team strength</span><span class="status context">CONTEXT</span></div>
+            <div class="model-row"><span>Poisson</span><span>Score distribution / draw shape</span><span class="status context">CONTEXT</span></div>
+            <div class="model-row"><span>Home / Away</span><span>Venue-role behaviour</span><span class="status context">CONTEXT</span></div>
+            <div class="model-row"><span>Head-to-head</span><span>Pair-specific history</span><span class="status rejected">NO WEIGHT</span></div>
+            <div class="model-row"><span>Market</span><span>Collective information + price</span><span class="status anchor">ANCHOR</span></div>
+            <div class="model-row"><span>Football 1 tightener</span><span>Conservative residual adjustment</span><span class="status testing">TESTING</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="ledgerPanel">
+        <div class="content-width">
+          <span class="eyebrow">PROSPECTIVE LEDGER</span>
+          <h2>No rewriting history.</h2>
+          <div class="ledger-card">
+            <div><strong>Prediction frozen</strong><span>before kickoff</span></div>
+            <div><strong>Market snapshot</strong><span>timestamped</span></div>
+            <div><strong>Result</strong><span>settled separately</span></div>
+            <div><strong>Decision quality</strong><span>kept apart from result</span></div>
+          </div>
+          <p class="muted wide-note">This interface is currently a preview. The next data bridge will replace illustrative Football 1 values with the immutable prospective output already implemented in Python.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Football 1 · Research Preview</span>
+      <span>No tip language. No certainty theatre. Probability, price, exposure.</span>
+    </footer>
+  </div>
+
+  <dialog id="aboutDialog">
+    <button class="dialog-close" id="closeDialog">×</button>
+    <span class="eyebrow">WHY THIS EXISTS</span>
+    <h2>Football 1 is not trying to make every prediction actionable.</h2>
+    <p>It is designed to distinguish likelihood from value: who is most likely to win, how uncertain that view is, what price the market offers, and whether the reward compensates for the risk.</p>
+    <p><strong>A good prediction is not necessarily a good bet.</strong></p>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
