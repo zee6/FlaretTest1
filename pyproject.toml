@@ -7,7 +7,7 @@ name = "football1"
 version = "0.1.0"
 description = "EPL probability and market-mispricing research pipeline"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = ["scikit-learn>=1.5,<2"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
@@ -17,6 +17,7 @@ football1-download-epl = "football1.ingest.football_data:main"
 football1-audit-data = "football1.audit:main"
 football1-build-db = "football1.build_db:main"
 football1-market-baseline = "football1.market_baseline:main"
+football1-model-baseline = "football1.model_baseline:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
