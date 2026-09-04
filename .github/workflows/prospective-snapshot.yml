@@ -2,6 +2,10 @@ name: Record Prospective EPL Snapshot
 
 on:
   workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.github/prospective.trigger'
 
 permissions:
   contents: write
@@ -94,5 +98,6 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-# Manual-only: each run makes one UK-region x h2h request to The Odds API.
+# Manual-only after the first controlled trigger is removed.
+# Each run makes one UK-region x h2h request to The Odds API.
 # The raw API response is never committed; only hashed normalized predictions are.
