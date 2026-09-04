@@ -1,0 +1,81 @@
+name: EPL Home Away Audit
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/home_away.py'
+      - 'tests/test_home_away.py'
+      - 'pyproject.toml'
+      - '.github/workflows/home-away.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/home_away.py'
+      - 'tests/test_home_away.py'
+      - 'pyproject.toml'
+      - '.github/workflows/home-away.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  home-away:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Download EPL history
+        run: football1-download-epl --from-season 2012 --to-season 2026
+
+      - name: Build canonical database
+        run: football1-build-db --input-dir data/raw/football-data --output data/processed/football1.sqlite
+
+      - name: Run walk-forward home-away audit
+        run: |
+          football1-home-away --database data/processed/football1.sqlite --output data/processed/home_away.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/home_away.json'))
+          m = r['overall_model']
+          p = r['paired_overall']
+          print('HOME_AWAY OOS matches=', m['matches'])
+          print('HOME_AWAY LL=', round(m['log_loss'], 6), 'Brier=', round(m['brier'], 6), 'accuracy=', round(m['accuracy'], 6), 'ECE=', round(m['top_label_ece'], 6))
+          print('PAIRED matches=', p['matches'], 'Model_LL=', round(p['model_log_loss'], 6), 'Market_LL=', round(p['market_log_loss'], 6), 'LL_delta=', round(p['log_loss_delta_model_minus_market'], 6))
+          print('Model_Brier=', round(p['model_brier'], 6), 'Market_Brier=', round(p['market_brier'], 6), 'Brier_delta=', round(p['brier_delta_model_minus_market'], 6))
+          print('SEASON DELTAS')
+          for s in r['seasons']:
+              q = s['paired_b365_pre_closing']
+              print(s['test_season_start_year'], 'matches=', s['test_matches'], 'LL_delta=', round(q['log_loss_delta_model_minus_market'], 6))
+
+          table = r['current_venue_table']
+          strongest_home = sorted(table, key=lambda x: (-x['home_ppg10'], -x['home_gd10'], x['team']))[:8]
+          weakest_away = sorted(table, key=lambda x: (x['away_ppg10'], x['away_gd10'], x['team']))[:8]
+          print('STRONGEST CURRENT HOME PROFILES')
+          for x in strongest_home:
+              print(x['team'], 'PPG10=', round(x['home_ppg10'], 3), 'GD10=', round(x['home_gd10'], 3))
+          print('WEAKEST CURRENT AWAY PROFILES')
+          for x in weakest_away:
+              print(x['team'], 'PPG10=', round(x['away_ppg10'], 3), 'GD10=', round(x['away_gd10'], 3))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-home-away-report
+          path: data/processed/home_away.json
+          if-no-files-found: error
+          retention-days: 14
