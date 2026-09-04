@@ -97,3 +97,5 @@ jobs:
             data/processed/football1.sqlite
           if-no-files-found: error
           retention-days: 14
+
+# Reproducible network-enabled audit; raw data is never committed.
