@@ -1,0 +1,68 @@
+name: EPL Shadow Price Consensus Audit
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/shadow_price_consensus.py'
+      - 'src/football1/model_disagreement.py'
+      - 'tests/test_shadow_price_consensus.py'
+      - 'pyproject.toml'
+      - '.github/workflows/shadow-price-consensus.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/shadow_price_consensus.py'
+      - 'src/football1/model_disagreement.py'
+      - 'tests/test_shadow_price_consensus.py'
+      - 'pyproject.toml'
+      - '.github/workflows/shadow-price-consensus.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shadow-price-consensus:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Download EPL history
+        run: football1-download-epl --from-season 2012 --to-season 2026
+
+      - name: Build canonical database
+        run: football1-build-db --input-dir data/raw/football-data --output data/processed/football1.sqlite
+
+      - name: Run shadow price consensus audit
+        run: |
+          football1-shadow-price-consensus --database data/processed/football1.sqlite --output data/processed/shadow_price_consensus_report.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/shadow_price_consensus_report.json'))
+          print('STATUS', r['status'])
+          for section in ('all_outcomes_by_support_count', 'favorites_by_support_count', 'non_favorites_by_support_count'):
+              print(section)
+              for support, metrics in r[section].items():
+                  print(' support=', support, 'n=', metrics['opportunities'], 'market_p=', metrics['mean_market_probability'], 'observed=', metrics['observed_frequency'], 'gap=', metrics['calibration_gap_observed_minus_market'], 'roi=', metrics['roi'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-shadow-price-consensus-report
+          path: data/processed/shadow_price_consensus_report.json
+          if-no-files-found: error
+          retention-days: 14
