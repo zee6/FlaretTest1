@@ -43,6 +43,12 @@ jobs:
           test -n "$THE_ODDS_API_KEY" || (echo 'THE_ODDS_API_KEY secret is missing' && exit 1)
           football1-live-odds --regions uk --markets h2h --odds-format decimal --output data/live/epl_odds_snapshot.json
 
+      - name: Archive normalized bookmaker quotes
+        run: |
+          football1-odds-archive \
+            --snapshot data/live/epl_odds_snapshot.json \
+            --archive prospective/odds_snapshots.jsonl
+
       - name: Append locked predictions
         run: |
           football1-prospective \
@@ -51,38 +57,58 @@ jobs:
             --ledger prospective/ledger.jsonl \
             --alpha 0.10
 
-      - name: Verify prospective ledger
+      - name: Verify prospective records
         run: |
           python - <<'PY'
           import json
           from datetime import datetime
           from pathlib import Path
+          from football1.odds_archive import odds_record_hash
           from football1.prospective import prediction_content_hash
 
-          path = Path('prospective/ledger.jsonl')
-          rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
-          assert rows, 'prospective ledger is empty'
-          for i, row in enumerate(rows, start=1):
+          prediction_path = Path('prospective/ledger.jsonl')
+          predictions = [json.loads(line) for line in prediction_path.read_text().splitlines() if line.strip()]
+          assert predictions, 'prospective prediction ledger is empty'
+          for i, row in enumerate(predictions, start=1):
               stored = row['content_sha256']
               unsigned = dict(row)
               unsigned.pop('content_sha256')
-              assert stored == prediction_content_hash(unsigned), f'hash failure on line {i}'
+              assert stored == prediction_content_hash(unsigned), f'prediction hash failure on line {i}'
               snap = datetime.fromisoformat(row['snapshot_retrieved_at_utc'].replace('Z', '+00:00'))
               kick = datetime.fromisoformat(row['commence_time_utc'].replace('Z', '+00:00'))
-              assert snap < kick, f'non-prospective line {i}'
-          print('ledger_records=', len(rows))
-          print('latest_snapshot=', rows[-1]['snapshot_retrieved_at_utc'])
+              assert snap < kick, f'non-prospective prediction line {i}'
+
+          odds_path = Path('prospective/odds_snapshots.jsonl')
+          odds_rows = [json.loads(line) for line in odds_path.read_text().splitlines() if line.strip()]
+          assert odds_rows, 'prospective odds archive is empty'
+          for i, row in enumerate(odds_rows, start=1):
+              stored = row['content_sha256']
+              unsigned = dict(row)
+              unsigned.pop('content_sha256')
+              assert stored == odds_record_hash(unsigned), f'odds hash failure on line {i}'
+              snap = datetime.fromisoformat(row['retrieved_at_utc'].replace('Z', '+00:00'))
+              kick = datetime.fromisoformat(row['commence_time_utc'].replace('Z', '+00:00'))
+              assert snap < kick, f'non-prospective odds line {i}'
+              assert row['complete_h2h_bookmaker_count'] == len(row['bookmakers'])
+
+          print('prediction_records=', len(predictions))
+          print('odds_event_snapshots=', len(odds_rows))
+          print('latest_prediction_snapshot=', predictions[-1]['snapshot_retrieved_at_utc'])
+          print('latest_odds_snapshot=', odds_rows[-1]['retrieved_at_utc'])
           PY
 
-      - name: Commit only the normalized prospective ledger
+      - name: Commit normalized prospective records
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add prospective/ledger.jsonl
+          if [ -f prospective/odds_snapshots.jsonl ]; then
+            git add prospective/odds_snapshots.jsonl
+          fi
           if git diff --cached --quiet; then
             echo 'No new prospective records to commit'
           else
-            git commit -m "Record prospective EPL prediction snapshot"
+            git commit -m "Record prospective EPL prediction and odds snapshot"
             git push origin HEAD:master
           fi
 
@@ -95,4 +121,5 @@ jobs:
           retention-days: 7
 
 # Manual-only: each run makes one UK-region x h2h request to The Odds API.
-# The raw API response is never committed; only hashed normalized predictions are.
+# Raw API responses remain short-lived artifacts. Only hash-verified normalized
+# predictions and bookmaker quote snapshots are committed for prospective study.
