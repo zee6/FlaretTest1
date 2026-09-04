@@ -74,7 +74,7 @@ enum MobileLiveData {
                 kickoff: kickoffLabel(kickoffDate),
                 home: record.homeTeamProvider,
                 away: record.awayTeamProvider,
-                bookmakerCount: record.completeH2hBookmakerCount,
+                bookmakerCount: record.completeH2HBookmakerCount,
                 isProspective: true,
                 snapshotRetrievedAt: record.snapshotRetrievedAtUtc,
                 outcomes: [
@@ -118,7 +118,7 @@ private struct LedgerPrediction: Decodable {
     let snapshotRetrievedAtUtc: String
     let homeTeamProvider: String
     let awayTeamProvider: String
-    let completeH2hBookmakerCount: Int
+    let completeH2HBookmakerCount: Int
     let status: String
     let marketAnchor: LedgerMarketAnchor
     let model: LedgerModel
