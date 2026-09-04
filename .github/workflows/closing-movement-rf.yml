@@ -1,0 +1,76 @@
+name: EPL Random Forest Closing Movement Audit
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/closing_movement_rf.py'
+      - 'src/football1/historical_closing_line.py'
+      - 'src/football1/features.py'
+      - 'src/football1/market_baseline.py'
+      - 'tests/test_closing_movement_rf.py'
+      - 'pyproject.toml'
+      - '.github/workflows/closing-movement-rf.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/closing_movement_rf.py'
+      - 'src/football1/historical_closing_line.py'
+      - 'src/football1/features.py'
+      - 'src/football1/market_baseline.py'
+      - 'tests/test_closing_movement_rf.py'
+      - 'pyproject.toml'
+      - '.github/workflows/closing-movement-rf.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  closing-movement-rf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Download EPL history
+        run: football1-download-epl --from-season 2012 --to-season 2026
+
+      - name: Build canonical database
+        run: football1-build-db --input-dir data/raw/football-data --output data/processed/football1.sqlite
+
+      - name: Run Random Forest closing-movement audit
+        run: |
+          football1-closing-movement-rf \
+            --database data/processed/football1.sqlite \
+            --output data/processed/closing_movement_rf_report.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/closing_movement_rf_report.json'))
+          print('STATUS', r['status'])
+          print('MATCHES', r['matches'])
+          print('TEST_SEASONS', r['test_seasons'])
+          print('OPENING', r['overall']['opening_market'])
+          print('ACTUAL_CLOSE', r['overall']['actual_closing_market'])
+          print('RF_PREDICTED_CLOSE', r['overall']['rf_predicted_close'])
+          print('MOVEMENT', r['overall']['closing_movement_forecast'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-closing-movement-rf-report
+          path: data/processed/closing_movement_rf_report.json
+          if-no-files-found: error
+          retention-days: 14
