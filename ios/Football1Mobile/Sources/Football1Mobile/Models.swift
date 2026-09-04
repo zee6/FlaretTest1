@@ -4,8 +4,8 @@ struct MobileOutcome: Identifiable, Hashable, Sendable {
     let id: String
     let name: String
     let market: Double
-    let elo: Double?
-    let poisson: Double?
+    let elo: Double
+    let poisson: Double
     let football1: Double
     let odds: Double
 
@@ -78,9 +78,9 @@ enum MobileLiveData {
                 isProspective: true,
                 snapshotRetrievedAt: record.snapshotRetrievedAtUtc,
                 outcomes: [
-                    MobileOutcome(id: "H", name: record.homeTeamProvider, market: market.home, elo: nil, poisson: nil, football1: model.home, odds: odds.home),
-                    MobileOutcome(id: "D", name: "Draw", market: market.draw, elo: nil, poisson: nil, football1: model.draw, odds: odds.draw),
-                    MobileOutcome(id: "A", name: record.awayTeamProvider, market: market.away, elo: nil, poisson: nil, football1: model.away, odds: odds.away)
+                    MobileOutcome(id: "H", name: record.homeTeamProvider, market: market.home, elo: .nan, poisson: .nan, football1: model.home, odds: odds.home),
+                    MobileOutcome(id: "D", name: "Draw", market: market.draw, elo: .nan, poisson: .nan, football1: model.draw, odds: odds.draw),
+                    MobileOutcome(id: "A", name: record.awayTeamProvider, market: market.away, elo: .nan, poisson: .nan, football1: model.away, odds: odds.away)
                 ]
             )
         }
