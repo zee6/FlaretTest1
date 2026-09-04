@@ -1,0 +1,27 @@
+name: macOS UI Build
+
+on:
+  pull_request:
+    paths:
+      - 'macos/Football1App/**'
+      - '.github/workflows/macos-ui.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'macos/Football1App/**'
+      - '.github/workflows/macos-ui.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Swift version
+        run: swift --version
+      - name: Build Football 1 macOS app
+        working-directory: macos/Football1App
+        run: swift build
