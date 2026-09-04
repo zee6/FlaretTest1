@@ -340,8 +340,8 @@ private struct ProspectiveModelRoom: View {
 
     private var rows: [(String, Double)] {
         var result: [(String, Double)] = [("Market", outcome.market)]
-        if let elo = outcome.elo { result.append(("Elo", elo)) }
-        if let poisson = outcome.poisson { result.append(("Poisson", poisson)) }
+        if outcome.elo.isFinite { result.append(("Elo", outcome.elo)) }
+        if outcome.poisson.isFinite { result.append(("Poisson", outcome.poisson)) }
         result.append(("Football 1", outcome.football1))
         return result
     }
@@ -368,7 +368,7 @@ private struct ProspectiveModelRoom: View {
                         .frame(width: 48, alignment: .trailing)
                 }
             }
-            if outcome.elo == nil || outcome.poisson == nil {
+            if !outcome.elo.isFinite || !outcome.poisson.isFinite {
                 Text("The prospective ledger currently carries the market anchor and Football 1 tightener. Independent Elo and Poisson probabilities remain context modules and are not fabricated here.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
