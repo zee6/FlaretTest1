@@ -5,6 +5,9 @@ on:
     branches: [master]
     paths:
       - '.github/workflows/epl-audit.yml'
+      - 'src/football1/**'
+      - 'tests/**'
+      - 'pyproject.toml'
   workflow_dispatch:
 
 permissions:
