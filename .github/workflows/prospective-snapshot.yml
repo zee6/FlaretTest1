@@ -2,6 +2,10 @@ name: Record Prospective EPL Snapshot
 
 on:
   workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/prospective-snapshot.yml'
 
 permissions:
   contents: write
