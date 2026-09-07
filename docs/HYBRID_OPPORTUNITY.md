@@ -38,23 +38,49 @@ It then records separately:
 - `result_plus_price_raw_interest`;
 - all outcomes with raw positive model EV.
 
+### Edge anatomy — model conviction versus quote generosity
+
+Raw EV is especially easy to misread at long odds. A small probability difference multiplied by a large decimal price can produce a visually large EV percentage even when Football 1 barely disagrees with the market.
+
+The opportunity layer therefore decomposes each H/D/A apparent edge in **probability space**:
+
+`model probability - quoted break-even probability`
+
+is exactly:
+
+`(model probability - market probability) + (market probability - quoted break-even probability)`.
+
+The two components are stored separately as:
+
+- **model probability edge versus market** — the part that actually comes from Football 1 disagreeing with the de-vigged market;
+- **quote probability edge versus market** — the part that comes from the selected bookmaker quote being more generous than market consensus;
+- **total probability edge versus quote** — their sum;
+- raw model EV remains available as a separate odds-scaled diagnostic.
+
+This prevents, for example, an 18.0 outsider price from being interpreted as strong Football 1 conviction merely because its raw EV percentage is large. No threshold is attached to any component.
+
 Raw positive EV is **not** a betting recommendation. `betting_threshold` and `stake_rule` remain `null`, and `decision_weight` remains `0.0`.
 
 ## Slate-relative rankings
 
 `src/football1/slate_rankings.py` ranks distinct research views across the currently available locked fixture slate without manufacturing a betting recommendation.
 
+The product/live default now includes **future fixtures only**. Already-started fixtures are excluded using kickoff timestamps. An explicit historical diagnostic mode can include them without changing or deleting any locked records.
+
 It exposes separate slate champions for:
 
 - strongest result call;
 - strongest result + price raw interest, when one exists;
-- best pure price discrepancy;
+- best raw EV / price discrepancy;
+- strongest Football 1 probability disagreement versus market;
+- strongest bookmaker quote premium versus market consensus;
+- strongest total probability edge versus the quoted break-even probability;
 - highest draw probability;
 - highest draw uplift versus market;
 - most balanced Home/Away match shape;
 - strongest outsider non-loss proposition.
 
-A category can always have a highest-ranked fixture even when the difference is too small to be actionable. The output therefore remains a **ranking observer**, not a recommendation engine.
+The model-disagreement and quote-premium rankings are intentionally separate rather than blended into another hand-built score. A category can always have a highest-ranked fixture even when the difference is too small to be actionable. The output therefore remains a **ranking observer**, not a recommendation engine.
 
 ## Non-loss analysis
 
@@ -67,11 +93,15 @@ The probabilities are exact sums because the component outcomes are mutually exc
 
 Until an actual bookmaker double-chance quote is ingested, Football 1 also calculates the effective price of covering the two component outcomes by dutching the separately available H/D/A prices. This explicitly includes the cost of buying two outcomes rather than pretending the combined event inherits a frictionless fair price.
 
+The same edge-anatomy decomposition is applied to the synthetic non-loss price, so model disagreement can be distinguished from the price effect of dutching the two component outcomes.
+
 The market outsider is identified from the margin-free Home/Away market probabilities, and the corresponding outsider-or-draw proposition is exposed as `outsider_non_loss`.
 
 No staking rule or threshold is attached.
 
 `src/football1/double_chance_odds.py` adds an **optional** event-level collector for the provider's real `double_chance` market. It requires explicit event selection (`--event-id` or `--max-events`) so routine 1X2 refreshes cannot silently spend additional API quota. The synthetic dutch calculation remains useful as a friction benchmark even after real double-chance quotes are available.
+
+`src/football1/double_chance_compare.py` joins an optional real double-chance snapshot to immutable Football 1 prediction locks and compares Football 1 fair 1X/X2 prices with both the synthetic dutch price and the bookmaker's quoted double-chance price. This remains zero-weight research.
 
 ## Draw Profile research observer
 
@@ -144,6 +174,9 @@ The backend output is intentionally shaped so that a later interface can present
 - Result Call;
 - Best Price;
 - Result + Price status;
+- model disagreement versus market;
+- bookmaker quote premium versus market;
+- total probability edge versus quoted break-even;
 - Draw Profile;
 - 1X / X2 fair probabilities and fair odds;
 - outsider non-loss / favourite vulnerability;
