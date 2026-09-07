@@ -102,6 +102,10 @@ def _iso_week(value: str) -> tuple[int, int]:
     return int(iso.year), int(iso.week)
 
 
+def _iso_week_start(week: tuple[int, int]) -> date:
+    return date.fromisocalendar(week[0], week[1], 1)
+
+
 def _flat_stake(config: PortfolioConfig, state: dict[str, float], context: dict[str, Any]) -> tuple[float, float]:
     del state, context
     return config.starting_bankroll * config.base_fraction, 1.0
@@ -157,7 +161,8 @@ def simulate_strategy(
         if current_week is None:
             current_week = week
         elif week != current_week:
-            previous_week_pnl = current_week_pnl
+            week_gap_days = (_iso_week_start(week) - _iso_week_start(current_week)).days
+            previous_week_pnl = current_week_pnl if week_gap_days == 7 else 0.0
             current_week_pnl = 0.0
             current_week = week
 
@@ -313,7 +318,7 @@ def portfolio_lab(
                 "Current-bankroll proportional stake multiplied by max(drawdown_floor, 1 - current_drawdown_fraction/drawdown_scale)."
             ),
             "previous_week_loss_throttle": (
-                "Current-bankroll proportional stake; if the immediately preceding ISO week's portfolio P&L was negative, multiply stake by loss_week_multiplier."
+                "Current-bankroll proportional stake; if the immediately preceding ISO week's portfolio P&L was negative, multiply stake by loss_week_multiplier. Empty intervening weeks reset the prior-week P&L to zero."
             ),
         },
         "governance": {
