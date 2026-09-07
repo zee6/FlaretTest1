@@ -2,6 +2,12 @@
 
 EPL-first football probability and market-mispricing research project.
 
+## Maintained project state
+
+Before substantial new development, read [`docs/PROJECT_STATE.md`](docs/PROJECT_STATE.md). It is the maintained status map separating implemented research, validated/negative findings, approved product direction and proposals.
+
+Frozen historical results remain in `docs/PHASE1C_RESULTS.md`; prospective integrity rules remain in `docs/PROSPECTIVE_PROTOCOL.md`.
+
 ## Phase 1
 
 Build a reproducible historical EPL database from Football-Data.co.uk, retaining raw source files and creating a canonical match table suitable for strict chronological research.
@@ -80,10 +86,12 @@ See `docs/PHASE1C_RESULTS.md` for the frozen results and interpretation.
 
 ## Next milestones
 
-1. Preserve Phase 1C as the historical benchmark; do not retune against its OOS outputs.
-2. Add genuinely pre-match/current football information with explicit timestamps.
-3. Create a prospective prediction ledger for future 2026/27 fixtures before results are known.
-4. Compare prospective results against raw/de-vigged market probabilities and the frozen residual architecture.
-5. Add current odds/API ingestion and caching.
-6. Add richer pre-match team-strength/xG-derived features only where historical or live availability is timestamp-safe.
-7. Build the Swift/macOS UI after the live research pipeline and signal contract are stable.
+The current milestone order is maintained in `docs/PROJECT_STATE.md`. In summary:
+
+1. Audit draw calibration and scoreline behaviour across the existing Davidson, Dixon-Coles, scoreline, correlated-score and market models before adding another draw model.
+2. Maintain a results/status registry for the existing model jury, including negative findings and current decision weight.
+3. Make the fair-price UI/data contract unmistakably distinguish the de-vigged market benchmark from Football 1's own fair estimate.
+4. Design faithful Random Forest explanations before presenting that juror as explainable in-product.
+5. Specify one modest neural-network experiment only after auditing existing implementations; it begins at zero decision weight.
+6. Continue prospective movement evidence collection without refitting the frozen 4 September forecasts or promoting a timing rule from inspected observations.
+7. Expand dependable automation and rollback while keeping meaningful model activation under explicit human control.
