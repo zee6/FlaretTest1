@@ -2,10 +2,18 @@ from __future__ import annotations
 
 import argparse
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
 from football1.opportunity_layer import DECISION_WEIGHT, analyze_locked_prediction
+
+
+def _parse_utc(value: str) -> datetime:
+    dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if dt.tzinfo is None:
+        raise ValueError(f"Timestamp must include timezone: {value}")
+    return dt.astimezone(timezone.utc)
 
 
 def _candidate(
@@ -51,17 +59,57 @@ def _latest_by_event(records: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     )
 
 
-def build_slate_rankings(records: Iterable[dict[str, Any]]) -> dict[str, Any]:
-    """Rank useful research views across a fixture slate without inventing recommendations."""
-    slate = _latest_by_event(records)
+def build_slate_rankings(
+    records: Iterable[dict[str, Any]],
+    *,
+    now_utc: datetime | None = None,
+    include_started: bool = False,
+) -> dict[str, Any]:
+    """Rank useful research views across a fixture slate without inventing recommendations.
+
+    The live/product default is future fixtures only. `include_started=True` exists
+    for historical ledger diagnostics and never changes the underlying locked records.
+    """
+    as_of = (now_utc or datetime.now(timezone.utc)).astimezone(timezone.utc)
+    latest = _latest_by_event(records)
+    invalid_kickoffs = 0
+    started = 0
+    slate: list[dict[str, Any]] = []
+
+    for record in latest:
+        commence = str(record.get("commence_time_utc") or "")
+        try:
+            kickoff = _parse_utc(commence)
+        except (TypeError, ValueError):
+            invalid_kickoffs += 1
+            continue
+        if not include_started and kickoff <= as_of:
+            started += 1
+            continue
+        slate.append(record)
+
+    scope = "all_locked_latest_per_event" if include_started else "future_locked_latest_per_event"
+    base = {
+        "schema_version": 2,
+        "status": "research_observer_zero_weight",
+        "decision_weight": DECISION_WEIGHT,
+        "scope": scope,
+        "as_of_utc": as_of.isoformat(),
+        "latest_locked_event_count": len(latest),
+        "excluded_started_event_count": started,
+        "excluded_invalid_kickoff_count": invalid_kickoffs,
+        "fixture_count": len(slate),
+    }
+
     if not slate:
         return {
-            "schema_version": 1,
-            "status": "research_observer_zero_weight",
-            "decision_weight": DECISION_WEIGHT,
-            "fixture_count": 0,
+            **base,
             "rankings": {},
-            "warning": "No locked prediction records were available.",
+            "interface_status": "data_contract_ready_interface_deferred",
+            "warning": (
+                "No eligible locked prediction records were available for this slate scope. "
+                "Future-only mode is the product default."
+            ),
         }
 
     paired: list[tuple[dict[str, Any], dict[str, Any]]] = [
@@ -74,7 +122,6 @@ def build_slate_rankings(records: Iterable[dict[str, Any]]) -> dict[str, Any]:
     def min_pair(key):
         return min(paired, key=lambda item: key(item[0], item[1]))
 
-    # Strongest result probability, irrespective of price.
     result_record, result_obs = max_pair(
         lambda _r, o: float(o["price"]["result_call_probability"])
     )
@@ -86,7 +133,6 @@ def build_slate_rankings(records: Iterable[dict[str, Any]]) -> dict[str, Any]:
         score=float(result_obs["price"]["result_call_probability"]),
     )
 
-    # Best pure price discrepancy across all H/D/A outcomes.
     price_record, price_obs = max_pair(
         lambda _r, o: float(o["price"]["best_price_model_ev"])
     )
@@ -98,7 +144,6 @@ def build_slate_rankings(records: Iterable[dict[str, Any]]) -> dict[str, Any]:
         score=float(price_obs["price"]["best_price_model_ev"]),
     )
 
-    # Preferred class: model's most likely result also has the best raw price support.
     result_price_pairs = [
         pair for pair in paired if pair[1]["price"]["result_plus_price_raw_interest"]
     ]
@@ -116,7 +161,6 @@ def build_slate_rankings(records: Iterable[dict[str, Any]]) -> dict[str, Any]:
             score=float(rp_obs["price"]["result_plus_price_model_ev"]),
         )
 
-    # Draw as a slate-relative candidate, not H/D/A argmax.
     draw_record, draw_obs = max_pair(
         lambda _r, o: float(o["draw_shape_inputs"]["model_draw_probability"])
     )
@@ -139,7 +183,6 @@ def build_slate_rankings(records: Iterable[dict[str, Any]]) -> dict[str, Any]:
         score=float(uplift_obs["draw_shape_inputs"]["draw_probability_edge_vs_market"]),
     )
 
-    # Most balanced H/A model shape; useful as a transparent draw-profile ingredient.
     balance_record, balance_obs = min_pair(
         lambda _r, o: float(o["draw_shape_inputs"]["absolute_model_home_away_gap"])
     )
@@ -164,10 +207,7 @@ def build_slate_rankings(records: Iterable[dict[str, Any]]) -> dict[str, Any]:
     )
 
     return {
-        "schema_version": 1,
-        "status": "research_observer_zero_weight",
-        "decision_weight": DECISION_WEIGHT,
-        "fixture_count": len(paired),
+        **base,
         "rankings": {
             "strongest_result_call": strongest_result_call,
             "strongest_result_plus_price_raw_interest": strongest_result_plus_price,
@@ -201,15 +241,29 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Rank zero-weight Football 1 research views across a fixture slate.")
     parser.add_argument("--ledger", type=Path, default=Path("prospective/ledger.jsonl"))
     parser.add_argument("--output", type=Path, default=Path("data/processed/slate_rankings.json"))
+    parser.add_argument(
+        "--as-of-utc",
+        help="Optional ISO-8601 UTC/offset timestamp for reproducible slate filtering. Defaults to now.",
+    )
+    parser.add_argument(
+        "--include-started",
+        action="store_true",
+        help="Historical diagnostic mode: include fixtures whose kickoff is at or before the as-of timestamp.",
+    )
     return parser
 
 
 def main() -> None:
     args = build_parser().parse_args()
-    report = build_slate_rankings(load_ledger(args.ledger))
+    as_of = _parse_utc(args.as_of_utc) if args.as_of_utc else None
+    report = build_slate_rankings(
+        load_ledger(args.ledger),
+        now_utc=as_of,
+        include_started=args.include_started,
+    )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(json.dumps({"fixture_count": report["fixture_count"], "rankings": report["rankings"]}, indent=2, sort_keys=True))
+    print(json.dumps({"fixture_count": report["fixture_count"], "scope": report["scope"], "rankings": report["rankings"]}, indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":
