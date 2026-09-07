@@ -1,0 +1,96 @@
+name: EPL Residual Magnitude Audit
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/residual_magnitude_audit.py'
+      - 'tests/test_residual_magnitude_audit.py'
+      - '.github/workflows/residual-magnitude.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  residual-magnitude:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run unit tests
+        run: pytest -q
+
+      - name: Reuse frozen canonical database from 4 September audit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p frozen-audit data/processed
+          gh run download 33924106948 --repo zee6/FlaretTest1 --name epl-audit-output --dir frozen-audit
+          DB="$(find frozen-audit -name football1.sqlite -type f -print -quit)"
+          if [ -z "$DB" ]; then
+            echo "football1.sqlite not found in frozen epl-audit-output artifact"
+            find frozen-audit -maxdepth 4 -type f -print
+            exit 1
+          fi
+          cp "$DB" data/processed/football1.sqlite
+          echo "FROZEN_AUDIT_RUN=33924106948"
+          echo "FROZEN_AUDIT_HEAD_SHA=ada0ebe987323389870d80aca0234be11c18b53d"
+          echo "FROZEN_DB_SHA256=$(sha256sum data/processed/football1.sqlite | awk '{print $1}')"
+
+      - name: Run residual magnitude diagnostic
+        run: |
+          python -m football1.residual_magnitude_audit \
+            --database data/processed/football1.sqlite \
+            --output data/processed/residual_magnitude_audit.json
+          python - <<'PY'
+          import json
+
+          r = json.load(open('data/processed/residual_magnitude_audit.json'))
+          print('STATUS', r['status'])
+          print('DECISION_WEIGHT', r['decision_weight'])
+          print('PROMOTION_ALLOWED', r['promotion_allowed'])
+          print('MATCHES', r['matches'])
+          print('REFERENCE_QUANTILES', r['reference_quantiles'])
+          print('OVERALL', r['overall'])
+          print('MATCH MAX-ABS RESIDUAL QUINTILES')
+          for q in r['match_max_abs_residual_quintiles']:
+              print(
+                  q['quintile'],
+                  'matches=', q['matches'],
+                  'mean_residual=', round(q['mean_max_abs_residual'], 6),
+                  'brier_delta=', round(q['brier_delta_model_minus_market'], 6),
+                  'll_delta=', round(q['log_loss_delta_model_minus_market'], 6),
+              )
+          print('SELECTED POSITIVE-SHIFT QUINTILES')
+          for q in r['selected_positive_shift_quintiles']:
+              print(
+                  q['quintile'],
+                  'matches=', q['matches'],
+                  'mean_shift=', round(q['mean_positive_shift'], 6),
+                  'market_p=', round(q['mean_market_probability'], 6),
+                  'model_p=', round(q['mean_model_probability'], 6),
+                  'observed=', round(q['observed_rate'], 6),
+                  'brier_delta=', round(q['brier_delta_model_minus_market'], 6),
+                  'll_delta=', round(q['log_loss_delta_model_minus_market'], 6),
+              )
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-residual-magnitude-audit
+          path: data/processed/residual_magnitude_audit.json
+          if-no-files-found: error
+          retention-days: 14
