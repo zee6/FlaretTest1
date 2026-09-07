@@ -4,6 +4,8 @@
 
 Build a rigorous EPL-first football probability and bookmaker-mispricing research system, later exposed through a native Apple-silicon application.
 
+Before substantial development, read `docs/PROJECT_STATE.md`. It is the maintained project status map separating implemented research, negative/validated findings, approved direction and proposals. Frozen historical results remain in `docs/PHASE1C_RESULTS.md`; prospective integrity rules remain in `docs/PROSPECTIVE_PROTOCOL.md`.
+
 ## Working style
 
 - Make small, testable changes.
@@ -83,6 +85,16 @@ The current alpha=0.10 residual model does not beat the market overall. Keep tha
 - Use UTC for retrieval timestamps.
 - Keep football match date/time and odds timing semantics explicit.
 
-## Next development target
+## Current development target
 
-Build the prospective 2026/27 prediction/odds ledger and richer timestamp-safe current-data ingestion. A prospective ledger row must be written before the associated match result is known and must include retrieval timestamp, fixture identity, quoted odds, de-vigged market probabilities, model probabilities, predicted EV, model/version hash and feature-availability metadata.
+Follow the milestone order in `docs/PROJECT_STATE.md`.
+
+Before adding substantial new model code:
+
+1. audit draw calibration and scoreline behaviour across the existing Davidson, Dixon-Coles, scoreline, correlated-score and market models;
+2. inventory existing juror targets, features, validation, negative findings and current decision weights;
+3. preserve the existing UI direction while making market benchmark versus Football 1 fair price unmistakable;
+4. design faithful Random Forest explanations rather than post-hoc prose;
+5. specify a modest neural-network experiment only after the existing jury audit, starting at zero decision weight;
+6. continue prospective movement logging/scoring without refitting the frozen 4 September forecasts or promoting a rule from inspected observations;
+7. expand automation, versioning and rollback while keeping meaningful model activation under explicit discussion with David.
