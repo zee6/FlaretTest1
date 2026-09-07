@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import argparse
+import json
 import math
+from pathlib import Path
 from typing import Any, Mapping
 
 
@@ -193,3 +196,45 @@ def analyze_locked_prediction(record: Mapping[str, Any]) -> dict[str, Any]:
         },
         "interface_status": "data_contract_ready_interface_deferred",
     }
+
+
+def analyze_ledger(ledger_path: Path) -> list[dict[str, Any]]:
+    """Read immutable locks and emit derived observations without rewriting them."""
+    observations: list[dict[str, Any]] = []
+    for line_number, line in enumerate(ledger_path.read_text(encoding="utf-8").splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            record = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Invalid JSON on ledger line {line_number}") from exc
+        if record.get("status") != "prediction_locked":
+            continue
+        observations.append(analyze_locked_prediction(record))
+    return observations
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Build zero-weight opportunity observations from the prospective ledger.")
+    parser.add_argument("--ledger", type=Path, default=Path("prospective/ledger.jsonl"))
+    parser.add_argument("--output", type=Path, default=Path("data/processed/opportunity_observer.json"))
+    return parser
+
+
+def main() -> None:
+    args = build_parser().parse_args()
+    observations = analyze_ledger(args.ledger)
+    payload = {
+        "schema_version": 1,
+        "status": "research_observer_zero_weight",
+        "decision_weight": DECISION_WEIGHT,
+        "interface_status": "data_contract_ready_interface_deferred",
+        "records": observations,
+    }
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(json.dumps({"records": len(observations), "decision_weight": DECISION_WEIGHT}, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()
