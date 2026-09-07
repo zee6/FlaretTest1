@@ -40,6 +40,22 @@ It then records separately:
 
 Raw positive EV is **not** a betting recommendation. `betting_threshold` and `stake_rule` remain `null`, and `decision_weight` remains `0.0`.
 
+## Slate-relative rankings
+
+`src/football1/slate_rankings.py` ranks distinct research views across the currently available locked fixture slate without manufacturing a betting recommendation.
+
+It exposes separate slate champions for:
+
+- strongest result call;
+- strongest result + price raw interest, when one exists;
+- best pure price discrepancy;
+- highest draw probability;
+- highest draw uplift versus market;
+- most balanced Home/Away match shape;
+- strongest outsider non-loss proposition.
+
+A category can always have a highest-ranked fixture even when the difference is too small to be actionable. The output therefore remains a **ranking observer**, not a recommendation engine.
+
 ## Non-loss analysis
 
 The same layer treats the two double-chance propositions as genuine binary events:
@@ -54,6 +70,8 @@ Until an actual bookmaker double-chance quote is ingested, Football 1 also calcu
 The market outsider is identified from the margin-free Home/Away market probabilities, and the corresponding outsider-or-draw proposition is exposed as `outsider_non_loss`.
 
 No staking rule or threshold is attached.
+
+`src/football1/double_chance_odds.py` adds an **optional** event-level collector for the provider's real `double_chance` market. It requires explicit event selection (`--event-id` or `--max-events`) so routine 1X2 refreshes cannot silently spend additional API quota. The synthetic dutch calculation remains useful as a friction benchmark even after real double-chance quotes are available.
 
 ## Draw Profile research observer
 
@@ -82,6 +100,41 @@ The hybrid is a regularized logistic observer, not a hand-built confidence score
 
 Because the hybrid was designed after existing Football 1 historical research had already been inspected, its historical results remain exploratory. It cannot be treated as fresh confirmation, regardless of whether it beats the market in the current audit.
 
+### First nested historical result — NEGATIVE versus market
+
+The first full nested audit completed successfully on the frozen 4 September canonical database.
+
+Common nested OOS sample:
+
+- 3,440 matches;
+- 803 draws;
+- observed draw rate: 23.34%;
+- hybrid test seasons: 2017 through 2026 start years.
+
+Draw Profile v1 versus the market control:
+
+| Metric | Hybrid Draw Profile v1 | Market | Hybrid minus market |
+|---|---:|---:|---:|
+| Draw Brier | 0.177702 | 0.176301 | +0.001402 (worse) |
+| Draw log loss | 0.539168 | 0.535305 | +0.003863 (worse) |
+| Draw AUC | 0.575014 | 0.580036 | -0.005022 (worse) |
+| Calibration ECE | 0.027054 | 0.009220 | +0.017834 (worse) |
+| Top-20% observed draw rate | 28.05% | 29.36% | -1.31 percentage points |
+
+The market's top draw quintile therefore remained more useful than the hybrid's top quintile. The hybrid's highest quintile also overpredicted draws materially: mean predicted draw probability about 34.80% versus an observed 28.05%.
+
+**Decision:** Draw Profile v1 receives no probability weight and must not alter Football 1 fair odds. Its components may still be useful descriptively for identifying match shape and for forming future hypotheses, but the v1 blend did not earn predictive promotion.
+
+### Non-loss historical result — no meaningful improvement over market
+
+On the same 3,440-match nested sample, the retained 10% RF market residual was also essentially indistinguishable from the market for `1X`, `X2`, and market-outsider-or-draw probabilities.
+
+- `1X`: RF Brier +0.000067 and log loss +0.000145 versus market (slightly worse).
+- `X2`: RF Brier -0.000013 and log loss -0.000010 versus market (tiny improvement, far below evidence for promotion).
+- market outsider + draw: RF Brier +0.000032 and log loss +0.000096 versus market (slightly worse).
+
+**Decision:** Non-loss remains a useful proposition and price lens, but there is no historical basis here for claiming Football 1 improves its probability over the market. The research value now lies in comparing our fair construction and real/synthetic double-chance prices prospectively.
+
 ## Interface requirement — deliberately deferred
 
 No Swift interface redesign is part of this implementation step.
@@ -94,7 +147,8 @@ The backend output is intentionally shaped so that a later interface can present
 - Draw Profile;
 - 1X / X2 fair probabilities and fair odds;
 - outsider non-loss / favourite vulnerability;
-- supporting market and model discrepancies.
+- supporting market and model discrepancies;
+- slate-relative category leaders.
 
 The likely product hierarchy remains:
 
