@@ -77,6 +77,7 @@ def test_slate_rankings_keep_distinct_champions() -> None:
     report = build_slate_rankings(records, now_utc=AS_OF)
     rankings = report["rankings"]
 
+    assert report["schema_version"] == 3
     assert report["decision_weight"] == 0.0
     assert report["scope"] == "future_locked_latest_per_event"
     assert report["fixture_count"] == 3
@@ -86,6 +87,41 @@ def test_slate_rankings_keep_distinct_champions() -> None:
     assert rankings["most_balanced_match"]["event_id"] == "b"
     assert rankings["strongest_outsider_non_loss"]["event_id"] in {"b", "c"}
     assert rankings["best_price_discrepancy"]["event_id"] in {"b", "c"}
+    assert rankings["strongest_model_disagreement"]["selected_hda_price_detail"] is not None
+    assert rankings["strongest_quote_premium"]["selected_hda_price_detail"] is not None
+    assert rankings["strongest_total_probability_edge"]["selected_hda_price_detail"] is not None
+
+
+def test_raw_long_odds_ev_is_not_confused_with_model_disagreement() -> None:
+    longshot = _record(
+        record_id="long",
+        event_id="long",
+        home="Huge Favourite",
+        away="Longshot",
+        model=(0.80, 0.13, 0.07),
+        market=(0.81, 0.125, 0.065),
+        odds=(1.18, 8.5, 18.0),
+        elo_diff=250,
+    )
+    conviction = _record(
+        record_id="conviction",
+        event_id="conviction",
+        home="Model Lean",
+        away="Peer",
+        model=(0.45, 0.30, 0.25),
+        market=(0.40, 0.30, 0.30),
+        odds=(2.40, 3.40, 3.50),
+        elo_diff=20,
+    )
+
+    report = build_slate_rankings([longshot, conviction], now_utc=AS_OF)
+    rankings = report["rankings"]
+
+    assert rankings["best_price_discrepancy"]["event_id"] == "long"
+    assert rankings["best_price_discrepancy"]["outcome"] == "away"
+    assert rankings["strongest_model_disagreement"]["event_id"] == "conviction"
+    assert rankings["strongest_model_disagreement"]["outcome"] == "home"
+    assert rankings["strongest_model_disagreement"]["ranking_score"] == 0.05
 
 
 def test_latest_record_per_event_is_used() -> None:
