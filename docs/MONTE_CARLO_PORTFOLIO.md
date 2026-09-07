@@ -27,6 +27,52 @@ Reasons:
 
 This still does not make weeks iid. It is a practical stress test, not a generative model of future football.
 
+## First frozen-data result
+
+Run policy:
+
+- frozen 4 September canonical database,
+- 2,000 simulations,
+- 40-week horizon,
+- 461 historical source week blocks,
+- starting bankroll 1,000,
+- base stake 1%,
+- illustrative 4% annual hurdle only (40-week terminal target 1,030.63),
+- same sampled weeks for all strategies.
+
+### Gold-standard selections
+
+| Strategy | Median terminal bankroll | Mean terminal bankroll | P(finish > start) | P(finish > illustrative 4% hurdle) | 95th pct max drawdown | P(max DD >=25%) | Worst 5% mean terminal |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Flat stake | 973.65 | 974.30 | 39.95% | 28.85% | 23.61% | 3.65% | 755.32 |
+| Bankroll proportional | 968.40 | 974.46 | 37.70% | 27.15% | 21.59% | 1.70% | 779.57 |
+| Drawdown throttle | 965.22 | 979.11 | 34.00% | 23.05% | 13.95% | 0.00% | 863.47 |
+| Previous-week-loss throttle | 970.79 | 979.35 | 37.20% | 26.00% | 17.80% | 0.25% | 821.53 |
+
+Interpretation:
+
+- The central tendency remains negative. No staking rule creates an edge.
+- Flat staking offers the highest chance of finishing above the illustrative hurdle, but also the weakest downside protection.
+- The drawdown throttle materially compresses the left tail: no simulated path lost 25% or more of starting capital at the terminal point, and none reached a 25% maximum drawdown in this 2,000-path sample.
+- The cost of that protection is lower upside participation and lower probability of finishing above the illustrative hurdle.
+- The previous-week-loss throttle is a middle ground, but remains an exploratory risk rule rather than a validated policy.
+
+### Market-favourite benchmark
+
+Betting the market favourite every eligible match was materially more dangerous over the same sampled week paths:
+
+- median terminal bankroll: 880.70,
+- mean terminal bankroll: 882.54,
+- probability finish above start: 24.85%,
+- probability finish above illustrative 4% hurdle: 20.20%,
+- median maximum drawdown: 24.39%,
+- 95th-percentile maximum drawdown: 45.47%,
+- probability of at least a 25% maximum drawdown: 47.55%,
+- probability of terminal loss of at least 25%: 22.90%,
+- worst 5% mean terminal bankroll: 526.32.
+
+This is a benchmark, not evidence that the Football 1 selection class is profitable. It shows that indiscriminate participation can be much more destructive than selective participation plus risk control.
+
 ## Casino lessons worth keeping
 
 ### 1. Staking does not create expected value
