@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   draw-jury:
@@ -32,11 +33,22 @@ jobs:
       - name: Run unit tests
         run: pytest -q
 
-      - name: Download EPL history
-        run: football1-download-epl --from-season 2012 --to-season 2026
-
-      - name: Build canonical database
-        run: football1-build-db --input-dir data/raw/football-data --output data/processed/football1.sqlite
+      - name: Reuse frozen canonical database from 4 September audit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p frozen-audit data/processed
+          gh run download 33924106948 --repo zee6/FlaretTest1 --name epl-audit-output --dir frozen-audit
+          DB="$(find frozen-audit -name football1.sqlite -type f -print -quit)"
+          if [ -z "$DB" ]; then
+            echo "football1.sqlite not found in frozen epl-audit-output artifact"
+            find frozen-audit -maxdepth 4 -type f -print
+            exit 1
+          fi
+          cp "$DB" data/processed/football1.sqlite
+          echo "FROZEN_AUDIT_RUN=33924106948"
+          echo "FROZEN_AUDIT_HEAD_SHA=ada0ebe987323389870d80aca0234be11c18b53d"
+          echo "FROZEN_DB_SHA256=$(sha256sum data/processed/football1.sqlite | awk '{print $1}')"
 
       - name: Run draw jury diagnostic
         run: |
@@ -46,6 +58,7 @@ jobs:
           r = json.load(open('data/processed/draw_jury_audit.json'))
           print('STATUS', r['status'])
           print('DECISION_WEIGHT', r['decision_weight'])
+          print('PROMOTION_ALLOWED', r['promotion_allowed'])
           print('COMMON_MATCHES', r['common_matches'])
           print('ACTUAL_DRAWS', r['actual_draws'], 'RATE', round(r['actual_draw_rate'], 6))
           print('SCORELINES', r['actual_draw_scoreline_counts'])
@@ -62,6 +75,8 @@ jobs:
                   'AUC=', round(d['draw_auc'], 6),
                   'ECE=', round(d['calibration_ece'], 6),
                   'meanP=', round(d['mean_predicted_draw_probability'], 6),
+                  'actualDrawP=', round(d['mean_probability_on_actual_draws'], 6),
+                  'nonDrawP=', round(d['mean_probability_on_non_draws'], 6),
                   'top20_draw_rate=', round(d['top_20pct']['observed_draw_rate'], 6),
                   'top20_lift=', round(d['top_20pct']['lift_vs_base_rate'], 6),
               )
