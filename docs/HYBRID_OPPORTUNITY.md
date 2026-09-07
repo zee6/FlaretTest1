@@ -102,6 +102,10 @@ The likely product hierarchy remains:
 
 The final information density, labels, confidence language and card hierarchy should be designed only after the research layer has settled. “Clarity is king” remains the interface constraint.
 
+### Elo chart scaling requirement
+
+When interface work resumes, the Elo charts must not use such a wide fixed vertical scale that meaningful differences between teams are visually compressed. The chart should use a tighter data-relative domain, with enough padding to avoid exaggeration while still making real separation legible. This is a presentation fix only; it must not alter Elo values or model calculations.
+
 ## Promotion rule
 
 All new outputs in this layer are research-only with zero decision weight. Before any label such as `HIGH`, `INTERESTING`, `ACT`, or `BET` receives operational meaning, Football 1 must freeze the rule and test it prospectively on untouched observations.
