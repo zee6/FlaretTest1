@@ -1,0 +1,98 @@
+name: EPL Portfolio Laboratory
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/portfolio_lab.py'
+      - 'src/football1/result_price_audit.py'
+      - 'tests/test_portfolio_lab.py'
+      - 'pyproject.toml'
+      - '.github/workflows/portfolio-lab.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/portfolio_lab.py'
+      - 'src/football1/result_price_audit.py'
+      - 'tests/test_portfolio_lab.py'
+      - 'pyproject.toml'
+      - '.github/workflows/portfolio-lab.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  portfolio-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Reuse frozen canonical database from 4 September audit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p frozen-audit data/processed
+          gh run download 33924106948 --repo zee6/FlaretTest1 --name epl-audit-output --dir frozen-audit
+          DB="$(find frozen-audit -name football1.sqlite -type f -print -quit)"
+          if [ -z "$DB" ]; then
+            echo "football1.sqlite not found in frozen epl-audit-output artifact"
+            find frozen-audit -maxdepth 4 -type f -print
+            exit 1
+          fi
+          cp "$DB" data/processed/football1.sqlite
+          echo "FROZEN_AUDIT_RUN=33924106948"
+          echo "FROZEN_AUDIT_HEAD_SHA=ada0ebe987323389870d80aca0234be11c18b53d"
+          echo "FROZEN_DB_SHA256=$(sha256sum data/processed/football1.sqlite | awk '{print $1}')"
+
+      - name: Run portfolio laboratory
+        run: |
+          football1-portfolio-lab \
+            --database data/processed/football1.sqlite \
+            --output data/processed/portfolio_lab.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/portfolio_lab.json'))
+          print('STATUS', r['status'])
+          print('DECISION_WEIGHT', r['decision_weight'])
+          print('CONFIG', r['portfolio_config'])
+          for selection_name, selection in r['selection_sets'].items():
+              print('SELECTION', selection_name, 'BETS', selection['bets'])
+              for strategy_name, s in selection['strategies'].items():
+                  print('STRATEGY', selection_name, strategy_name, {
+                      'bets': s['bets_placed'],
+                      'final_bankroll': s['final_bankroll'],
+                      'roi_on_turnover': s['roi_on_turnover'],
+                      'max_drawdown_fraction': s['max_drawdown_fraction'],
+                      'longest_losing_streak': s['longest_losing_streak'],
+                  })
+          f = r['benchmarks']['market_favourite_every_match_flat_stake']
+          print('FAVOURITE_BENCHMARK', {
+              'bets': f['bets_placed'],
+              'final_bankroll': f['final_bankroll'],
+              'roi_on_turnover': f['roi_on_turnover'],
+              'max_drawdown_fraction': f['max_drawdown_fraction'],
+              'longest_losing_streak': f['longest_losing_streak'],
+          })
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-portfolio-lab
+          path: data/processed/portfolio_lab.json
+          if-no-files-found: error
+          retention-days: 14
