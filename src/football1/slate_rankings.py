@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
-from football1.opportunity_layer import DECISION_WEIGHT, analyze_locked_prediction
+from football1.opportunity_layer import DECISION_WEIGHT, OUTCOMES, analyze_locked_prediction
 
 
 def _parse_utc(value: str) -> datetime:
@@ -36,6 +36,9 @@ def _candidate(
         "result_call": observation["price"]["result_call"],
         "best_price_outcome": observation["price"]["best_price_outcome"],
         "result_plus_price_raw_interest": observation["price"]["result_plus_price_raw_interest"],
+        "selected_hda_price_detail": (
+            observation["price"]["outcomes"].get(outcome) if outcome in OUTCOMES else None
+        ),
         "draw_shape_inputs": observation["draw_shape_inputs"],
         "outsider_non_loss": observation["non_loss"]["outsider_non_loss"],
     }
@@ -90,7 +93,7 @@ def build_slate_rankings(
 
     scope = "all_locked_latest_per_event" if include_started else "future_locked_latest_per_event"
     base = {
-        "schema_version": 2,
+        "schema_version": 3,
         "status": "research_observer_zero_weight",
         "decision_weight": DECISION_WEIGHT,
         "scope": scope,
@@ -142,6 +145,42 @@ def build_slate_rankings(
         category="best_price_discrepancy",
         outcome=price_obs["price"]["best_price_outcome"],
         score=float(price_obs["price"]["best_price_model_ev"]),
+    )
+
+    # Keep model disagreement and bookmaker quote generosity separate. This is
+    # deliberately not another composite score: it exposes where an apparent
+    # opportunity comes from instead of rewarding long-odds EV mechanically.
+    model_record, model_obs = max_pair(
+        lambda _r, o: float(o["price"]["best_model_disagreement_probability_edge"])
+    )
+    strongest_model_disagreement = _candidate(
+        model_record,
+        model_obs,
+        category="strongest_model_disagreement",
+        outcome=model_obs["price"]["best_model_disagreement_outcome"],
+        score=float(model_obs["price"]["best_model_disagreement_probability_edge"]),
+    )
+
+    quote_record, quote_obs = max_pair(
+        lambda _r, o: float(o["price"]["best_quote_premium_probability_edge"])
+    )
+    strongest_quote_premium = _candidate(
+        quote_record,
+        quote_obs,
+        category="strongest_quote_premium",
+        outcome=quote_obs["price"]["best_quote_premium_outcome"],
+        score=float(quote_obs["price"]["best_quote_premium_probability_edge"]),
+    )
+
+    total_record, total_obs = max_pair(
+        lambda _r, o: float(o["price"]["best_total_probability_edge"])
+    )
+    strongest_total_probability_edge = _candidate(
+        total_record,
+        total_obs,
+        category="strongest_total_probability_edge",
+        outcome=total_obs["price"]["best_total_probability_edge_outcome"],
+        score=float(total_obs["price"]["best_total_probability_edge"]),
     )
 
     result_price_pairs = [
@@ -212,6 +251,9 @@ def build_slate_rankings(
             "strongest_result_call": strongest_result_call,
             "strongest_result_plus_price_raw_interest": strongest_result_plus_price,
             "best_price_discrepancy": best_price_discrepancy,
+            "strongest_model_disagreement": strongest_model_disagreement,
+            "strongest_quote_premium": strongest_quote_premium,
+            "strongest_total_probability_edge": strongest_total_probability_edge,
             "highest_draw_probability": highest_draw_probability,
             "highest_draw_uplift_vs_market": highest_draw_uplift_vs_market,
             "most_balanced_match": most_balanced_match,
@@ -219,8 +261,9 @@ def build_slate_rankings(
         },
         "interface_status": "data_contract_ready_interface_deferred",
         "warning": (
-            "These are slate-relative research rankings, not betting recommendations. A category always "
-            "having a 'winner' does not mean that winner clears a validated materiality threshold."
+            "These are slate-relative research rankings, not betting recommendations. A category always having a "
+            "'winner' does not mean that winner clears a validated materiality threshold. Model disagreement and "
+            "quote premium are intentionally ranked separately so long odds do not masquerade as model conviction."
         ),
     }
 
