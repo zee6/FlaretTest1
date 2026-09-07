@@ -1,0 +1,103 @@
+name: EPL Hybrid Draw and Opportunity Audit
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/opportunity_layer.py'
+      - 'src/football1/draw_profile.py'
+      - 'tests/test_opportunity_layer.py'
+      - 'tests/test_draw_profile.py'
+      - 'pyproject.toml'
+      - '.github/workflows/hybrid-opportunity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  hybrid-opportunity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run unit tests
+        run: pytest -q
+
+      - name: Build read-only prospective opportunity observations
+        run: |
+          football1-opportunity-observer --ledger prospective/ledger.jsonl --output data/processed/opportunity_observer.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/opportunity_observer.json'))
+          print('OPPORTUNITY_STATUS', r['status'])
+          print('DECISION_WEIGHT', r['decision_weight'])
+          print('RECORDS', len(r['records']))
+          if r['records']:
+              latest = r['records'][-1]
+              print('EXAMPLE_EVENT', latest['event_id'])
+              print('RESULT_CALL', latest['price']['result_call'])
+              print('BEST_PRICE', latest['price']['best_price_outcome'])
+              print('OUTSIDER_NON_LOSS', latest['non_loss']['outsider_non_loss']['id'])
+          PY
+
+      - name: Reuse frozen canonical database from 4 September audit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p frozen-audit data/processed
+          gh run download 33924106948 --repo zee6/FlaretTest1 --name epl-audit-output --dir frozen-audit
+          DB="$(find frozen-audit -name football1.sqlite -type f -print -quit)"
+          if [ -z "$DB" ]; then
+            echo "football1.sqlite not found in frozen epl-audit-output artifact"
+            find frozen-audit -maxdepth 4 -type f -print
+            exit 1
+          fi
+          cp "$DB" data/processed/football1.sqlite
+          echo "FROZEN_AUDIT_RUN=33924106948"
+          echo "FROZEN_AUDIT_HEAD_SHA=ada0ebe987323389870d80aca0234be11c18b53d"
+          echo "FROZEN_DB_SHA256=$(sha256sum data/processed/football1.sqlite | awk '{print $1}')"
+
+      - name: Run nested hybrid draw profile audit
+        run: |
+          football1-draw-profile --database data/processed/football1.sqlite --output data/processed/draw_profile_audit.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/draw_profile_audit.json'))
+          print('PROFILE_STATUS', r['status'])
+          print('DECISION_WEIGHT', r['decision_weight'])
+          print('PROMOTION_ALLOWED', r['promotion_allowed'])
+          print('OOS_MATCHES', r['oos_matches'])
+          print('NESTED_TEST_SEASONS', r['nested_profile_test_seasons'])
+          print('HYBRID', {k: r['hybrid'][k] for k in ('brier','log_loss','auc','calibration_ece')})
+          print('MARKET', {k: r['market_control'][k] for k in ('brier','log_loss','auc','calibration_ece')})
+          print('DELTA_HYBRID_MINUS_MARKET', r['delta_hybrid_minus_market'])
+          print('TOP20_HYBRID', r['hybrid']['top_20pct'])
+          print('TOP20_MARKET', r['market_control']['top_20pct'])
+          print('OUTSIDER_NON_LOSS_DELTA', r['non_loss_probability_audit']['market_outsider_or_draw']['delta_rf_minus_market'])
+          print('LARGEST_STANDARDIZED_COEFFICIENTS')
+          coeff = r['latest_oos_fit_standardized_coefficients']
+          for name, value in sorted(coeff.items(), key=lambda item: abs(item[1]), reverse=True)[:8]:
+              print(name, round(value, 6))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-hybrid-opportunity-audit
+          path: |
+            data/processed/opportunity_observer.json
+            data/processed/draw_profile_audit.json
+          if-no-files-found: error
+          retention-days: 14
