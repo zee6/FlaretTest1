@@ -24,6 +24,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   historical-closing-line:
@@ -45,11 +46,22 @@ jobs:
       - name: Run tests
         run: pytest -q
 
-      - name: Download EPL history
-        run: football1-download-epl --from-season 2012 --to-season 2026
-
-      - name: Build canonical database
-        run: football1-build-db --input-dir data/raw/football-data --output data/processed/football1.sqlite
+      - name: Reuse frozen canonical database from 4 September audit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p frozen-audit data/processed
+          gh run download 33924106948 --repo zee6/FlaretTest1 --name epl-audit-output --dir frozen-audit
+          DB="$(find frozen-audit -name football1.sqlite -type f -print -quit)"
+          if [ -z "$DB" ]; then
+            echo "football1.sqlite not found in frozen epl-audit-output artifact"
+            find frozen-audit -maxdepth 4 -type f -print
+            exit 1
+          fi
+          cp "$DB" data/processed/football1.sqlite
+          echo "FROZEN_AUDIT_RUN=33924106948"
+          echo "FROZEN_AUDIT_HEAD_SHA=ada0ebe987323389870d80aca0234be11c18b53d"
+          echo "FROZEN_DB_SHA256=$(sha256sum data/processed/football1.sqlite | awk '{print $1}')"
 
       - name: Run historical closing-line observer
         run: |
@@ -60,9 +72,12 @@ jobs:
           import json
           r = json.load(open('data/processed/historical_closing_line_report.json'))
           print('STATUS', r['status'])
+          print('DECISION_WEIGHT', r.get('decision_weight'))
           print('MATCHES', r['matches'])
           print('TEST_SEASONS', r.get('test_seasons'))
           print('OVERALL', r.get('overall'))
+          print('QUARTILES', r.get('residual_quartiles'))
+          print('SEASONS', r.get('seasons'))
           PY
 
       - uses: actions/upload-artifact@v4
