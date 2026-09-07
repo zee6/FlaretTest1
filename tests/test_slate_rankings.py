@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
+import pytest
+
 from football1.slate_rankings import build_slate_rankings
 
 
@@ -121,7 +123,7 @@ def test_raw_long_odds_ev_is_not_confused_with_model_disagreement() -> None:
     assert rankings["best_price_discrepancy"]["outcome"] == "away"
     assert rankings["strongest_model_disagreement"]["event_id"] == "conviction"
     assert rankings["strongest_model_disagreement"]["outcome"] == "home"
-    assert rankings["strongest_model_disagreement"]["ranking_score"] == 0.05
+    assert rankings["strongest_model_disagreement"]["ranking_score"] == pytest.approx(0.05)
 
 
 def test_latest_record_per_event_is_used() -> None:
