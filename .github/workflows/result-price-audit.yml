@@ -1,0 +1,85 @@
+name: EPL Result Plus Price Audit
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/result_price_audit.py'
+      - 'tests/test_result_price_audit.py'
+      - '.github/workflows/result-price-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  result-price:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run unit tests
+        run: pytest -q
+
+      - name: Reuse frozen canonical database from 4 September audit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p frozen-audit data/processed
+          gh run download 33924106948 --repo zee6/FlaretTest1 --name epl-audit-output --dir frozen-audit
+          DB="$(find frozen-audit -name football1.sqlite -type f -print -quit)"
+          if [ -z "$DB" ]; then
+            echo "football1.sqlite not found in frozen epl-audit-output artifact"
+            exit 1
+          fi
+          cp "$DB" data/processed/football1.sqlite
+          echo "FROZEN_DB_SHA256=$(sha256sum data/processed/football1.sqlite | awk '{print $1}')"
+
+      - name: Run result plus price diagnostic
+        run: |
+          python -m football1.result_price_audit \
+            --database data/processed/football1.sqlite \
+            --output data/processed/result_price_audit.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/result_price_audit.json'))
+          print('STATUS', r['status'])
+          print('DECISION_WEIGHT', r['decision_weight'])
+          print('PROMOTION_ALLOWED', r['promotion_allowed'])
+          print('MATCHES', r['matches'])
+          print('RESULT_CALL_ACCURACY', r['result_call_accuracy'])
+          for name, block in r['classes'].items():
+              print('\nCLASS', name)
+              for key in (
+                  'matches','wins','hit_rate','mean_odds','mean_model_probability',
+                  'mean_market_probability','mean_model_edge_vs_market',
+                  'mean_total_probability_edge_vs_quote','mean_raw_model_ev',
+                  'observed_minus_model_probability','observed_minus_market_probability',
+                  'pnl_units','roi','max_drawdown_units'
+              ):
+                  if key in block:
+                      print(key, block[key])
+              if 'by_outcome' in block:
+                  print('BY_OUTCOME', block['by_outcome'])
+              if 'by_season' in block:
+                  print('BY_SEASON', block['by_season'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-result-price-audit
+          path: data/processed/result_price_audit.json
+          if-no-files-found: error
+          retention-days: 14
