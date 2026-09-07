@@ -1,8 +1,11 @@
 from __future__ import annotations
 
-import pytest
+from datetime import datetime, timezone
 
 from football1.slate_rankings import build_slate_rankings
+
+
+AS_OF = datetime(2026, 9, 7, 20, 0, tzinfo=timezone.utc)
 
 
 def _record(
@@ -16,12 +19,13 @@ def _record(
     odds: tuple[float, float, float],
     elo_diff: float,
     retrieved: str = "2026-09-04T09:00:00Z",
+    commence: str = "2026-09-10T14:00:00Z",
 ) -> dict:
     return {
         "record_id": record_id,
         "event_id": event_id,
         "status": "prediction_locked",
-        "commence_time_utc": "2026-09-10T14:00:00Z",
+        "commence_time_utc": commence,
         "snapshot_retrieved_at_utc": retrieved,
         "home_team_provider": home,
         "away_team_provider": away,
@@ -70,10 +74,12 @@ def test_slate_rankings_keep_distinct_champions() -> None:
         ),
     ]
 
-    report = build_slate_rankings(records)
+    report = build_slate_rankings(records, now_utc=AS_OF)
     rankings = report["rankings"]
 
     assert report["decision_weight"] == 0.0
+    assert report["scope"] == "future_locked_latest_per_event"
+    assert report["fixture_count"] == 3
     assert rankings["strongest_result_call"]["event_id"] == "a"
     assert rankings["highest_draw_probability"]["event_id"] == "b"
     assert rankings["highest_draw_uplift_vs_market"]["event_id"] == "b"
@@ -106,12 +112,48 @@ def test_latest_record_per_event_is_used() -> None:
         retrieved="2026-09-04T10:00:00Z",
     )
 
-    report = build_slate_rankings([old, new])
+    report = build_slate_rankings([old, new], now_utc=AS_OF)
     assert report["fixture_count"] == 1
     assert report["rankings"]["highest_draw_probability"]["source_record_id"] == "new"
 
 
+def test_future_only_default_excludes_started_fixtures() -> None:
+    past = _record(
+        record_id="past",
+        event_id="past",
+        home="Past A",
+        away="Past B",
+        model=(0.80, 0.10, 0.10),
+        market=(0.70, 0.15, 0.15),
+        odds=(1.50, 8.0, 8.0),
+        elo_diff=200,
+        commence="2026-09-05T14:00:00Z",
+    )
+    future = _record(
+        record_id="future",
+        event_id="future",
+        home="Future A",
+        away="Future B",
+        model=(0.40, 0.32, 0.28),
+        market=(0.41, 0.30, 0.29),
+        odds=(2.50, 3.50, 3.70),
+        elo_diff=12,
+        commence="2026-09-12T14:00:00Z",
+    )
+
+    report = build_slate_rankings([past, future], now_utc=AS_OF)
+    assert report["latest_locked_event_count"] == 2
+    assert report["excluded_started_event_count"] == 1
+    assert report["fixture_count"] == 1
+    assert report["rankings"]["strongest_result_call"]["event_id"] == "future"
+
+    historical = build_slate_rankings([past, future], now_utc=AS_OF, include_started=True)
+    assert historical["scope"] == "all_locked_latest_per_event"
+    assert historical["fixture_count"] == 2
+    assert historical["excluded_started_event_count"] == 0
+
+
 def test_empty_slate_is_explicit() -> None:
-    report = build_slate_rankings([])
+    report = build_slate_rankings([], now_utc=AS_OF)
     assert report["fixture_count"] == 0
     assert report["rankings"] == {}
