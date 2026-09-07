@@ -26,6 +26,40 @@ def _triple(raw: Mapping[str, Any], *, name: str, odds: bool = False) -> dict[st
     return values
 
 
+def _edge_anatomy(
+    *,
+    model_probability: float,
+    market_probability: float,
+    quoted_odds: float,
+) -> dict[str, float]:
+    """Decompose apparent value into model disagreement and quote generosity.
+
+    In probability space:
+
+        model - quoted break-even
+        = (model - market) + (market - quoted break-even)
+
+    This identity is useful because long odds can make a small total probability
+    discrepancy look like a very large EV percentage. The decomposition is
+    descriptive only; neither component has a promoted materiality threshold.
+    """
+    quoted_break_even = 1.0 / quoted_odds
+    model_vs_market = model_probability - market_probability
+    quote_vs_market = market_probability - quoted_break_even
+    total_vs_quote = model_probability - quoted_break_even
+    if not math.isclose(total_vs_quote, model_vs_market + quote_vs_market, abs_tol=1e-12):
+        raise AssertionError("Price-edge decomposition identity failed")
+    market_fair_odds = 1.0 / market_probability
+    return {
+        "model_probability_edge_vs_market": model_vs_market,
+        "quote_probability_edge_vs_market": quote_vs_market,
+        "total_probability_edge_vs_quote": total_vs_quote,
+        "market_fair_odds": market_fair_odds,
+        "quoted_odds_premium_vs_market_fair": quoted_odds / market_fair_odds - 1.0,
+        "model_ev_at_quoted_odds": model_probability * quoted_odds - 1.0,
+    }
+
+
 def synthetic_dutch_odds(first_odds: float, second_odds: float) -> float:
     """Decimal odds for a two-outcome cover created by dutching separate bets.
 
@@ -57,18 +91,37 @@ def price_opportunity_analysis(
     for label in OUTCOMES:
         probability = model[label]
         quoted_odds = odds[label]
+        anatomy = _edge_anatomy(
+            model_probability=probability,
+            market_probability=market[label],
+            quoted_odds=quoted_odds,
+        )
         outcomes[label] = {
             "model_probability": probability,
             "market_probability": market[label],
-            "probability_edge_vs_market": probability - market[label],
+            # Compatibility alias retained for existing consumers.
+            "probability_edge_vs_market": anatomy["model_probability_edge_vs_market"],
             "fair_odds": 1.0 / probability,
             "quoted_odds": quoted_odds,
             "quoted_break_even_probability": 1.0 / quoted_odds,
-            "model_ev_at_quoted_odds": probability * quoted_odds - 1.0,
+            "model_ev_at_quoted_odds": anatomy["model_ev_at_quoted_odds"],
+            "edge_anatomy": anatomy,
         }
 
     result_call = max(OUTCOMES, key=lambda label: model[label])
     best_price = max(OUTCOMES, key=lambda label: outcomes[label]["model_ev_at_quoted_odds"])
+    best_model_disagreement = max(
+        OUTCOMES,
+        key=lambda label: outcomes[label]["edge_anatomy"]["model_probability_edge_vs_market"],
+    )
+    best_quote_premium = max(
+        OUTCOMES,
+        key=lambda label: outcomes[label]["edge_anatomy"]["quote_probability_edge_vs_market"],
+    )
+    best_total_probability_edge = max(
+        OUTCOMES,
+        key=lambda label: outcomes[label]["edge_anatomy"]["total_probability_edge_vs_quote"],
+    )
     positive_price_outcomes = [
         label for label in OUTCOMES if outcomes[label]["model_ev_at_quoted_odds"] > 0.0
     ]
@@ -83,13 +136,20 @@ def price_opportunity_analysis(
         "result_call_probability": model[result_call],
         "best_price_outcome": best_price,
         "best_price_model_ev": outcomes[best_price]["model_ev_at_quoted_odds"],
+        "best_model_disagreement_outcome": best_model_disagreement,
+        "best_model_disagreement_probability_edge": outcomes[best_model_disagreement]["edge_anatomy"]["model_probability_edge_vs_market"],
+        "best_quote_premium_outcome": best_quote_premium,
+        "best_quote_premium_probability_edge": outcomes[best_quote_premium]["edge_anatomy"]["quote_probability_edge_vs_market"],
+        "best_total_probability_edge_outcome": best_total_probability_edge,
+        "best_total_probability_edge": outcomes[best_total_probability_edge]["edge_anatomy"]["total_probability_edge_vs_quote"],
         "result_plus_price_raw_interest": result_call_ev > 0.0,
         "result_plus_price_model_ev": result_call_ev,
         "positive_price_outcomes": positive_price_outcomes,
         "outcomes": outcomes,
         "warning": (
-            "Positive model EV is descriptive research output only. No minimum discrepancy "
-            "has been prospectively validated for recommendation or staking."
+            "Positive model EV is descriptive research output only. The edge anatomy separates Football 1's "
+            "probability disagreement from best-quote generosity so long odds do not masquerade as model conviction. "
+            "No minimum discrepancy has been prospectively validated for recommendation or staking."
         ),
     }
 
@@ -109,16 +169,22 @@ def non_loss_analysis(
         p_model = model[first] + model[second]
         p_market = market[first] + market[second]
         synthetic = synthetic_dutch_odds(odds[first], odds[second])
+        anatomy = _edge_anatomy(
+            model_probability=p_model,
+            market_probability=p_market,
+            quoted_odds=synthetic,
+        )
         return {
             "id": name,
             "covered_outcomes": [first, second],
             "model_probability": p_model,
             "market_probability": p_market,
-            "probability_edge_vs_market": p_model - p_market,
+            "probability_edge_vs_market": anatomy["model_probability_edge_vs_market"],
             "fair_odds": 1.0 / p_model,
             "synthetic_dutched_odds": synthetic,
             "synthetic_break_even_probability": 1.0 / synthetic,
-            "model_ev_at_synthetic_odds": p_model * synthetic - 1.0,
+            "model_ev_at_synthetic_odds": anatomy["model_ev_at_quoted_odds"],
+            "edge_anatomy": anatomy,
         }
 
     home_or_draw = cover("1X", "home", "draw")
@@ -141,9 +207,9 @@ def non_loss_analysis(
         "outsider_non_loss": outsider_cover,
         "best_non_loss_price": best_cover,
         "warning": (
-            "Synthetic dutched odds use the separately available H/D/A prices and therefore "
-            "include the cost of buying two outcomes. They are not assumed equal to a bookmaker's "
-            "quoted double-chance market."
+            "Synthetic dutched odds use the separately available H/D/A prices and therefore include the cost "
+            "of buying two outcomes. Edge anatomy separates model disagreement from the synthetic price premium. "
+            "They are not assumed equal to a bookmaker's quoted double-chance market."
         ),
     }
 
@@ -170,7 +236,7 @@ def analyze_locked_prediction(record: Mapping[str, Any]) -> dict[str, Any]:
     features = record.get("features") if isinstance(record.get("features"), Mapping) else {}
     elo_diff = features.get("elo_diff")
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "source_record_id": record.get("record_id"),
         "event_id": record.get("event_id"),
         "status": "research_observer_zero_weight",
@@ -225,7 +291,7 @@ def main() -> None:
     args = build_parser().parse_args()
     observations = analyze_ledger(args.ledger)
     payload = {
-        "schema_version": 1,
+        "schema_version": 2,
         "status": "research_observer_zero_weight",
         "decision_weight": DECISION_WEIGHT,
         "interface_status": "data_contract_ready_interface_deferred",
