@@ -5,8 +5,10 @@ on:
     branches: [master]
     paths:
       - 'src/football1/opportunity_layer.py'
+      - 'src/football1/slate_rankings.py'
       - 'src/football1/draw_profile.py'
       - 'tests/test_opportunity_layer.py'
+      - 'tests/test_slate_rankings.py'
       - 'tests/test_draw_profile.py'
       - 'pyproject.toml'
       - '.github/workflows/hybrid-opportunity.yml'
@@ -39,9 +41,11 @@ jobs:
       - name: Build read-only prospective opportunity observations
         run: |
           football1-opportunity-observer --ledger prospective/ledger.jsonl --output data/processed/opportunity_observer.json
+          football1-slate-rankings --ledger prospective/ledger.jsonl --output data/processed/slate_rankings.json
           python - <<'PY'
           import json
           r = json.load(open('data/processed/opportunity_observer.json'))
+          s = json.load(open('data/processed/slate_rankings.json'))
           print('OPPORTUNITY_STATUS', r['status'])
           print('DECISION_WEIGHT', r['decision_weight'])
           print('RECORDS', len(r['records']))
@@ -51,6 +55,12 @@ jobs:
               print('RESULT_CALL', latest['price']['result_call'])
               print('BEST_PRICE', latest['price']['best_price_outcome'])
               print('OUTSIDER_NON_LOSS', latest['non_loss']['outsider_non_loss']['id'])
+          print('SLATE_FIXTURES', s['fixture_count'])
+          for category, item in s['rankings'].items():
+              if item is None:
+                  print(category, 'NONE')
+              else:
+                  print(category, item['home_team'], 'vs', item['away_team'], 'OUTCOME', item['outcome'], 'SCORE', item['ranking_score'])
           PY
 
       - name: Reuse frozen canonical database from 4 September audit
@@ -98,6 +108,7 @@ jobs:
           name: epl-hybrid-opportunity-audit
           path: |
             data/processed/opportunity_observer.json
+            data/processed/slate_rankings.json
             data/processed/draw_profile_audit.json
           if-no-files-found: error
           retention-days: 14
