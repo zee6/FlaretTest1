@@ -1,0 +1,79 @@
+name: EPL Prospective Recency Shadow
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/recency_shadow.py'
+      - 'src/football1/recency_audit.py'
+      - 'tests/test_recency_shadow.py'
+      - 'pyproject.toml'
+      - '.github/workflows/recency-shadow.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/recency_shadow.py'
+      - 'src/football1/recency_audit.py'
+      - 'tests/test_recency_shadow.py'
+      - 'pyproject.toml'
+      - '.github/workflows/recency-shadow.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  recency-shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Reuse frozen canonical database from 4 September audit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p frozen-audit data/processed
+          gh run download 33924106948 --repo zee6/FlaretTest1 --name epl-audit-output --dir frozen-audit
+          DB="$(find frozen-audit -name football1.sqlite -type f -print -quit)"
+          if [ -z "$DB" ]; then
+            echo "football1.sqlite not found in frozen epl-audit-output artifact"
+            exit 1
+          fi
+          cp "$DB" data/processed/football1.sqlite
+          echo "FROZEN_DB_SHA256=$(sha256sum data/processed/football1.sqlite | awk '{print $1}')"
+
+      - name: Lock future-only recency shadow
+        run: |
+          LOCKED_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          football1-recency-shadow \
+            --database data/processed/football1.sqlite \
+            --source-ledger prospective/ledger.jsonl \
+            --output prospective/recency_shadow.jsonl \
+            --locked-at-utc "$LOCKED_AT"
+          python - <<'PY'
+          import json
+          rows=[json.loads(x) for x in open('prospective/recency_shadow.jsonl') if x.strip()]
+          print('RECORDS', len(rows))
+          for r in rows:
+              print('SHADOW', r['commence_time_utc'], r['teams'], r['recency_minus_equal_weight'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-prospective-recency-shadow
+          path: prospective/recency_shadow.jsonl
+          if-no-files-found: error
+          retention-days: 14
