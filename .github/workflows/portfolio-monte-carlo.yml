@@ -1,0 +1,90 @@
+name: EPL Portfolio Monte Carlo
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/portfolio_lab.py'
+      - 'src/football1/portfolio_monte_carlo.py'
+      - 'tests/test_portfolio_lab.py'
+      - 'tests/test_portfolio_monte_carlo.py'
+      - 'pyproject.toml'
+      - '.github/workflows/portfolio-monte-carlo.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/portfolio_lab.py'
+      - 'src/football1/portfolio_monte_carlo.py'
+      - 'tests/test_portfolio_lab.py'
+      - 'tests/test_portfolio_monte_carlo.py'
+      - 'pyproject.toml'
+      - '.github/workflows/portfolio-monte-carlo.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  portfolio-monte-carlo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Reuse frozen canonical database from 4 September audit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p frozen-audit data/processed
+          gh run download 33924106948 --repo zee6/FlaretTest1 --name epl-audit-output --dir frozen-audit
+          DB="$(find frozen-audit -name football1.sqlite -type f -print -quit)"
+          if [ -z "$DB" ]; then
+            echo "football1.sqlite not found in frozen epl-audit-output artifact"
+            find frozen-audit -maxdepth 4 -type f -print
+            exit 1
+          fi
+          cp "$DB" data/processed/football1.sqlite
+          echo "FROZEN_AUDIT_RUN=33924106948"
+          echo "FROZEN_AUDIT_HEAD_SHA=ada0ebe987323389870d80aca0234be11c18b53d"
+          echo "FROZEN_DB_SHA256=$(sha256sum data/processed/football1.sqlite | awk '{print $1}')"
+
+      - name: Run portfolio Monte Carlo
+        run: |
+          # 4% is an illustrative annual hurdle only. It is NOT labelled as a
+          # current or historical Treasury yield in the report.
+          football1-portfolio-monte-carlo \
+            --database data/processed/football1.sqlite \
+            --output data/processed/portfolio_monte_carlo.json \
+            --simulations 2000 \
+            --horizon-weeks 40 \
+            --annual-benchmark-rate 0.04
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/portfolio_monte_carlo.json'))
+          print('STATUS', r['status'])
+          print('BOOTSTRAP', r['bootstrap'])
+          print('BENCHMARK', r['benchmark'])
+          for name, metrics in r['gold_standard'].items():
+              print('GOLD', name, metrics)
+          print('FAVOURITE', r['market_favourite_benchmark'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-portfolio-monte-carlo
+          path: data/processed/portfolio_monte_carlo.json
+          if-no-files-found: error
+          retention-days: 14

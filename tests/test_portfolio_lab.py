@@ -99,6 +99,23 @@ def test_previous_week_loss_throttle_only_uses_completed_prior_week() -> None:
     assert report["journal"][4]["previous_week_pnl_for_sizing"] > 0.0
 
 
+def test_previous_week_loss_throttle_resets_after_empty_week() -> None:
+    config = PortfolioConfig(starting_bankroll=1000.0, base_fraction=0.01, loss_week_multiplier=0.5)
+    report = simulate_strategy(
+        [
+            _bet("a", "2025-09-01", won=False),  # week 36 loses
+            # week 37 has no bets
+            _bet("b", "2025-09-15", won=True),   # week 38 must not inherit week 36 loss
+        ],
+        name="weekly-gap",
+        config=config,
+        stake_rule=_weekly_loss_stake,
+    )
+
+    assert [entry["stake_multiplier"] for entry in report["journal"]] == pytest.approx([1.0, 1.0])
+    assert report["journal"][1]["previous_week_pnl_for_sizing"] == pytest.approx(0.0)
+
+
 def test_drawdown_metrics_and_journal_are_deterministic() -> None:
     config = PortfolioConfig(starting_bankroll=100.0, base_fraction=0.10)
     report = simulate_strategy(
