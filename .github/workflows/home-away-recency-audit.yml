@@ -1,0 +1,102 @@
+name: EPL Home Away Recency Audit
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/recency_short_audit.py'
+      - 'src/football1/home_away_recency_audit.py'
+      - 'src/football1/recency_audit.py'
+      - 'src/football1/home_away.py'
+      - 'src/football1/home_away_ablation.py'
+      - 'tests/test_home_away_recency_audit.py'
+      - '.github/workflows/home-away-recency-audit.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/recency_short_audit.py'
+      - 'src/football1/home_away_recency_audit.py'
+      - 'src/football1/recency_audit.py'
+      - 'src/football1/home_away.py'
+      - 'src/football1/home_away_ablation.py'
+      - 'tests/test_home_away_recency_audit.py'
+      - '.github/workflows/home-away-recency-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  home-away-recency-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Reuse frozen canonical database from 4 September audit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p frozen-audit data/processed
+          gh run download 33924106948 --repo zee6/FlaretTest1 --name epl-audit-output --dir frozen-audit
+          DB="$(find frozen-audit -name football1.sqlite -type f -print -quit)"
+          if [ -z "$DB" ]; then
+            echo "football1.sqlite not found in frozen epl-audit-output artifact"
+            find frozen-audit -maxdepth 4 -type f -print
+            exit 1
+          fi
+          cp "$DB" data/processed/football1.sqlite
+          echo "FROZEN_AUDIT_RUN=33924106948"
+          echo "FROZEN_AUDIT_HEAD_SHA=ada0ebe987323389870d80aca0234be11c18b53d"
+          echo "FROZEN_DB_SHA256=$(sha256sum data/processed/football1.sqlite | awk '{print $1}')"
+
+      - name: Run 15-day recency extension
+        run: |
+          python -m football1.recency_short_audit \
+            --database data/processed/football1.sqlite \
+            --output data/processed/recency_short_audit.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/recency_short_audit.json'))
+          print('SHORT_RECENCY_STATUS', r['status'])
+          print('SHORT_RECENCY_RAW_MARKET', r['overall_raw_market'])
+          for name, metrics in r['overall_variants'].items():
+              print('SHORT_RECENCY_VARIANT', name, metrics)
+          PY
+
+      - name: Run home/away recency audit
+        run: |
+          python -m football1.home_away_recency_audit \
+            --database data/processed/football1.sqlite \
+            --output data/processed/home_away_recency_audit.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/home_away_recency_audit.json'))
+          print('VENUE_RECENCY_STATUS', r['status'])
+          print('VENUE_RECENCY_RAW_MARKET', r['overall_raw_market'])
+          print('VENUE_RECENCY_FIXED_RESIDUAL', r['fixed_residual_control'])
+          for name, metrics in r['overall_venue_variants'].items():
+              print('VENUE_RECENCY_VARIANT', name, metrics)
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-home-away-recency-audit
+          path: |
+            data/processed/recency_short_audit.json
+            data/processed/home_away_recency_audit.json
+          if-no-files-found: error
+          retention-days: 14
