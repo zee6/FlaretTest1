@@ -14,9 +14,12 @@ from typing import Any
 
 API_BASE = "https://api.the-odds-api.com/v4"
 SPORT_KEY = "soccer_epl"
+COMPETITION = "English Premier League"
+PORTFOLIO_CURRENCY = "GBP"
 DEFAULT_REGIONS = "uk"
 DEFAULT_MARKETS = "h2h"
 DEFAULT_ODDS_FORMAT = "decimal"
+OUTCOME_LABELS = ("home", "draw", "away")
 
 
 def _devig(prices: tuple[float, float, float]) -> tuple[float, float, float]:
@@ -61,10 +64,7 @@ def fetch_epl_odds(
         }
     )
     url = f"{API_BASE}/sports/{SPORT_KEY}/odds?{query}"
-    request = urllib.request.Request(
-        url,
-        headers={"User-Agent": "Football1Research/0.1"},
-    )
+    request = urllib.request.Request(url, headers={"User-Agent": "Football1Research/0.1"})
 
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
@@ -80,7 +80,6 @@ def fetch_epl_odds(
         payload = json.loads(raw.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise ValueError("The Odds API returned invalid JSON") from exc
-
     if not isinstance(payload, list):
         raise ValueError("Expected The Odds API EPL response to be a list of events")
 
@@ -95,22 +94,18 @@ def fetch_epl_odds(
             usage[key] = int(value) if value is not None else None
         except ValueError:
             usage[key] = None
-
     return payload, usage
 
 
-def _complete_h2h(
+def _complete_h2h_market(
     bookmaker: dict[str, Any],
     home_team: str,
     away_team: str,
-) -> tuple[float, float, float] | None:
+) -> tuple[tuple[float, float, float], dict[str, Any]] | None:
     for market in bookmaker.get("markets", []):
         if market.get("key") != "h2h":
             continue
-        outcomes = {
-            str(item.get("name")): item.get("price")
-            for item in market.get("outcomes", [])
-        }
+        outcomes = {str(item.get("name")): item.get("price") for item in market.get("outcomes", [])}
         try:
             prices = (
                 float(outcomes[home_team]),
@@ -121,8 +116,17 @@ def _complete_h2h(
             return None
         if any(price <= 1.0 for price in prices):
             return None
-        return prices
+        return prices, market
     return None
+
+
+def _complete_h2h(
+    bookmaker: dict[str, Any],
+    home_team: str,
+    away_team: str,
+) -> tuple[float, float, float] | None:
+    result = _complete_h2h_market(bookmaker, home_team, away_team)
+    return result[0] if result is not None else None
 
 
 def summarize_event(event: dict[str, Any]) -> dict[str, Any]:
@@ -133,17 +137,29 @@ def summarize_event(event: dict[str, Any]) -> dict[str, Any]:
 
     fair_rows: list[tuple[float, float, float]] = []
     complete_bookmakers: list[str] = []
-    best = {"home": None, "draw": None, "away": None}
+    quote_board: dict[str, list[dict[str, Any]]] = {label: [] for label in OUTCOME_LABELS}
 
     for bookmaker in event.get("bookmakers", []):
-        prices = _complete_h2h(bookmaker, home, away)
-        if prices is None:
+        complete = _complete_h2h_market(bookmaker, home, away)
+        if complete is None:
             continue
-        complete_bookmakers.append(str(bookmaker.get("title") or bookmaker.get("key") or "unknown"))
+        prices, market = complete
+        bookmaker_key = str(bookmaker.get("key") or "unknown")
+        bookmaker_title = str(bookmaker.get("title") or bookmaker_key)
+        bookmaker_last_update = bookmaker.get("last_update")
+        market_last_update = market.get("last_update")
+        complete_bookmakers.append(bookmaker_title)
         fair_rows.append(_devig(prices))
-        for label, price in zip(("home", "draw", "away"), prices):
-            current = best[label]
-            best[label] = price if current is None else max(float(current), price)
+        for label, price in zip(OUTCOME_LABELS, prices):
+            quote_board[label].append(
+                {
+                    "decimal_odds": float(price),
+                    "bookmaker_key": bookmaker_key,
+                    "bookmaker_title": bookmaker_title,
+                    "bookmaker_last_update": bookmaker_last_update,
+                    "market_last_update": market_last_update,
+                }
+            )
 
     consensus = None
     if fair_rows:
@@ -152,6 +168,14 @@ def summarize_event(event: dict[str, Any]) -> dict[str, Any]:
             "draw": statistics.fmean(row[1] for row in fair_rows),
             "away": statistics.fmean(row[2] for row in fair_rows),
         }
+
+    best_quotes: dict[str, dict[str, Any] | None] = {}
+    best_decimal_odds: dict[str, float | None] = {}
+    for label in OUTCOME_LABELS:
+        quote_board[label].sort(key=lambda quote: (-float(quote["decimal_odds"]), str(quote["bookmaker_title"])))
+        best_quote = quote_board[label][0] if quote_board[label] else None
+        best_quotes[label] = best_quote
+        best_decimal_odds[label] = float(best_quote["decimal_odds"]) if best_quote is not None else None
 
     return {
         "event_id": event.get("id"),
@@ -162,7 +186,10 @@ def summarize_event(event: dict[str, Any]) -> dict[str, Any]:
         "complete_h2h_bookmaker_count": len(fair_rows),
         "complete_h2h_bookmakers": complete_bookmakers,
         "consensus_fair_probability": consensus,
-        "best_decimal_odds": best,
+        "best_decimal_odds": best_decimal_odds,
+        "best_price_quotes": best_quotes,
+        "quote_board": quote_board,
+        "best_price_policy": "highest observed decimal quote in the complete eligible bookmaker universe; commercial relationships do not affect ordering",
     }
 
 
@@ -180,6 +207,8 @@ def build_snapshot(
     return {
         "provider": "the-odds-api",
         "sport_key": SPORT_KEY,
+        "competition": COMPETITION,
+        "portfolio_currency": PORTFOLIO_CURRENCY,
         "retrieved_at_utc": retrieved,
         "request": {
             "regions": regions,
@@ -199,14 +228,8 @@ def write_snapshot(snapshot: dict[str, Any], output: Path) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Fetch one current EPL 1X2 odds snapshot from The Odds API."
-    )
-    parser.add_argument(
-        "--output",
-        type=Path,
-        default=Path("data/live/epl_odds_snapshot.json"),
-    )
+    parser = argparse.ArgumentParser(description="Fetch one current EPL 1X2 odds snapshot from The Odds API.")
+    parser.add_argument("--output", type=Path, default=Path("data/live/epl_odds_snapshot.json"))
     parser.add_argument("--regions", default=DEFAULT_REGIONS)
     parser.add_argument("--markets", default=DEFAULT_MARKETS)
     parser.add_argument("--odds-format", default=DEFAULT_ODDS_FORMAT)
@@ -244,14 +267,12 @@ def main() -> None:
         "usage_remaining=", usage.get("requests_remaining"),
     )
     for item in snapshot["summary"]:
-        consensus = item["consensus_fair_probability"]
-        best = item["best_decimal_odds"]
         print(
             item["commence_time"],
             f"{item['home_team']} vs {item['away_team']}",
             f"books={item['complete_h2h_bookmaker_count']}",
-            f"consensus={consensus}",
-            f"best={best}",
+            f"consensus={item['consensus_fair_probability']}",
+            f"best={item['best_price_quotes']}",
         )
 
 
