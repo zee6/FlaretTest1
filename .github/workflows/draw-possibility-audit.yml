@@ -1,0 +1,80 @@
+name: EPL Draw Possibility Audit
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/draw_possibility_audit.py'
+      - 'tests/test_draw_possibility_audit.py'
+      - '.github/workflows/draw-possibility-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  draw-possibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Reuse frozen canonical database from 4 September audit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p frozen-audit data/processed
+          gh run download 33924106948 --repo zee6/FlaretTest1 --name epl-audit-output --dir frozen-audit
+          DB="$(find frozen-audit -name football1.sqlite -type f -print -quit)"
+          if [ -z "$DB" ]; then
+            echo "football1.sqlite not found in frozen epl-audit-output artifact"
+            exit 1
+          fi
+          cp "$DB" data/processed/football1.sqlite
+          test "$(sha256sum data/processed/football1.sqlite | awk '{print $1}')" = "4b5c751b22608026fb18eb190279c13b41d50ab88055057787c041ae4b841454"
+
+      - name: Run draw possibility audit
+        run: |
+          python -m football1.draw_possibility_audit \
+            --database data/processed/football1.sqlite \
+            --output data/processed/draw_possibility_audit.json
+          python - <<'PY'
+          import json
+          r=json.load(open('data/processed/draw_possibility_audit.json'))
+          assert r['decision_weight'] == 0.0
+          assert r['promotion_allowed'] is False
+          print('OVERALL', r['overall'])
+          print('TREND_SLOPE_ALL', r['linear_draw_rate_slope_per_season'])
+          print('TREND_SLOPE_EX_LATEST', r['linear_draw_rate_slope_excluding_latest_partial_season'])
+          print('GAP_BINS')
+          for row in r['home_away_gap_bins']:
+              print(row)
+          print('FIXED_THRESHOLDS')
+          for row in r['fixed_balance_thresholds']:
+              print(row)
+          print('SEASON_STABILITY')
+          for block in r['fixed_balance_thresholds_by_season']:
+              print('THRESHOLD', block['max_home_away_gap'], 'positive_residual', block['seasons_with_positive_draw_residual_vs_market'], '/', block['seasons_observed'], 'positive_roi', block['seasons_with_positive_flat_draw_roi'], '/', block['seasons_observed'])
+              for row in block['seasons']:
+                  if row['matches']:
+                      print(row['season_start_year'], row['matches'], row['draw_rate'], row['mean_market_draw_probability'], row['draw_rate_minus_market'], row['flat_draw_roi'])
+          print('RANKING', r['ranking_diagnostics'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-draw-possibility-audit
+          path: data/processed/draw_possibility_audit.json
+          if-no-files-found: error
+          retention-days: 90
