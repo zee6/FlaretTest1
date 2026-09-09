@@ -1,0 +1,70 @@
+name: EPL Draw Balance Uncertainty Audit
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/draw_balance_uncertainty_audit.py'
+      - 'tests/test_draw_balance_uncertainty_audit.py'
+      - '.github/workflows/draw-balance-uncertainty-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  draw-balance-uncertainty:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Reuse frozen canonical database from 4 September audit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p frozen-audit data/processed
+          gh run download 33924106948 --repo zee6/FlaretTest1 --name epl-audit-output --dir frozen-audit
+          DB="$(find frozen-audit -name football1.sqlite -type f -print -quit)"
+          if [ -z "$DB" ]; then
+            echo "football1.sqlite not found in frozen epl-audit-output artifact"
+            exit 1
+          fi
+          cp "$DB" data/processed/football1.sqlite
+          test "$(sha256sum data/processed/football1.sqlite | awk '{print $1}')" = "4b5c751b22608026fb18eb190279c13b41d50ab88055057787c041ae4b841454"
+
+      - name: Run draw balance uncertainty audit
+        run: |
+          python -m football1.draw_balance_uncertainty_audit \
+            --database data/processed/football1.sqlite \
+            --output data/processed/draw_balance_uncertainty_audit.json
+          python - <<'PY'
+          import json
+          r=json.load(open('data/processed/draw_balance_uncertainty_audit.json'))
+          assert r['decision_weight'] == 0.0
+          assert r['promotion_allowed'] is False
+          for block in r['fixed_balance_thresholds']:
+              print('THRESHOLD', block['max_home_away_gap'])
+              print('matches', block['matches'], 'observed', block['observed_draws'], 'expected', block['expected_draws_from_individual_market_pdraw'])
+              print('residual_rate', block['draw_rate_residual'], '95ci', block['independence_95pct_normal_interval_for_residual_rate'])
+              print('poisson_binomial_p', block['poisson_binomial_one_sided_p'], 'holm_p', block['holm_adjusted_one_sided_p_across_three_nested_probes'])
+              print('season_sign', block['season_sign_robustness']['positive_residual_seasons'], '/', block['season_sign_robustness']['seasons'], 'p=', block['season_sign_robustness']['one_sided_binomial_sign_p'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-draw-balance-uncertainty-audit
+          path: data/processed/draw_balance_uncertainty_audit.json
+          if-no-files-found: error
+          retention-days: 90
