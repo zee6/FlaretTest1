@@ -1,0 +1,101 @@
+name: EPL Bet Check Core
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/bet_check.py'
+      - 'tests/test_bet_check.py'
+      - 'docs/BET_CHECK.md'
+      - 'pyproject.toml'
+      - '.github/workflows/bet-check.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/bet_check.py'
+      - 'tests/test_bet_check.py'
+      - 'docs/BET_CHECK.md'
+      - 'pyproject.toml'
+      - '.github/workflows/bet-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bet-check-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Exercise deterministic structured Bet Check contract
+        run: |
+          cat > /tmp/bet.json <<'JSON'
+          {
+            "currency": "GBP",
+            "stake": 10.0,
+            "quoted_combined_odds": 7.5,
+            "legs": [
+              {"event_id": "e1", "market": "h2h", "outcome": "home", "quoted_odds": 2.0},
+              {"event_id": "e2", "market": "h2h", "outcome": "away", "quoted_odds": 4.0}
+            ]
+          }
+          JSON
+          cat > /tmp/references.json <<'JSON'
+          {
+            "events": [
+              {
+                "event_id": "e1",
+                "home_team": "Alpha",
+                "away_team": "Beta",
+                "market_probability": {"home": 0.50, "draw": 0.25, "away": 0.25},
+                "football1_probability": {"home": 0.52, "draw": 0.24, "away": 0.24},
+                "best_observed_price": {
+                  "home": {"odds": 2.10, "bookmaker_title": "Book A", "observed_at_utc": "2026-09-09T09:00:00Z", "books_checked": 15},
+                  "draw": {"odds": 4.10},
+                  "away": {"odds": 4.20}
+                }
+              },
+              {
+                "event_id": "e2",
+                "home_team": "Gamma",
+                "away_team": "Delta",
+                "market_probability": {"home": 0.50, "draw": 0.25, "away": 0.25},
+                "football1_probability": {"home": 0.51, "draw": 0.245, "away": 0.245},
+                "best_observed_price": {
+                  "home": {"odds": 2.05},
+                  "draw": {"odds": 4.10},
+                  "away": {"odds": 4.20}
+                }
+              }
+            ]
+          }
+          JSON
+          football1-bet-check --bet /tmp/bet.json --references /tmp/references.json --output /tmp/bet-check.json
+          python - <<'PY'
+          import json
+          r = json.load(open('/tmp/bet-check.json'))
+          assert r['engine'] == 'deterministic_local_bet_check_v1'
+          assert r['governance']['uses_llm'] is False
+          assert r['governance']['cloud_reasoning_required'] is False
+          assert r['combined']['joint_probability_status'] == 'independence_only_distinct_events'
+          print(json.dumps({
+              'status': r['status'],
+              'bet_type': r['bet_type'],
+              'weakest_leg': r['weakest_leg'],
+              'combined': r['combined']
+          }, indent=2, sort_keys=True))
+          PY
