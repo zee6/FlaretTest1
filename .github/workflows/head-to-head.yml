@@ -1,19 +1,6 @@
 name: EPL Head To Head Audit
 
 on:
-  pull_request:
-    paths:
-      - 'src/football1/head_to_head.py'
-      - 'tests/test_head_to_head.py'
-      - 'pyproject.toml'
-      - '.github/workflows/head-to-head.yml'
-  push:
-    branches: [master]
-    paths:
-      - 'src/football1/head_to_head.py'
-      - 'tests/test_head_to_head.py'
-      - 'pyproject.toml'
-      - '.github/workflows/head-to-head.yml'
   workflow_dispatch:
 
 permissions:
