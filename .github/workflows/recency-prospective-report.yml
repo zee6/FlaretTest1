@@ -1,0 +1,79 @@
+name: EPL Recency Prospective Comparison Integrity
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/recency_prospective_report.py'
+      - 'tests/test_recency_prospective_report.py'
+      - 'pyproject.toml'
+      - '.github/workflows/recency-prospective-report.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/recency_prospective_report.py'
+      - 'tests/test_recency_prospective_report.py'
+      - 'pyproject.toml'
+      - '.github/workflows/recency-prospective-report.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  recency-prospective-integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Recover canonical pre-match shadow artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/r30 /tmp/r15
+          gh run download 34335029540 --repo zee6/FlaretTest1 --name epl-prospective-recency-shadow --dir /tmp/r30
+          gh run download 34337404778 --repo zee6/FlaretTest1 --name epl-prospective-recency-shadow-15d --dir /tmp/r15
+          test "$(sha256sum /tmp/r30/recency_shadow.jsonl | awk '{print $1}')" = "28de0ae556d1e9f24ee7491118a7ab06ba439563a808b6f49eaa7a581120400c"
+          test "$(sha256sum /tmp/r15/recency_shadow_15d.jsonl | awk '{print $1}')" = "c3fcbe7ebd207f3fffd19f0b07b1bf2d3ed763d2343b7e7c59055f589729aef5"
+
+      - name: Verify strict common-event comparison state
+        run: |
+          football1-recency-prospective-report \
+            --ledger prospective/ledger.jsonl \
+            --settlements prospective/settlements.jsonl \
+            --shadow /tmp/r30/recency_shadow.jsonl \
+            --shadow /tmp/r15/recency_shadow_15d.jsonl \
+            --output /tmp/recency-prospective-report.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/recency-prospective-report.json'))
+          assert r['shadow_event_count'] == 10
+          assert r['settled_common_event_count'] == 0
+          assert r['unsettled_shadow_event_count'] == 10
+          ids={row['model_id'] for row in r['shadow_files']}
+          assert ids == {
+              'fixed_market_offset_football_slant_v1_recency_30d_prospective_shadow',
+              'fixed_market_offset_football_slant_v1_recency_15d_prospective_shadow',
+          }
+          assert all(row['decision_weight_set'] == [0.0] for row in r['shadow_files'])
+          print(json.dumps(r, indent=2, sort_keys=True))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-recency-prospective-comparison-pre-match
+          path: /tmp/recency-prospective-report.json
+          if-no-files-found: error
+          retention-days: 90
