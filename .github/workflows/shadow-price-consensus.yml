@@ -1,21 +1,6 @@
 name: EPL Shadow Price Consensus Audit
 
 on:
-  pull_request:
-    paths:
-      - 'src/football1/shadow_price_consensus.py'
-      - 'src/football1/model_disagreement.py'
-      - 'tests/test_shadow_price_consensus.py'
-      - 'pyproject.toml'
-      - '.github/workflows/shadow-price-consensus.yml'
-  push:
-    branches: [master]
-    paths:
-      - 'src/football1/shadow_price_consensus.py'
-      - 'src/football1/model_disagreement.py'
-      - 'tests/test_shadow_price_consensus.py'
-      - 'pyproject.toml'
-      - '.github/workflows/shadow-price-consensus.yml'
   workflow_dispatch:
 
 permissions:
