@@ -96,6 +96,29 @@ def _season_trend(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     ]
 
 
+def _threshold_by_season(rows: list[dict[str, Any]], threshold: float) -> dict[str, Any]:
+    seasons = sorted({int(r["season_start_year"]) for r in rows})
+    reports = []
+    for season in seasons:
+        bucket = [
+            r for r in rows
+            if int(r["season_start_year"]) == season and float(r["home_away_gap"]) <= threshold
+        ]
+        reports.append({"season_start_year": season, **_summary(bucket)})
+    usable = [r for r in reports if r["matches"]]
+    return {
+        "max_home_away_gap": threshold,
+        "seasons": reports,
+        "seasons_with_positive_draw_residual_vs_market": sum(
+            1 for r in usable if float(r["draw_rate_minus_market"]) > 0.0
+        ),
+        "seasons_with_positive_flat_draw_roi": sum(
+            1 for r in usable if float(r["flat_draw_roi"]) > 0.0
+        ),
+        "seasons_observed": len(usable),
+    }
+
+
 def _linear_draw_rate_slope(season_rows: list[dict[str, Any]]) -> float | None:
     usable = [r for r in season_rows if r["draw_rate"] is not None]
     if len(usable) < 2:
@@ -131,22 +154,30 @@ def audit_draw_possibility(db_path: Path) -> dict[str, Any]:
     rows = [x for row in build_feature_rows(db_path) if (x := _market_row(row)) is not None]
     overall = _summary(rows)
     season_rows = _season_trend(rows)
+    latest_season = max(int(r["season_start_year"]) for r in rows)
+    rows_ex_latest = [r for r in rows if int(r["season_start_year"]) != latest_season]
+    season_rows_ex_latest = [r for r in season_rows if int(r["season_start_year"]) != latest_season]
 
     thresholds = []
+    threshold_robustness = []
     for threshold in FIXED_BALANCE_THRESHOLDS:
         bucket = [r for r in rows if float(r["home_away_gap"]) <= threshold]
+        bucket_ex_latest = [r for r in rows_ex_latest if float(r["home_away_gap"]) <= threshold]
+        bucket_summary = _summary(bucket)
         thresholds.append(
             {
                 "max_home_away_gap": threshold,
                 "description": f"de-vigged market home/away probabilities within {threshold * 100:.0f} percentage points",
-                **_summary(bucket),
+                **bucket_summary,
                 "draw_rate_lift_vs_all": (
-                    float(_summary(bucket)["draw_rate"]) / float(overall["draw_rate"])
+                    float(bucket_summary["draw_rate"]) / float(overall["draw_rate"])
                     if bucket and overall["draw_rate"]
                     else None
                 ),
+                "excluding_latest_partial_season": _summary(bucket_ex_latest),
             }
         )
+        threshold_robustness.append(_threshold_by_season(rows, threshold))
 
     ranked = sorted(rows, key=lambda r: (float(r["home_away_gap"]), -float(r["p_draw"])))
     top_count = max(1, math.ceil(len(ranked) * 0.20)) if ranked else 0
@@ -168,9 +199,13 @@ def audit_draw_possibility(db_path: Path) -> dict[str, Any]:
         "overall": overall,
         "season_draw_rates": season_rows,
         "linear_draw_rate_slope_per_season": _linear_draw_rate_slope(season_rows),
+        "latest_partial_season_excluded_from_robustness": latest_season,
+        "overall_excluding_latest_partial_season": _summary(rows_ex_latest),
+        "linear_draw_rate_slope_excluding_latest_partial_season": _linear_draw_rate_slope(season_rows_ex_latest),
         "home_away_gap_bins": _fixed_bins(rows, GAP_BINS, "home_away_gap"),
         "favorite_probability_bins": _fixed_bins(rows, FAV_BINS, "favorite_probability"),
         "fixed_balance_thresholds": thresholds,
+        "fixed_balance_thresholds_by_season": threshold_robustness,
         "ranking_diagnostics": {
             "closeness_auc_for_draw": _closeness_auc(rows),
             "market_draw_probability_auc_for_draw": _market_draw_auc(rows),
@@ -183,7 +218,8 @@ def audit_draw_possibility(db_path: Path) -> dict[str, Any]:
         },
         "guardrails": [
             "No draw probability is boosted or pasted onto the existing model.",
-            "The fixed 2/5/10pp balance thresholds are sensitivity probes, not validated betting cutoffs.",
+            "The fixed 2/5/10pp balance thresholds were specified before the historical audit ran; they are sensitivity probes, not validated betting cutoffs.",
+            "Season diagnostics were added after the aggregate result was observed and are robustness descriptions, not fresh confirmation.",
             "Flat draw ROI is descriptive and uses historical B365 pre-closing quotes; it is not a prospective recommendation.",
             "If balanced-match draw frequency does not exceed the market draw probability, closeness may make draws visible without creating price edge.",
             "Any future individual Draw Possibility score must be frozen and tested prospectively before decision weight is allowed.",
