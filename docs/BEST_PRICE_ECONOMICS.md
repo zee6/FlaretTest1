@@ -77,7 +77,7 @@ A post-hoc descriptive price-band view reinforces that pattern:
 
 These bands were inspected after seeing the first result and are descriptive only. They must not become thresholds or a reason to prefer longshots.
 
-## Practical account burden
+## Practical account burden — exact best
 
 A greedy set-cover diagnostic asks how many sportsbooks in this particular archived sample would have been required to have access to *a tied-best quote* on a given fraction of the 114 outcome observations.
 
@@ -89,9 +89,32 @@ Result:
 - 7 sportsbooks: **95.61%**,
 - 10 sportsbooks: **100%**.
 
-This is more encouraging than the naive assumption that a user needs every bookmaker account. However, it is only two snapshots of 19 fixtures. The identity of the useful bookmakers can change, account availability differs by user, and exact-best coverage is a stricter standard than simply getting a price close to best.
+This is more encouraging than the naive assumption that a user needs every bookmaker account. However, exact-best coverage is a strict standard; missing the exact leader by a trivial amount may have little economic cost.
 
-The next useful practical question is therefore a **price-access frontier**: with 1, 2, 3, 4, 6... bookmaker accounts, how much of the *economic value* of the full best-price universe is retained even when the exact best quote is missed?
+## Practical account burden — price-access frontier
+
+`src/football1/price_access_frontier.py` therefore asks a more useful question: as sportsbook-account access increases, how close is the best quote available from that restricted set to the full 18-sportsbook best quote?
+
+The account set is chosen greedily on this already observed sample to maximize coverage and price closeness. It is a **post-hoc diagnostic**, not a recommendation about which bookmaker accounts anybody should hold.
+
+Result:
+
+| Accounts | Exact best | Within 1% of full best | Within 2% | Mean price shortfall vs full best | Mean winning-profit shortfall |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 40.35% | 44.74% | 59.65% | 2.2295% | 3.2366% |
+| 2 | 57.89% | 62.28% | 77.19% | 1.3237% | 1.9119% |
+| 3 | 74.56% | 80.70% | 85.96% | 0.7393% | 0.9632% |
+| 4 | 82.46% | 88.60% | 92.11% | 0.4056% | 0.5527% |
+| 5 | 89.47% | 93.86% | 95.61% | 0.2033% | 0.3021% |
+| 6 | 92.11% | 96.49% | 98.25% | 0.1245% | 0.1892% |
+| 8 | 95.61% | 100.00% | 100.00% | 0.0255% | 0.0657% |
+| 10 | 100.00% | 100.00% | 100.00% | 0.0000% | 0.0000% |
+
+The important practical observation is that **near-best access is much more concentrated than exact-best access**. In this first sample, four accounts left the available quote only about 0.41% below the full-universe best on average; six reduced that to about 0.12%.
+
+This is promising for the product concept because `Find best price` need not imply that a rational user must maintain every bookmaker account. A future Bet Check can also compare the user's entered quote directly with the full observed best and say, for example, that the user's price is already within 1% of best.
+
+These figures must be accumulated over many more prospective snapshots before any bookmaker-set claim is considered stable.
 
 ## Interpretation
 
@@ -115,6 +138,8 @@ A future user-facing contract should continue to separate:
 5. bookmaker and quote timestamp,
 6. number of eligible books checked.
 
+A useful Bet Check interpretation layer can additionally state whether the user's entered price is exact best, within 1% of best, within 2%, or materially worse. Those labels describe **price quality only** and must not be confused with confidence in the football outcome.
+
 ## Governance
 
 - Decision weight remains 0.
@@ -124,3 +149,4 @@ A future user-facing contract should continue to separate:
 - Raw exchange prices are not used as directly comparable best prices until commission can be handled honestly.
 - Price-shopping gains do not validate a selection policy.
 - `Find best price` remains a neutral price-comparison action and never places a bet.
+- The greedy account frontier is not a bookmaker recommendation and must not be monetized through reordered affiliate placement.
