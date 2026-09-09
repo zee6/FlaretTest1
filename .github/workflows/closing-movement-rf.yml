@@ -1,25 +1,6 @@
 name: EPL Random Forest Closing Movement Audit
 
 on:
-  pull_request:
-    paths:
-      - 'src/football1/closing_movement_rf.py'
-      - 'src/football1/historical_closing_line.py'
-      - 'src/football1/features.py'
-      - 'src/football1/market_baseline.py'
-      - 'tests/test_closing_movement_rf.py'
-      - 'pyproject.toml'
-      - '.github/workflows/closing-movement-rf.yml'
-  push:
-    branches: [master]
-    paths:
-      - 'src/football1/closing_movement_rf.py'
-      - 'src/football1/historical_closing_line.py'
-      - 'src/football1/features.py'
-      - 'src/football1/market_baseline.py'
-      - 'tests/test_closing_movement_rf.py'
-      - 'pyproject.toml'
-      - '.github/workflows/closing-movement-rf.yml'
   workflow_dispatch:
 
 permissions:
