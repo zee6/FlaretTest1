@@ -1,0 +1,66 @@
+name: EPL Best Price Access Frontier
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/price_shopping_audit.py'
+      - 'src/football1/price_access_frontier.py'
+      - 'tests/test_price_shopping_audit.py'
+      - 'tests/test_price_access_frontier.py'
+      - 'prospective/odds_snapshots.jsonl'
+      - 'pyproject.toml'
+      - '.github/workflows/price-access-frontier.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/price_shopping_audit.py'
+      - 'src/football1/price_access_frontier.py'
+      - 'tests/test_price_shopping_audit.py'
+      - 'tests/test_price_access_frontier.py'
+      - 'prospective/odds_snapshots.jsonl'
+      - 'pyproject.toml'
+      - '.github/workflows/price-access-frontier.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  price-access-frontier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Run bookmaker access frontier
+        run: |
+          football1-price-access-frontier \
+            --archive prospective/odds_snapshots.jsonl \
+            --output data/processed/price_access_frontier.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/price_access_frontier.json'))
+          for row in r['frontier']['frontier']:
+              if row['account_count'] in {1, 2, 3, 4, 6, 8, 10}:
+                  print(row)
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-best-price-access-frontier
+          path: data/processed/price_access_frontier.json
+          if-no-files-found: error
+          retention-days: 14
