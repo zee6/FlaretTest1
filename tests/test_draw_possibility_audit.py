@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from football1.draw_possibility_audit import _closeness_auc, _fixed_bins, _linear_draw_rate_slope, _summary
 
 
@@ -10,11 +12,11 @@ def test_summary_reports_draw_rate_market_gap_and_flat_roi() -> None:
     ]
     result = _summary(rows)
     assert result["matches"] == 2
-    assert result["draw_rate"] == 0.5
-    assert result["mean_market_draw_probability"] == 0.29
-    assert abs(result["draw_rate_minus_market"] - 0.21) < 1e-12
-    assert abs(result["flat_draw_pnl_units"] - 1.5) < 1e-12
-    assert abs(result["flat_draw_roi"] - 0.75) < 1e-12
+    assert result["draw_rate"] == pytest.approx(0.5)
+    assert result["mean_market_draw_probability"] == pytest.approx(0.29)
+    assert result["draw_rate_minus_market"] == pytest.approx(0.21)
+    assert result["flat_draw_pnl_units"] == pytest.approx(1.5)
+    assert result["flat_draw_roi"] == pytest.approx(0.75)
 
 
 def test_closeness_auc_rewards_draws_with_smaller_home_away_gap() -> None:
@@ -24,7 +26,7 @@ def test_closeness_auc_rewards_draws_with_smaller_home_away_gap() -> None:
         {"is_draw": False, "home_away_gap": 0.12},
         {"is_draw": False, "home_away_gap": 0.20},
     ]
-    assert _closeness_auc(rows) == 1.0
+    assert _closeness_auc(rows) == pytest.approx(1.0)
 
 
 def test_fixed_bins_are_disjoint() -> None:
@@ -44,4 +46,4 @@ def test_linear_draw_rate_slope_detects_rising_sequence() -> None:
         {"season_start_year": 2023, "draw_rate": 0.22},
         {"season_start_year": 2024, "draw_rate": 0.24},
     ]
-    assert abs(_linear_draw_rate_slope(seasons) - 0.02) < 1e-12
+    assert _linear_draw_rate_slope(seasons) == pytest.approx(0.02)
