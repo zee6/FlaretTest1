@@ -1,0 +1,70 @@
+name: EPL Best Price Economics Audit
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/price_shopping_audit.py'
+      - 'tests/test_price_shopping_audit.py'
+      - 'prospective/odds_snapshots.jsonl'
+      - 'prospective/ledger.jsonl'
+      - 'pyproject.toml'
+      - '.github/workflows/price-shopping-audit.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/price_shopping_audit.py'
+      - 'tests/test_price_shopping_audit.py'
+      - 'prospective/odds_snapshots.jsonl'
+      - 'prospective/ledger.jsonl'
+      - 'pyproject.toml'
+      - '.github/workflows/price-shopping-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  price-shopping-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Run prospective best-price economics audit
+        run: |
+          football1-price-shopping-audit \
+            --archive prospective/odds_snapshots.jsonl \
+            --ledger prospective/ledger.jsonl \
+            --output data/processed/price_shopping_audit.json
+          python - <<'PY'
+          import json
+          r = json.load(open('data/processed/price_shopping_audit.json'))
+          q = r['quote_economics']
+          print('STATUS', r['status'])
+          print('EVENT_SNAPSHOTS', q['event_snapshots'])
+          print('OBSERVATIONS', q['outcome_quote_observations'])
+          print('UPLIFT', q['price_uplift'])
+          print('COVERAGE', q['best_price_coverage'])
+          print('EXCHANGES', q['raw_exchange_comparison'])
+          print('LOCK_JOIN', r['locked_snapshot_join'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-best-price-economics
+          path: data/processed/price_shopping_audit.json
+          if-no-files-found: error
+          retention-days: 14
