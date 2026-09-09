@@ -1,0 +1,74 @@
+name: EPL Prospective Error Batch Comparison
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/prospective_error_batch_comparison.py'
+      - 'tests/test_prospective_error_batch_comparison.py'
+      - '.github/workflows/prospective-error-batch-comparison.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prospective-error-batch-comparison:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Verify predeclared two-batch state
+        run: |
+          python -m football1.prospective_error_batch_comparison \
+            --ledger prospective/ledger.jsonl \
+            --settlements prospective/settlements.jsonl \
+            --output /tmp/prospective_error_batch_comparison.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/prospective_error_batch_comparison.json'))
+          assert r['status'] == 'predeclared_zero_decision_weight_batch_comparison'
+          assert r['decision_weight'] == 0.0
+          assert r['selection_rule'] is None
+          assert r['model_change_allowed_from_report'] is False
+          assert r['locked_snapshot_utc'] == '2026-09-04T09:20:03.134040+00:00'
+          first, confirmation = r['batches']
+          assert first['batch_id'] == 'first_settled_2026_09_04_to_06'
+          assert first['prediction_records'] == 10
+          assert first['settled_records'] == 10
+          assert first['evidence_stage'] == 'prospective_complete'
+          assert first['by_realized_result_when_settled']['draw']['matches'] == 6
+          assert first['by_realized_result_when_settled']['draw']['model_helped_realized_outcome'] == 1
+          assert first['by_realized_result_when_settled']['draw']['model_hurt_realized_outcome'] == 5
+          assert confirmation['batch_id'] == 'confirmation_2026_09_12_to_14'
+          assert confirmation['prediction_records'] == 10
+          assert confirmation['settled_records'] == 0
+          assert confirmation['evidence_stage'] == 'prospective_frozen'
+          assert len(set(confirmation['prediction_record_ids'])) == 10
+          assert len(set(confirmation['prediction_content_sha256'])) == 10
+          assert r['comparison']['available'] is False
+          assert r['comparison']['complete_common_interpretation_allowed'] is False
+          assert r['comparison']['pass_fail_rule'] is None
+          assert r['comparison']['minimum_draw_count_rule'] is None
+          print('FIRST_OVERALL', first['overall_when_settled'])
+          print('FIRST_DRAW', first['by_realized_result_when_settled']['draw'])
+          print('CONFIRMATION_IDS', confirmation['prediction_record_ids'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-prospective-error-batch-comparison-pre-match
+          path: /tmp/prospective_error_batch_comparison.json
+          if-no-files-found: error
+          retention-days: 90
