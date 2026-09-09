@@ -1,0 +1,68 @@
+name: EPL Prospective Settlement Integrity
+
+on:
+  pull_request:
+    paths:
+      - 'prospective/settlements.jsonl'
+      - 'prospective/ledger.jsonl'
+      - 'src/football1/settlement.py'
+      - 'src/football1/prospective_report.py'
+      - '.github/workflows/prospective-settlement-integrity.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'prospective/settlements.jsonl'
+      - 'prospective/ledger.jsonl'
+      - 'src/football1/settlement.py'
+      - 'src/football1/prospective_report.py'
+      - '.github/workflows/prospective-settlement-integrity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  settlement-integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+      - name: Run tests
+        run: pytest -q
+      - name: Build prospective report and verify first settled week
+        run: |
+          football1-prospective-report --ledger prospective/ledger.jsonl --settlements prospective/settlements.jsonl --output /tmp/prospective-report.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path('/tmp/prospective-report.json').read_text())
+          assert report['prediction_records'] == 20
+          assert report['settled_records'] == 10
+          assert report['unsettled_records'] == 10
+
+          settlements = [json.loads(line) for line in Path('prospective/settlements.jsonl').read_text().splitlines() if line.strip()]
+          assert len(settlements) == 10
+          assert all(row['scores_retrieved_at_utc'] == '2026-09-09T09:41:09+00:00' for row in settlements)
+          assert all(row.get('result_verification', {}).get('source_type') == 'official_premier_league_matchweek_report' for row in settlements)
+
+          settled_events = {row['event_id'] for row in settlements}
+          ledger = [json.loads(line) for line in Path('prospective/ledger.jsonl').read_text().splitlines() if line.strip()]
+          future = [row for row in ledger if row['commence_time_utc'] >= '2026-09-12T00:00:00Z']
+          assert len(future) == 10
+          assert not any(row['event_id'] in settled_events for row in future)
+
+          print(json.dumps(report, indent=2, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-first-prospective-settlement-report
+          path: /tmp/prospective-report.json
+          if-no-files-found: error
