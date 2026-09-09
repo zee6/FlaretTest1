@@ -1,12 +1,6 @@
 name: EPL Home Away Residual Ablation
 
 on:
-  pull_request:
-    paths:
-      - 'src/football1/home_away_ablation.py'
-      - 'tests/test_home_away_ablation.py'
-      - 'pyproject.toml'
-      - '.github/workflows/home-away-ablation.yml'
   workflow_dispatch:
 
 permissions:

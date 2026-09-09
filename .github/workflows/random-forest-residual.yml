@@ -1,21 +1,6 @@
 name: EPL Random Forest Residual Audit
 
 on:
-  pull_request:
-    paths:
-      - 'src/football1/random_forest_residual.py'
-      - 'src/football1/features.py'
-      - 'tests/test_random_forest_residual.py'
-      - 'pyproject.toml'
-      - '.github/workflows/random-forest-residual.yml'
-  push:
-    branches: [master]
-    paths:
-      - 'src/football1/random_forest_residual.py'
-      - 'src/football1/features.py'
-      - 'tests/test_random_forest_residual.py'
-      - 'pyproject.toml'
-      - '.github/workflows/random-forest-residual.yml'
   workflow_dispatch:
 
 permissions:

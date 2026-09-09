@@ -1,23 +1,6 @@
 name: EPL Poisson Scoreline Audit
 
 on:
-  pull_request:
-    paths:
-      - 'src/football1/scoreline.py'
-      - 'src/football1/scoreline_ablation.py'
-      - 'tests/test_scoreline.py'
-      - 'tests/test_scoreline_ablation.py'
-      - 'pyproject.toml'
-      - '.github/workflows/scoreline.yml'
-  push:
-    branches: [master]
-    paths:
-      - 'src/football1/scoreline.py'
-      - 'src/football1/scoreline_ablation.py'
-      - 'tests/test_scoreline.py'
-      - 'tests/test_scoreline_ablation.py'
-      - 'pyproject.toml'
-      - '.github/workflows/scoreline.yml'
   workflow_dispatch:
 
 permissions:

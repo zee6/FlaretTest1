@@ -1,23 +1,6 @@
 name: EPL Market Consensus Baseline Check
 
 on:
-  pull_request:
-    paths:
-      - 'src/football1/market_consensus_movement.py'
-      - 'src/football1/market_consensus_baseline_check.py'
-      - 'tests/test_market_consensus_movement.py'
-      - 'tests/test_market_consensus_baseline_check.py'
-      - 'pyproject.toml'
-      - '.github/workflows/market-consensus-baseline-check.yml'
-  push:
-    branches: [master]
-    paths:
-      - 'src/football1/market_consensus_movement.py'
-      - 'src/football1/market_consensus_baseline_check.py'
-      - 'tests/test_market_consensus_movement.py'
-      - 'tests/test_market_consensus_baseline_check.py'
-      - 'pyproject.toml'
-      - '.github/workflows/market-consensus-baseline-check.yml'
   workflow_dispatch:
 
 permissions:

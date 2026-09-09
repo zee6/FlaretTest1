@@ -1,25 +1,6 @@
 name: EPL Elo Audit
 
 on:
-  pull_request:
-    paths:
-      - 'src/football1/elo.py'
-      - 'src/football1/elo_research.py'
-      - 'src/football1/elo_observer.py'
-      - 'tests/test_elo.py'
-      - 'tests/test_elo_observer.py'
-      - 'pyproject.toml'
-      - '.github/workflows/elo-epl.yml'
-  push:
-    branches: [master]
-    paths:
-      - 'src/football1/elo.py'
-      - 'src/football1/elo_research.py'
-      - 'src/football1/elo_observer.py'
-      - 'tests/test_elo.py'
-      - 'tests/test_elo_observer.py'
-      - 'pyproject.toml'
-      - '.github/workflows/elo-epl.yml'
   workflow_dispatch:
 
 permissions:

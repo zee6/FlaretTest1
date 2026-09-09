@@ -1,19 +1,6 @@
 name: EPL Home Away Audit
 
 on:
-  pull_request:
-    paths:
-      - 'src/football1/home_away.py'
-      - 'tests/test_home_away.py'
-      - 'pyproject.toml'
-      - '.github/workflows/home-away.yml'
-  push:
-    branches: [master]
-    paths:
-      - 'src/football1/home_away.py'
-      - 'tests/test_home_away.py'
-      - 'pyproject.toml'
-      - '.github/workflows/home-away.yml'
   workflow_dispatch:
 
 permissions:

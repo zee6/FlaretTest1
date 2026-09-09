@@ -1,23 +1,6 @@
 name: EPL Fixed Market Regime Audit
 
 on:
-  pull_request:
-    paths:
-      - 'src/football1/market_regime_audit.py'
-      - 'src/football1/features.py'
-      - 'src/football1/offset_slant.py'
-      - 'tests/test_market_regime_audit.py'
-      - 'pyproject.toml'
-      - '.github/workflows/market-regime-audit.yml'
-  push:
-    branches: [master]
-    paths:
-      - 'src/football1/market_regime_audit.py'
-      - 'src/football1/features.py'
-      - 'src/football1/offset_slant.py'
-      - 'tests/test_market_regime_audit.py'
-      - 'pyproject.toml'
-      - '.github/workflows/market-regime-audit.yml'
   workflow_dispatch:
 
 permissions:

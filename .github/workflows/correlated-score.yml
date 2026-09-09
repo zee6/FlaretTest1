@@ -1,21 +1,6 @@
 name: EPL Correlated Score Audit
 
 on:
-  pull_request:
-    paths:
-      - 'src/football1/correlated_score.py'
-      - 'src/football1/correlated_score_ablation.py'
-      - 'tests/test_correlated_score.py'
-      - 'pyproject.toml'
-      - '.github/workflows/correlated-score.yml'
-  push:
-    branches: [master]
-    paths:
-      - 'src/football1/correlated_score.py'
-      - 'src/football1/correlated_score_ablation.py'
-      - 'tests/test_correlated_score.py'
-      - 'pyproject.toml'
-      - '.github/workflows/correlated-score.yml'
   workflow_dispatch:
 
 permissions:

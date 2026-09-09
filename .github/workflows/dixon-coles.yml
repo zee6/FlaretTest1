@@ -1,21 +1,6 @@
 name: EPL Dixon-Coles Audit
 
 on:
-  pull_request:
-    paths:
-      - 'src/football1/dixon_coles.py'
-      - 'src/football1/dixon_coles_ablation.py'
-      - 'tests/test_dixon_coles.py'
-      - 'pyproject.toml'
-      - '.github/workflows/dixon-coles.yml'
-  push:
-    branches: [master]
-    paths:
-      - 'src/football1/dixon_coles.py'
-      - 'src/football1/dixon_coles_ablation.py'
-      - 'tests/test_dixon_coles.py'
-      - 'pyproject.toml'
-      - '.github/workflows/dixon-coles.yml'
   workflow_dispatch:
 
 permissions:

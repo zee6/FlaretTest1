@@ -1,21 +1,6 @@
 name: EPL Market Confidence Observer
 
 on:
-  pull_request:
-    paths:
-      - 'src/football1/confidence_observer.py'
-      - 'src/football1/model_disagreement.py'
-      - 'tests/test_confidence_observer.py'
-      - 'pyproject.toml'
-      - '.github/workflows/confidence-observer.yml'
-  push:
-    branches: [master]
-    paths:
-      - 'src/football1/confidence_observer.py'
-      - 'src/football1/model_disagreement.py'
-      - 'tests/test_confidence_observer.py'
-      - 'pyproject.toml'
-      - '.github/workflows/confidence-observer.yml'
   workflow_dispatch:
 
 permissions:

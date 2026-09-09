@@ -1,25 +1,6 @@
 name: EPL Market Regime Movement Audit
 
 on:
-  pull_request:
-    paths:
-      - 'src/football1/market_regime_movement.py'
-      - 'src/football1/market_regime_audit.py'
-      - 'src/football1/closing_movement_rf.py'
-      - 'src/football1/historical_closing_line.py'
-      - 'tests/test_market_regime_movement.py'
-      - 'pyproject.toml'
-      - '.github/workflows/market-regime-movement.yml'
-  push:
-    branches: [master]
-    paths:
-      - 'src/football1/market_regime_movement.py'
-      - 'src/football1/market_regime_audit.py'
-      - 'src/football1/closing_movement_rf.py'
-      - 'src/football1/historical_closing_line.py'
-      - 'tests/test_market_regime_movement.py'
-      - 'pyproject.toml'
-      - '.github/workflows/market-regime-movement.yml'
   workflow_dispatch:
 
 permissions:

@@ -5,7 +5,6 @@ on:
     paths:
       - 'src/football1/prospective_consensus_movement.py'
       - 'tests/test_prospective_consensus_movement.py'
-      - 'pyproject.toml'
       - '.github/workflows/prospective-consensus-movement.yml'
       - '.github/workflows/prospective-snapshot.yml'
   push:
@@ -13,13 +12,13 @@ on:
     paths:
       - 'src/football1/prospective_consensus_movement.py'
       - 'tests/test_prospective_consensus_movement.py'
-      - 'pyproject.toml'
       - '.github/workflows/prospective-consensus-movement.yml'
       - '.github/workflows/prospective-snapshot.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   prospective-consensus-movement:
@@ -46,11 +45,19 @@ jobs:
           football1-prospective-consensus-movement-lock --help
           football1-prospective-consensus-movement-report --help
 
-      - name: Download EPL history
-        run: football1-download-epl --from-season 2012 --to-season 2026
-
-      - name: Build canonical database
-        run: football1-build-db --input-dir data/raw/football-data --output data/processed/football1.sqlite
+      - name: Reuse frozen canonical database from 4 September audit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p frozen-audit data/processed
+          gh run download 33924106948 --repo zee6/FlaretTest1 --name epl-audit-output --dir frozen-audit
+          DB="$(find frozen-audit -name football1.sqlite -type f -print -quit)"
+          if [ -z "$DB" ]; then
+            echo "football1.sqlite not found in frozen epl-audit-output artifact"
+            exit 1
+          fi
+          cp "$DB" data/processed/football1.sqlite
+          test "$(sha256sum data/processed/football1.sqlite | awk '{print $1}')" = "4b5c751b22608026fb18eb190279c13b41d50ab88055057787c041ae4b841454"
 
       - name: Create synthetic future common-book snapshots
         run: |

@@ -1,23 +1,6 @@
 name: EPL Paired Battle Models Audit
 
 on:
-  pull_request:
-    paths:
-      - 'src/football1/davidson.py'
-      - 'src/football1/davidson_ablation.py'
-      - 'src/football1/nontransitive.py'
-      - 'tests/test_paired_battle_models.py'
-      - 'pyproject.toml'
-      - '.github/workflows/paired-battle-models.yml'
-  push:
-    branches: [master]
-    paths:
-      - 'src/football1/davidson.py'
-      - 'src/football1/davidson_ablation.py'
-      - 'src/football1/nontransitive.py'
-      - 'tests/test_paired_battle_models.py'
-      - 'pyproject.toml'
-      - '.github/workflows/paired-battle-models.yml'
   workflow_dispatch:
 
 permissions:
