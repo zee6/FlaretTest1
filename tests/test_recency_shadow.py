@@ -5,7 +5,13 @@ from pathlib import Path
 
 import pytest
 
-from football1.recency_shadow import append_shadow_records, build_shadow_records, content_hash
+from football1.recency_shadow import (
+    append_shadow_records,
+    build_shadow_records,
+    content_hash,
+    model_id_for_half_life,
+    selection_provenance,
+)
 
 
 def _shadow_record(record_id: str = "shadow-a") -> dict:
@@ -44,6 +50,22 @@ def test_append_rejects_tampered_existing_ledger(tmp_path: Path) -> None:
         append_shadow_records(path, [])
 
 
+def test_default_30d_model_id_is_preserved() -> None:
+    assert model_id_for_half_life(30.0) == "fixed_market_offset_football_slant_v1_recency_30d_prospective_shadow"
+
+
+def test_15d_model_id_and_provenance_are_explicitly_post_hoc_historically() -> None:
+    assert model_id_for_half_life(15.0) == "fixed_market_offset_football_slant_v1_recency_15d_prospective_shadow"
+    text = selection_provenance(15.0)
+    assert "post-hoc historically" in text
+    assert "prospective confirmation only" in text
+
+
+def test_invalid_half_life_is_rejected() -> None:
+    with pytest.raises(ValueError, match="positive and finite"):
+        model_id_for_half_life(0.0)
+
+
 def test_already_started_sources_are_never_backfilled(tmp_path: Path) -> None:
     source = [
         {
@@ -59,4 +81,25 @@ def test_already_started_sources_are_never_backfilled(tmp_path: Path) -> None:
     )
     assert records == []
     assert metadata["created_records"] == 0
+    assert metadata["skipped_already_started"] == 1
+    assert metadata["half_life_days"] == pytest.approx(30.0)
+
+
+def test_15d_started_only_batch_needs_no_database_and_uses_separate_model_id(tmp_path: Path) -> None:
+    source = [
+        {
+            "event_id": "old-event",
+            "commence_time_utc": "2026-09-05T14:00:00Z",
+            "snapshot_retrieved_at_utc": "2026-09-04T10:00:00Z",
+        }
+    ]
+    records, metadata = build_shadow_records(
+        tmp_path / "database-not-needed.sqlite",
+        source,
+        locked_at_utc="2026-09-09T10:00:00Z",
+        half_life_days=15.0,
+    )
+    assert records == []
+    assert metadata["model_id"] == "fixed_market_offset_football_slant_v1_recency_15d_prospective_shadow"
+    assert metadata["half_life_days"] == pytest.approx(15.0)
     assert metadata["skipped_already_started"] == 1

@@ -5,7 +5,6 @@ import hashlib
 import json
 import math
 from dataclasses import asdict
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -15,8 +14,8 @@ from football1.prospective import _parse_utc, _states_as_of
 from football1.recency_audit import _summarize, build_recency_feature_rows
 
 
-MODEL_ID = "fixed_market_offset_football_slant_v1_recency_30d_prospective_shadow"
-HALF_LIFE_DAYS = 30.0
+DEFAULT_MODEL_ID = "fixed_market_offset_football_slant_v1_recency_30d_prospective_shadow"
+DEFAULT_HALF_LIFE_DAYS = 30.0
 DECISION_WEIGHT = 0.0
 LABELS = ("home", "draw", "away")
 
@@ -24,6 +23,34 @@ LABELS = ("home", "draw", "away")
 def content_hash(record_without_hash: dict[str, Any]) -> str:
     encoded = json.dumps(record_without_hash, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()
+
+
+def model_id_for_half_life(half_life_days: float) -> str:
+    value = float(half_life_days)
+    if not math.isfinite(value) or value <= 0:
+        raise ValueError("half_life_days must be positive and finite")
+    if math.isclose(value, DEFAULT_HALF_LIFE_DAYS, abs_tol=1e-12):
+        return DEFAULT_MODEL_ID
+    compact = f"{value:g}".replace(".", "p")
+    return f"fixed_market_offset_football_slant_v1_recency_{compact}d_prospective_shadow"
+
+
+def selection_provenance(half_life_days: float) -> str:
+    value = float(half_life_days)
+    if math.isclose(value, 30.0, abs_tol=1e-12):
+        return (
+            "30-day probe ranked best on inspected historical Recency Audit v1 when this shadow was first proposed; "
+            "this lock is prospective confirmation only, not prior validation"
+        )
+    if math.isclose(value, 15.0, abs_tol=1e-12):
+        return (
+            "15-day probe was inspected after the 30-day result and was marginally best among the observed historical recency probes; "
+            "it is post-hoc historically and this lock is prospective confirmation only, not prior validation"
+        )
+    return (
+        f"{value:g}-day probe is an observed historical sensitivity setting; "
+        "this lock is prospective confirmation only, not prior validation"
+    )
 
 
 def _probability_tuple(raw: dict[str, Any]) -> tuple[float, float, float]:
@@ -35,7 +62,12 @@ def _probability_tuple(raw: dict[str, Any]) -> tuple[float, float, float]:
     return values  # type: ignore[return-value]
 
 
-def _live_recency_feature_row(source: dict[str, Any], states: dict[str, Any]) -> FeatureRow:
+def _live_recency_feature_row(
+    source: dict[str, Any],
+    states: dict[str, Any],
+    *,
+    half_life_days: float,
+) -> FeatureRow:
     kickoff = _parse_utc(str(source["commence_time_utc"]))
     match_date = kickoff.date().isoformat()
     home_name = str(source["home_team_canonical"])
@@ -46,10 +78,10 @@ def _live_recency_feature_row(source: dict[str, Any], states: dict[str, Any]) ->
         raise ValueError(f"No historical state for away team {away_name!r}")
     home = states[home_name]
     away = states[away_name]
-    h5 = _summarize(home, 5, current_date=match_date, half_life_days=HALF_LIFE_DAYS)
-    a5 = _summarize(away, 5, current_date=match_date, half_life_days=HALF_LIFE_DAYS)
-    h10 = _summarize(home, 10, current_date=match_date, half_life_days=HALF_LIFE_DAYS)
-    a10 = _summarize(away, 10, current_date=match_date, half_life_days=HALF_LIFE_DAYS)
+    h5 = _summarize(home, 5, current_date=match_date, half_life_days=half_life_days)
+    a5 = _summarize(away, 5, current_date=match_date, half_life_days=half_life_days)
+    h10 = _summarize(home, 10, current_date=match_date, half_life_days=half_life_days)
+    a10 = _summarize(away, 10, current_date=match_date, half_life_days=half_life_days)
     return FeatureRow(
         match_id=str(source["event_id"]),
         season_start_year=int(source["features"]["season_start_year"]),
@@ -98,7 +130,16 @@ def build_shadow_records(
     source_records: list[dict[str, Any]],
     *,
     locked_at_utc: str,
+    half_life_days: float = DEFAULT_HALF_LIFE_DAYS,
+    model_id: str | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    half_life = float(half_life_days)
+    if not math.isfinite(half_life) or half_life <= 0:
+        raise ValueError("half_life_days must be positive and finite")
+    shadow_model_id = str(model_id or model_id_for_half_life(half_life))
+    if not shadow_model_id:
+        raise ValueError("model_id must not be empty")
+
     locked_at = _parse_utc(locked_at_utc)
     future = [row for row in source_records if _parse_utc(str(row["commence_time_utc"])) > locked_at]
     skipped_started = len(source_records) - len(future)
@@ -111,7 +152,7 @@ def build_shadow_records(
         cutoff_date = _parse_utc(source_snapshot).date().isoformat()
         training_rows = [
             row
-            for row in build_recency_feature_rows(db_path, half_life_days=HALF_LIFE_DAYS)
+            for row in build_recency_feature_rows(db_path, half_life_days=half_life)
             if row.match_date < cutoff_date
             and row.b365_home is not None
             and row.b365_draw is not None
@@ -125,9 +166,13 @@ def build_shadow_records(
         for source in rows:
             market = _probability_tuple(source["market_anchor"]["probability"])
             equal = _probability_tuple(source["model"]["probability"])
-            feature_row = _live_recency_feature_row(source, states)
+            feature_row = _live_recency_feature_row(
+                source,
+                states,
+                half_life_days=half_life,
+            )
             probability = model.predict_with_base(feature_row, market)
-            identity = "|".join([str(source["record_id"]), MODEL_ID]).encode("utf-8")
+            identity = "|".join([str(source["record_id"]), shadow_model_id]).encode("utf-8")
             recency = dict(zip(LABELS, probability, strict=True))
             equal_dict = dict(zip(LABELS, equal, strict=True))
             market_dict = dict(zip(LABELS, market, strict=True))
@@ -135,7 +180,7 @@ def build_shadow_records(
                 "schema_version": 1,
                 "record_id": hashlib.sha256(identity).hexdigest()[:24],
                 "status": "recency_shadow_locked",
-                "model_id": MODEL_ID,
+                "model_id": shadow_model_id,
                 "decision_weight": DECISION_WEIGHT,
                 "event_id": source["event_id"],
                 "commence_time_utc": source["commence_time_utc"],
@@ -166,8 +211,8 @@ def build_shadow_records(
                     "market_training_anchor": "B365 pre-closing de-vigged",
                 },
                 "recency_policy": {
-                    "half_life_days": HALF_LIFE_DAYS,
-                    "selection_provenance": "30-day probe ranked best on inspected historical Recency Audit v1; this lock is prospective confirmation only, not prior validation",
+                    "half_life_days": half_life,
+                    "selection_provenance": selection_provenance(half_life),
                     "historical_audit_status": "exploratory_previously_observed_data",
                     "betting_rule": None,
                     "stake_rule": None,
@@ -180,7 +225,8 @@ def build_shadow_records(
 
     records.sort(key=lambda row: (row["commence_time_utc"], row["event_id"]))
     return records, {
-        "model_id": MODEL_ID,
+        "model_id": shadow_model_id,
+        "half_life_days": half_life,
         "decision_weight": DECISION_WEIGHT,
         "locked_at_utc": locked_at_utc,
         "source_records": len(source_records),
@@ -212,18 +258,26 @@ def append_shadow_records(path: Path, records: list[dict[str, Any]]) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Lock the zero-weight 30-day recency prospective shadow.")
+    parser = argparse.ArgumentParser(description="Lock a zero-weight recency prospective shadow.")
     parser.add_argument("--database", type=Path, default=Path("data/processed/football1.sqlite"))
     parser.add_argument("--source-ledger", type=Path, default=Path("prospective/ledger.jsonl"))
     parser.add_argument("--output", type=Path, default=Path("prospective/recency_shadow.jsonl"))
     parser.add_argument("--locked-at-utc", required=True)
+    parser.add_argument("--half-life-days", type=float, default=DEFAULT_HALF_LIFE_DAYS)
+    parser.add_argument("--model-id")
     return parser
 
 
 def main() -> None:
     args = build_parser().parse_args()
     source = load_source_records(args.source_ledger)
-    records, metadata = build_shadow_records(args.database, source, locked_at_utc=args.locked_at_utc)
+    records, metadata = build_shadow_records(
+        args.database,
+        source,
+        locked_at_utc=args.locked_at_utc,
+        half_life_days=args.half_life_days,
+        model_id=args.model_id,
+    )
     added = append_shadow_records(args.output, records)
     print(json.dumps({**metadata, "appended_records": added}, indent=2, sort_keys=True))
 
