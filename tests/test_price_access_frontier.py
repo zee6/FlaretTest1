@@ -32,7 +32,8 @@ def test_evaluate_book_set_reports_closeness_not_only_exact_best() -> None:
     observations = build_price_matrix([_record("r1", (2.0, 3.0, 4.0), (2.1, 3.1, 3.9), (2.05, 3.05, 4.1))])
     metrics = evaluate_book_set(observations, ["a"])
     assert metrics["served_fraction"] == pytest.approx(1.0)
-    assert metrics["exact_best_fraction"] == pytest.approx(1 / 3)
+    # Book A is close on every outcome but is never the exact best in this toy board.
+    assert metrics["exact_best_fraction"] == pytest.approx(0.0)
     assert metrics["mean_price_shortfall_vs_full_best"] > 0.0
     assert metrics["within_2pct_of_best_fraction"] < 1.0
 
