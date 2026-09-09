@@ -1,0 +1,123 @@
+name: EPL Bet Check Synchronized Reference
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/bet_check.py'
+      - 'src/football1/bet_check_reference.py'
+      - 'src/football1/prospective.py'
+      - 'src/football1/live_odds.py'
+      - 'src/football1/price_shopping_audit.py'
+      - 'tests/test_bet_check.py'
+      - 'tests/test_bet_check_reference.py'
+      - 'docs/BET_CHECK_REFERENCE.md'
+      - 'pyproject.toml'
+      - '.github/workflows/bet-check-reference.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'src/football1/bet_check.py'
+      - 'src/football1/bet_check_reference.py'
+      - 'src/football1/prospective.py'
+      - 'src/football1/live_odds.py'
+      - 'src/football1/price_shopping_audit.py'
+      - 'tests/test_bet_check.py'
+      - 'tests/test_bet_check_reference.py'
+      - 'docs/BET_CHECK_REFERENCE.md'
+      - 'pyproject.toml'
+      - '.github/workflows/bet-check-reference.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  bet-check-reference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Reuse frozen canonical database from 4 September audit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p frozen-audit data/processed
+          gh run download 33924106948 --repo zee6/FlaretTest1 --name epl-audit-output --dir frozen-audit
+          DB="$(find frozen-audit -name football1.sqlite -type f -print -quit)"
+          if [ -z "$DB" ]; then
+            echo "football1.sqlite not found in frozen audit artifact"
+            exit 1
+          fi
+          cp "$DB" data/processed/football1.sqlite
+
+      - name: Exercise synchronized reference end-to-end
+        run: |
+          cat > /tmp/live-snapshot.json <<'JSON'
+          {
+            "provider": "the-odds-api",
+            "sport_key": "soccer_epl",
+            "competition": "English Premier League",
+            "portfolio_currency": "GBP",
+            "retrieved_at_utc": "2026-09-04T09:00:00+00:00",
+            "summary": [
+              {
+                "event_id": "bet-check-ci-ars-liv",
+                "commence_time": "2026-09-12T14:00:00Z",
+                "home_team": "Arsenal",
+                "away_team": "Liverpool",
+                "complete_h2h_bookmaker_count": 3,
+                "consensus_fair_probability": {"home": 0.50, "draw": 0.25, "away": 0.25},
+                "best_decimal_odds": {"home": 2.20, "draw": 4.10, "away": 4.20},
+                "quote_board": {
+                  "home": [
+                    {"decimal_odds": 2.20, "bookmaker_key": "smarkets", "bookmaker_title": "Smarkets"},
+                    {"decimal_odds": 2.10, "bookmaker_key": "book_a", "bookmaker_title": "Book A"},
+                    {"decimal_odds": 2.05, "bookmaker_key": "book_b", "bookmaker_title": "Book B"}
+                  ],
+                  "draw": [
+                    {"decimal_odds": 4.10, "bookmaker_key": "matchbook", "bookmaker_title": "Matchbook"},
+                    {"decimal_odds": 4.00, "bookmaker_key": "book_a", "bookmaker_title": "Book A"},
+                    {"decimal_odds": 3.95, "bookmaker_key": "book_b", "bookmaker_title": "Book B"}
+                  ],
+                  "away": [
+                    {"decimal_odds": 4.20, "bookmaker_key": "betfair_ex_uk", "bookmaker_title": "Betfair Exchange"},
+                    {"decimal_odds": 4.10, "bookmaker_key": "book_a", "bookmaker_title": "Book A"},
+                    {"decimal_odds": 4.00, "bookmaker_key": "book_b", "bookmaker_title": "Book B"}
+                  ]
+                }
+              }
+            ]
+          }
+          JSON
+          football1-bet-check-reference \
+            --database data/processed/football1.sqlite \
+            --snapshot /tmp/live-snapshot.json \
+            --output /tmp/bet-check-references.json
+          python - <<'PY'
+          import json
+          r = json.load(open('/tmp/bet-check-references.json'))
+          assert r['metadata']['ledger_written'] is False
+          assert r['metadata']['market_anchor_policy_unchanged'] is True
+          assert len(r['events']) == 1
+          e = r['events'][0]
+          assert e['timing_contract']['exact_timestamp_match'] is True
+          assert e['best_observed_price']['home']['odds'] == 2.10
+          assert e['best_observed_price']['home']['bookmaker_title'] == 'Book A'
+          assert e['best_observed_price']['home']['books_checked'] == 2
+          print(json.dumps(r, indent=2, sort_keys=True))
+          PY
