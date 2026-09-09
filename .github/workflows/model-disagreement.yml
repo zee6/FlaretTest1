@@ -1,19 +1,6 @@
 name: EPL Shadow Model Disagreement Audit
 
 on:
-  pull_request:
-    paths:
-      - 'src/football1/model_disagreement.py'
-      - 'tests/test_model_disagreement.py'
-      - 'pyproject.toml'
-      - '.github/workflows/model-disagreement.yml'
-  push:
-    branches: [master]
-    paths:
-      - 'src/football1/model_disagreement.py'
-      - 'tests/test_model_disagreement.py'
-      - 'pyproject.toml'
-      - '.github/workflows/model-disagreement.yml'
   workflow_dispatch:
 
 permissions:
