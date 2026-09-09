@@ -1,12 +1,6 @@
 name: EPL Elo Residual Ablation
 
 on:
-  pull_request:
-    paths:
-      - 'src/football1/elo_ablation.py'
-      - 'tests/test_elo_ablation.py'
-      - 'pyproject.toml'
-      - '.github/workflows/elo-ablation.yml'
   workflow_dispatch:
 
 permissions:
