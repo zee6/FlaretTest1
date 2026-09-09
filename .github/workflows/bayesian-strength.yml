@@ -1,23 +1,6 @@
 name: EPL Bayesian Strength Audit
 
 on:
-  pull_request:
-    paths:
-      - 'src/football1/bayesian_strength.py'
-      - 'src/football1/bayesian_strength_ablation.py'
-      - 'tests/test_bayesian_strength.py'
-      - 'tests/test_bayesian_strength_ablation.py'
-      - 'pyproject.toml'
-      - '.github/workflows/bayesian-strength.yml'
-  push:
-    branches: [master]
-    paths:
-      - 'src/football1/bayesian_strength.py'
-      - 'src/football1/bayesian_strength_ablation.py'
-      - 'tests/test_bayesian_strength.py'
-      - 'tests/test_bayesian_strength_ablation.py'
-      - 'pyproject.toml'
-      - '.github/workflows/bayesian-strength.yml'
   workflow_dispatch:
 
 permissions:
