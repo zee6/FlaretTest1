@@ -136,6 +136,28 @@ def test_register_rejects_nonzero_movement_decision_weight(tmp_path: Path) -> No
         build_register(ledger, settlements, movement)
 
 
+def test_primary_report_must_match_immutable_ledger_counts(tmp_path: Path) -> None:
+    prediction = _prediction()
+    ledger = tmp_path / "ledger.jsonl"
+    settlements = tmp_path / "settlements.jsonl"
+    movement = tmp_path / "movement.jsonl"
+    _write_jsonl(ledger, [prediction])
+    _write_jsonl(settlements, [])
+    _write_jsonl(movement, [_movement()])
+
+    with pytest.raises(ValueError, match="prediction count"):
+        build_register(
+            ledger,
+            settlements,
+            movement,
+            primary_report={
+                "prediction_records": 2,
+                "settled_records": 0,
+                "probability_scoring": {},
+            },
+        )
+
+
 def test_artifact_pins_are_explicit_and_distinct() -> None:
     assert set(ARTIFACT_PINS) == {
         "recency_30d_shadow",
