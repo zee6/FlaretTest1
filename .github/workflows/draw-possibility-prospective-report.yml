@@ -1,0 +1,76 @@
+name: EPL Prospective Draw Possibility Report
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/draw_possibility_prospective_report.py'
+      - 'tests/test_draw_possibility_prospective_report.py'
+      - '.github/workflows/draw-possibility-prospective-report.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  draw-possibility-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Recover exact pre-match Draw Possibility shadow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p frozen-draw-shadow
+          gh run download 34345280458 --repo zee6/FlaretTest1 --name epl-prospective-draw-possibility-shadow --dir frozen-draw-shadow
+          SHADOW="$(find frozen-draw-shadow -name '*.jsonl' -type f -print -quit)"
+          if [ -z "$SHADOW" ]; then
+            echo "Draw Possibility shadow JSONL not found"
+            exit 1
+          fi
+          cp "$SHADOW" /tmp/draw_possibility_shadow.jsonl
+          test "$(sha256sum /tmp/draw_possibility_shadow.jsonl | awk '{print $1}')" = "915b174364b631db6fcdfb6e675855dcf527ec18e214daea701ee7d7d6db17ed"
+
+      - name: Score current settled subset without redefining ranking
+        run: |
+          python -m football1.draw_possibility_prospective_report \
+            --shadow /tmp/draw_possibility_shadow.jsonl \
+            --ledger prospective/ledger.jsonl \
+            --settlements prospective/settlements.jsonl \
+            --output /tmp/draw_possibility_prospective_report.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/draw_possibility_prospective_report.json'))
+          assert r['status'] == 'prospective_zero_decision_weight'
+          assert r['shadow_records'] == 10
+          assert r['settled_shadow_records'] == 0
+          top2=r['predeclared_rank_summaries']['top_2_draw_possibility']['events']
+          assert [(x['home'], x['away']) for x in top2] == [
+              ('Bournemouth', 'Brentford'),
+              ('Leeds', 'Newcastle'),
+          ]
+          assert r['predeclared_rank_summaries']['top_2_draw_possibility']['complete'] is False
+          print('TOP2_PREMATCH', top2)
+          print('FIXED_FLAGS', r['predeclared_rank_summaries']['fixed_balance_flags'])
+          print('SETTLED', r['settled_shadow_records'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-prospective-draw-possibility-report-pre-match
+          path: /tmp/draw_possibility_prospective_report.json
+          if-no-files-found: error
+          retention-days: 90
