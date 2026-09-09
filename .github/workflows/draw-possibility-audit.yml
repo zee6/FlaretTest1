@@ -55,13 +55,20 @@ jobs:
           assert r['decision_weight'] == 0.0
           assert r['promotion_allowed'] is False
           print('OVERALL', r['overall'])
-          print('TREND_SLOPE', r['linear_draw_rate_slope_per_season'])
+          print('TREND_SLOPE_ALL', r['linear_draw_rate_slope_per_season'])
+          print('TREND_SLOPE_EX_LATEST', r['linear_draw_rate_slope_excluding_latest_partial_season'])
           print('GAP_BINS')
           for row in r['home_away_gap_bins']:
               print(row)
           print('FIXED_THRESHOLDS')
           for row in r['fixed_balance_thresholds']:
               print(row)
+          print('SEASON_STABILITY')
+          for block in r['fixed_balance_thresholds_by_season']:
+              print('THRESHOLD', block['max_home_away_gap'], 'positive_residual', block['seasons_with_positive_draw_residual_vs_market'], '/', block['seasons_observed'], 'positive_roi', block['seasons_with_positive_flat_draw_roi'], '/', block['seasons_observed'])
+              for row in block['seasons']:
+                  if row['matches']:
+                      print(row['season_start_year'], row['matches'], row['draw_rate'], row['mean_market_draw_probability'], row['draw_rate_minus_market'], row['flat_draw_roi'])
           print('RANKING', r['ranking_diagnostics'])
           PY
 
