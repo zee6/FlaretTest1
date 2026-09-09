@@ -120,7 +120,7 @@ def test_probability_moves_must_sum_to_zero(tmp_path: Path) -> None:
     ledger = tmp_path / "ledger.jsonl"
     settlements = tmp_path / "settlements.jsonl"
     _write_jsonl(ledger, [prediction])
-    _write_jsonl(settlements, [])
+    _write_jsonl(settlements, [_settlement(prediction, "home")])
 
     with pytest.raises(ValueError, match="sum to one"):
         build_report(ledger, settlements)
