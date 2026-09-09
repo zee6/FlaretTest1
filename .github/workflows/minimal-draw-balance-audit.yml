@@ -1,0 +1,72 @@
+name: EPL Minimal Draw Balance Audit
+
+on:
+  pull_request:
+    paths:
+      - 'src/football1/minimal_draw_balance_audit.py'
+      - 'tests/test_minimal_draw_balance_audit.py'
+      - '.github/workflows/minimal-draw-balance-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  minimal-draw-balance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Reuse frozen canonical database from 4 September audit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p frozen-audit data/processed
+          gh run download 33924106948 --repo zee6/FlaretTest1 --name epl-audit-output --dir frozen-audit
+          DB="$(find frozen-audit -name football1.sqlite -type f -print -quit)"
+          if [ -z "$DB" ]; then
+            echo "football1.sqlite not found in frozen epl-audit-output artifact"
+            exit 1
+          fi
+          cp "$DB" data/processed/football1.sqlite
+          test "$(sha256sum data/processed/football1.sqlite | awk '{print $1}')" = "4b5c751b22608026fb18eb190279c13b41d50ab88055057787c041ae4b841454"
+
+      - name: Run minimal draw balance audit
+        run: |
+          python -m football1.minimal_draw_balance_audit \
+            --database data/processed/football1.sqlite \
+            --output data/processed/minimal_draw_balance_audit.json
+          python - <<'PY'
+          import json
+          r=json.load(open('data/processed/minimal_draw_balance_audit.json'))
+          assert r['decision_weight'] == 0.0
+          assert r['promotion_allowed'] is False
+          print('OOS_MATCHES', r['oos_matches'])
+          print('MARKET', r['market_raw_pdraw'])
+          print('PDRAW_ONLY', r['pdraw_only_recalibration'])
+          print('PDRAW_PLUS_GAP', r['pdraw_plus_home_away_gap'])
+          print('DELTA_GAP_MINUS_PDRAWCAL', r['delta_gap_minus_pdraw_only'])
+          print('DELTA_GAP_MINUS_MARKET', r['delta_gap_minus_market'])
+          print('SEASON_STABILITY', r['season_stability'])
+          print('LATEST_COEFFICIENTS', r['latest_fit_standardized_coefficients'])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-minimal-draw-balance-audit
+          path: data/processed/minimal_draw_balance_audit.json
+          if-no-files-found: error
+          retention-days: 90
