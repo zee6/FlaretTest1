@@ -2,143 +2,143 @@
   "change_policy": "Five-match change compares the current post-result rating with the pre-match rating five EPL appearances back. Season change compares with the first pre-match rating of the latest EPL season.",
   "current_ratings": [
     {
-      "change_5_matches": -21.05784112488118,
+      "change_5_matches": -22.472230442250066,
       "rank": 1,
-      "rating": 1663.4020200831137,
-      "season_change": 13.721978879131257,
+      "rating": 1668.3416307994694,
+      "season_change": 18.66158959548693,
       "team": "Arsenal"
     },
     {
-      "change_5_matches": -41.883454218356974,
+      "change_5_matches": -41.54243960965778,
       "rank": 2,
-      "rating": 1645.0427346683873,
-      "season_change": 14.046479443313274,
+      "rating": 1649.128641492861,
+      "season_change": 18.13238626778707,
       "team": "Man City"
     },
     {
-      "change_5_matches": -17.497859517947745,
+      "change_5_matches": -16.643431043209375,
       "rank": 3,
-      "rating": 1578.328759647909,
-      "season_change": -5.68164857077636,
+      "rating": 1578.7094018143832,
+      "season_change": -5.301006404302143,
       "team": "Man United"
     },
     {
-      "change_5_matches": -42.855122537417174,
+      "change_5_matches": -30.211623101247596,
       "rank": 4,
-      "rating": 1565.0251810286634,
-      "season_change": -3.318756338856474,
+      "rating": 1573.580097016263,
+      "season_change": 5.236159648743069,
       "team": "Liverpool"
     },
     {
-      "change_5_matches": -17.3294069991141,
+      "change_5_matches": -26.7510360854576,
       "rank": 5,
-      "rating": 1551.2821433217273,
-      "season_change": -9.266620779791538,
+      "rating": 1552.705083774577,
+      "season_change": -7.8436803269419215,
       "team": "Bournemouth"
     },
     {
-      "change_5_matches": -20.460321936558103,
+      "change_5_matches": -15.700139929857414,
       "rank": 6,
-      "rating": 1549.2663230738199,
-      "season_change": -18.311778973005858,
+      "rating": 1550.5059078301435,
+      "season_change": -17.072194216682192,
       "team": "Aston Villa"
     },
     {
-      "change_5_matches": 12.734633269799133,
+      "change_5_matches": 3.706439104873425,
       "rank": 7,
-      "rating": 1544.7446306490367,
-      "season_change": 19.79831839431222,
+      "rating": 1539.805019932681,
+      "season_change": 14.858707677956545,
       "team": "Chelsea"
     },
     {
-      "change_5_matches": -5.031853859730745,
+      "change_5_matches": -3.202927921480523,
       "rank": 8,
-      "rating": 1535.7809763158803,
-      "season_change": 7.977659484176229,
+      "rating": 1533.1459704465908,
+      "season_change": 5.342653614886785,
       "team": "Brentford"
     },
     {
-      "change_5_matches": -25.490368280658913,
+      "change_5_matches": -32.082701962054216,
       "rank": 9,
-      "rating": 1532.0425513440832,
-      "season_change": 0.9324694290003208,
+      "rating": 1529.5078665946257,
+      "season_change": -1.6022153204571623,
       "team": "Brighton"
     },
     {
-      "change_5_matches": 4.75482988707904,
+      "change_5_matches": 1.1929254349220173,
       "rank": 10,
-      "rating": 1526.05793837123,
-      "season_change": 9.925947721787452,
+      "rating": 1524.6349979183803,
+      "season_change": 8.503007268937836,
       "team": "Newcastle"
     },
     {
-      "change_5_matches": 74.64059505142859,
+      "change_5_matches": 14.827715378803077,
       "rank": 11,
-      "rating": 1517.5565528390946,
-      "season_change": 22.24297783016914,
-      "team": "Hull"
-    },
-    {
-      "change_5_matches": 12.666495817777786,
-      "rank": 12,
-      "rating": 1517.0197591498913,
-      "season_change": -2.619707607670989,
+      "rating": 1519.6547650191808,
+      "season_change": 0.01529826161845449,
       "team": "Sunderland"
     },
     {
-      "change_5_matches": 8.875636834727175,
-      "rank": 13,
-      "rating": 1517.016445874082,
-      "season_change": 10.525474768518961,
+      "change_5_matches": 10.859035615755374,
+      "rank": 12,
+      "rating": 1519.5511306235394,
+      "season_change": 13.060159517976444,
       "team": "Leeds"
     },
     {
-      "change_5_matches": -12.0885503155057,
+      "change_5_matches": 87.23356779902088,
+      "rank": 13,
+      "rating": 1516.316968082771,
+      "season_change": 21.003393073845473,
+      "team": "Hull"
+    },
+    {
+      "change_5_matches": -14.03414020446894,
       "rank": 14,
-      "rating": 1516.5600157047793,
-      "season_change": 10.929749897197325,
+      "rating": 1516.179373538305,
+      "season_change": 10.549107730723108,
       "team": "Everton"
     },
     {
-      "change_5_matches": -19.915934498534398,
+      "change_5_matches": -21.27187446485891,
       "rank": 15,
-      "rating": 1501.8679092807567,
-      "season_change": -8.251538324021794,
+      "rating": 1498.3730053151248,
+      "season_change": -11.746442289653714,
       "team": "Nott'm Forest"
     },
     {
-      "change_5_matches": -28.108519291234188,
+      "change_5_matches": -6.9791896961703515,
       "rank": 16,
-      "rating": 1494.916450873833,
-      "season_change": -19.52557288325829,
-      "team": "Fulham"
-    },
-    {
-      "change_5_matches": -16.15464044439318,
-      "rank": 17,
-      "rating": 1483.8453595556068,
-      "season_change": -16.15464044439318,
-      "team": "Coventry"
-    },
-    {
-      "change_5_matches": -23.154484332653965,
-      "rank": 18,
-      "rating": 1483.751492130197,
-      "season_change": -15.709608560719062,
+      "rating": 1496.181894550906,
+      "season_change": -3.2792061400100465,
       "team": "Crystal Palace"
     },
     {
-      "change_5_matches": -2.212409572364095,
+      "change_5_matches": -29.694352172750087,
+      "rank": 17,
+      "rating": 1482.4860484531239,
+      "season_change": -31.955975303967307,
+      "team": "Fulham"
+    },
+    {
+      "change_5_matches": -20.240547268866976,
+      "rank": 18,
+      "rating": 1479.759452731133,
+      "season_change": -20.240547268866976,
+      "team": "Coventry"
+    },
+    {
+      "change_5_matches": 1.8337803616971087,
       "rank": 19,
-      "rating": 1450.1014749187898,
-      "season_change": -16.858787311604374,
+      "rating": 1453.5963788844217,
+      "season_change": -13.363883345972454,
       "team": "Tottenham"
     },
     {
-      "change_5_matches": 30.103394775949482,
+      "change_5_matches": 29.997050891572144,
       "rank": 20,
-      "rating": 1439.4638866349605,
-      "season_change": 5.597603946491745,
+      "rating": 1430.908970647361,
+      "season_change": -2.957312041107798,
       "team": "Ipswich"
     }
   ],
@@ -298,6 +298,11 @@
         "date": "2026-08-31",
         "rating": 1653.9857262662101,
         "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-06",
+        "rating": 1663.4020200831137,
+        "season_start_year": 2026
       }
     ],
     "Aston Villa": [
@@ -454,6 +459,11 @@
       {
         "date": "2026-08-31",
         "rating": 1558.6826168907235,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-05",
+        "rating": 1549.2663230738199,
         "season_start_year": 2026
       }
     ],
@@ -612,6 +622,11 @@
         "date": "2026-08-29",
         "rating": 1554.5065335484333,
         "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-05",
+        "rating": 1551.2821433217273,
+        "season_start_year": 2026
       }
     ],
     "Brentford": [
@@ -768,6 +783,11 @@
       {
         "date": "2026-08-30",
         "rating": 1534.081202449113,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-05",
+        "rating": 1535.7809763158803,
         "season_start_year": 2026
       }
     ],
@@ -926,6 +946,11 @@
         "date": "2026-08-30",
         "rating": 1540.0055670711852,
         "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-05",
+        "rating": 1532.0425513440832,
+        "season_start_year": 2026
       }
     ],
     "Chelsea": [
@@ -1083,6 +1108,11 @@
         "date": "2026-08-30",
         "rating": 1536.7816149219348,
         "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-06",
+        "rating": 1544.7446306490367,
+        "season_start_year": 2026
       }
     ],
     "Coventry": [
@@ -1094,6 +1124,11 @@
       {
         "date": "2026-08-29",
         "rating": 1495.6943149377723,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-05",
+        "rating": 1483.8453595556068,
         "season_start_year": 2026
       }
     ],
@@ -1252,6 +1287,11 @@
         "date": "2026-08-28",
         "rating": 1491.7557410204247,
         "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-05",
+        "rating": 1483.751492130197,
+        "season_start_year": 2026
       }
     ],
     "Everton": [
@@ -1408,6 +1448,11 @@
       {
         "date": "2026-08-29",
         "rating": 1513.3356254780733,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-06",
+        "rating": 1516.5600157047793,
         "season_start_year": 2026
       }
     ],
@@ -1566,6 +1611,11 @@
         "date": "2026-08-30",
         "rating": 1502.606721089881,
         "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-05",
+        "rating": 1494.916450873833,
+        "season_start_year": 2026
       }
     ],
     "Hull": [
@@ -1577,6 +1627,11 @@
       {
         "date": "2026-08-29",
         "rating": 1505.707597456929,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-05",
+        "rating": 1517.5565528390946,
         "season_start_year": 2026
       }
     ],
@@ -1640,6 +1695,11 @@
         "date": "2026-08-30",
         "rating": 1444.1762605121878,
         "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-04",
+        "rating": 1439.4638866349605,
+        "season_start_year": 2026
       }
     ],
     "Leeds": [
@@ -1701,6 +1761,11 @@
       {
         "date": "2026-08-30",
         "rating": 1518.716219740849,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-05",
+        "rating": 1517.016445874082,
         "season_start_year": 2026
       }
     ],
@@ -1859,6 +1924,11 @@
         "date": "2026-08-29",
         "rating": 1568.9988913399277,
         "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-04",
+        "rating": 1565.0251810286634,
+        "season_start_year": 2026
       }
     ],
     "Man City": [
@@ -2015,6 +2085,11 @@
       {
         "date": "2026-08-28",
         "rating": 1637.0384857781596,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-05",
+        "rating": 1645.0427346683873,
         "season_start_year": 2026
       }
     ],
@@ -2173,6 +2248,11 @@
         "date": "2026-08-30",
         "rating": 1573.6163857706817,
         "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-06",
+        "rating": 1578.328759647909,
+        "season_start_year": 2026
       }
     ],
     "Newcastle": [
@@ -2329,6 +2409,11 @@
       {
         "date": "2026-08-29",
         "rating": 1515.4770366770347,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-05",
+        "rating": 1526.05793837123,
         "season_start_year": 2026
       }
     ],
@@ -2487,6 +2572,11 @@
         "date": "2026-08-29",
         "rating": 1497.8941989694924,
         "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-05",
+        "rating": 1501.8679092807567,
+        "season_start_year": 2026
       }
     ],
     "Sunderland": [
@@ -2548,6 +2638,11 @@
       {
         "date": "2026-08-30",
         "rating": 1509.3294889338433,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-05",
+        "rating": 1517.0197591498913,
         "season_start_year": 2026
       }
     ],
@@ -2706,12 +2801,17 @@
         "date": "2026-08-29",
         "rating": 1460.682376612985,
         "season_start_year": 2026
+      },
+      {
+        "date": "2026-09-05",
+        "rating": 1450.1014749187898,
+        "season_start_year": 2026
       }
     ]
   },
   "history_policy": "Every plotted value is an exact leakage-safe pre-match rating. The graph covers the latest three years. Current-season matches are kept individually; earlier months keep the final pre-match snapshot in each calendar month. Same-day results are applied only after all fixtures on that date are frozen.",
-  "history_start_date": "2023-08-31",
-  "latest_match_date": "2026-08-31",
+  "history_start_date": "2023-09-06",
+  "latest_match_date": "2026-09-06",
   "latest_season_start_year": 2026,
   "model": "elo_1x2_v1",
   "parameters": {
