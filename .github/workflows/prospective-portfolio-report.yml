@@ -47,7 +47,7 @@ jobs:
           python - <<'PY'
           import json
           r=json.load(open('/tmp/prospective-portfolio.json'))
-          assert r['settled_records'] == 10
+          assert r['settled_records'] == 20
           official=r['official_research_portfolio']['portfolio']
           assert official['bets_placed'] == 0
           assert official['final_bankroll'] == 1000.0
@@ -57,7 +57,7 @@ jobs:
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: epl-prospective-portfolio-first-week
+          name: epl-prospective-portfolio-current
           path: /tmp/prospective-portfolio.json
           if-no-files-found: error
           retention-days: 90
