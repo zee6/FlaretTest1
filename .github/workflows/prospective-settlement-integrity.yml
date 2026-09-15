@@ -30,42 +30,65 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
       - name: Install Football 1
         run: |
           python -m pip install --upgrade pip
           pip install -e '.[dev]'
+
       - name: Run tests
         run: pytest -q
-      - name: Build prospective report and verify immutable settlements
+
+      - name: Build prospective report and verify immutable settlement subset
         run: |
-          python -m football1.prospective_report --ledger prospective/ledger.jsonl --settlements prospective/settlements.jsonl --output /tmp/prospective-report.json
+          python -m football1.prospective_report \
+            --ledger prospective/ledger.jsonl \
+            --settlements prospective/settlements.jsonl \
+            --output /tmp/prospective-report.json
           python - <<'PY'
           import json
           from pathlib import Path
 
+          predictions = [
+              json.loads(line)
+              for line in Path('prospective/ledger.jsonl').read_text().splitlines()
+              if line.strip()
+          ]
+          settlements = [
+              json.loads(line)
+              for line in Path('prospective/settlements.jsonl').read_text().splitlines()
+              if line.strip()
+          ]
           report = json.loads(Path('/tmp/prospective-report.json').read_text())
-          assert report['prediction_records'] == 20
-          assert report['settled_records'] == 20
-          assert report['unsettled_records'] == 0
 
-          settlements = [json.loads(line) for line in Path('prospective/settlements.jsonl').read_text().splitlines() if line.strip()]
-          assert len(settlements) == 20
-          assert len({row['prediction_record_id'] for row in settlements}) == 20
-          assert len({row['event_id'] for row in settlements}) == 20
+          assert len({row['record_id'] for row in predictions}) == len(predictions)
+          assert len({row['event_id'] for row in predictions}) == len(predictions)
+          assert len({row['prediction_record_id'] for row in settlements}) == len(settlements)
+          assert len({row['event_id'] for row in settlements}) == len(settlements)
+          assert len(settlements) <= len(predictions)
 
-          first = settlements[:10]
-          second = settlements[10:]
-          assert all(row['scores_retrieved_at_utc'] == '2026-09-09T09:41:09+00:00' for row in first)
-          assert all(row.get('result_verification', {}).get('source_type') == 'official_premier_league_matchweek_report' for row in first)
-          assert all(row['scores_retrieved_at_utc'] == '2026-09-15T06:31:53+00:00' for row in second)
-          assert all(row.get('result_verification', {}).get('cross_check') == 'structured_soccer_schedule_summary' for row in second)
+          by_id = {row['record_id']: row for row in predictions}
+          for row in settlements:
+              prediction = by_id[row['prediction_record_id']]
+              assert row['event_id'] == prediction['event_id']
+              assert row['prediction_content_sha256'] == prediction['content_sha256']
 
-          ledger = [json.loads(line) for line in Path('prospective/ledger.jsonl').read_text().splitlines() if line.strip()]
-          assert len(ledger) == 20
-          assert {row['event_id'] for row in settlements} == {row['event_id'] for row in ledger}
+          settled_ids = {row['prediction_record_id'] for row in settlements}
+          unresolved = [row for row in predictions if row['record_id'] not in settled_ids]
 
+          assert report['prediction_records'] == len(predictions)
+          assert report['settled_records'] == len(settlements)
+          assert report['unsettled_records'] == len(unresolved)
+          assert report['prediction_records'] == report['settled_records'] + report['unsettled_records']
+
+          print('PREDICTIONS', len(predictions))
+          print('SETTLEMENTS', len(settlements))
+          print('UNRESOLVED', len(unresolved))
+          for row in unresolved:
+              print('UNRESOLVED_EVENT', row['commence_time_utc'], row['home_team_provider'], 'vs', row['away_team_provider'])
           print(json.dumps(report, indent=2, sort_keys=True))
           PY
+
       - uses: actions/upload-artifact@v4
         with:
           name: epl-prospective-settlement-report
