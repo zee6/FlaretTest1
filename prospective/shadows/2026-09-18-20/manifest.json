@@ -1,0 +1,73 @@
+{
+  "draw_possibility_historical_reference": {
+    "data_cutoff": "2026-08-31",
+    "matches": 5340,
+    "policy": "frozen original reference retained so the structural ranking scale does not drift after observed results",
+    "sha256": "4b5c751b22608026fb18eb190279c13b41d50ab88055057787c041ae4b841454"
+  },
+  "fixture_count": 10,
+  "prediction_content_sha256": [
+    "c5a8eb6793814bf24a7017f8c66585ff36fee17e2afb0533aa36284fea28fed4",
+    "d8247ed4260a336d86a4934cbec8d2aea4b52acc798466cac24d0c7d4d088106",
+    "0838c3b9408f2b51c4912179e6bbad7fb3e105859295a435e6dc5910b6f6d21a",
+    "20b51aa819272a214340c084b0a993511d8ac4fc8dbdf0a394f6b3afe63ed03f",
+    "2e3749cb4ea571e1c3382a00ceef3515de3938e5877024abd7233230a8e06954",
+    "80ee5e2e3cfc5ca694948a5c8e920197b9d569c4b3e7e9d27fb0353be53b36ab",
+    "6ef74786096ea156c06005f65eecc8a6b6947b4edc7833260f086b1f86e11985",
+    "096d30a4d23db166f82f5386cf211b1ce86a6318cf098db34f078ef69386bb13",
+    "8d87511bde19e00111b0d5246c33a0dfcbb885b15b1c3a757a2213cabac429c2",
+    "568d8f12ecf6b5bbd3fa79636750a3bec9400e25a02a4fdbb7a9c16c8f001515"
+  ],
+  "prediction_record_ids": [
+    "9ee620f96707cc638df9d438",
+    "915d7700eaa1ade290115b32",
+    "3d8782bba8fa9e6e1ffc83d9",
+    "34fb481ac72c2d5910c5065e",
+    "6e3d76897a1ce64a0698fe62",
+    "8b0ff22fd45912e4d0a02f90",
+    "a7c61d2327dad75d7e9e5f1d",
+    "eeb8d8b7bcc390e0bec4b22d",
+    "f661a615027594585666fdfa",
+    "d81a7235048a6941584fb52e"
+  ],
+  "primary_decision_threshold": null,
+  "primary_model_id": "fixed_market_offset_football_slant_v1_live_consensus_anchor",
+  "prohibited": [
+    "no probability override from Draw Possibility",
+    "no betting threshold selected from prior prospective outcomes",
+    "no recency activation from one prior ten-match batch",
+    "no stake rule activation",
+    "no retrospective fixture selection"
+  ],
+  "rolling_walk_forward_database": {
+    "historical_data_cutoff": "2026-09-14",
+    "matches": 5360,
+    "policy": "existing live workflow updated with all completed EPL matches available before the snapshot",
+    "sha256": "3ffecb38d6ecb3c0c3b969ce6dd9508ef575a4eb840e32fe257e6bae6bf5c611"
+  },
+  "schema_version": 1,
+  "shadow_files": {
+    "draw_possibility": {
+      "data_policy": "frozen 5,340-match structural reference",
+      "decision_weight": 0.0,
+      "is_probability": false,
+      "path": "prospective/shadows/2026-09-18-20/draw_possibility.jsonl",
+      "sha256": "6d2c12d6a545fece12802f0d788918c532a8ed23cbff0322b55bdb10e67be734"
+    },
+    "recency_15d": {
+      "data_policy": "rolling walk-forward through 2026-09-14",
+      "decision_weight": 0.0,
+      "path": "prospective/shadows/2026-09-18-20/recency_15d.jsonl",
+      "sha256": "68e48ab4c521ae9b09b4133cdbdd8990abca4d7e78c202681a223e9a3f26b3a0"
+    },
+    "recency_30d": {
+      "data_policy": "rolling walk-forward through 2026-09-14",
+      "decision_weight": 0.0,
+      "path": "prospective/shadows/2026-09-18-20/recency_30d.jsonl",
+      "sha256": "b4c20efc45856cce5f646415d34d335b10bade95c71776a6cb093b4250947849"
+    }
+  },
+  "slate": "2026-09-18_to_2026-09-20",
+  "snapshot_retrieved_at_utc": "2026-09-15T06:48:37.892753+00:00",
+  "status": "prospective_frozen_before_kickoff"
+}
