@@ -1,0 +1,216 @@
+name: EPL Prospective Slate Evaluation 2026-09-18 to 20
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/prospective-slate-2026-09-18-20.yml'
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/prospective-slate-2026-09-18-20.yml'
+      - 'prospective/settlements.jsonl'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Verify immutable pre-match manifest and shadow hashes
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          base=Path('prospective/shadows/2026-09-18-20')
+          manifest=json.loads((base/'manifest.json').read_text())
+
+          assert manifest['status']=='prospective_frozen_before_kickoff'
+          assert manifest['fixture_count']==10
+          assert len(manifest['prediction_record_ids'])==10
+          assert len(set(manifest['prediction_record_ids']))==10
+          assert manifest['primary_decision_threshold'] is None
+          assert manifest['rolling_walk_forward_database']['historical_data_cutoff']=='2026-09-14'
+          assert manifest['rolling_walk_forward_database']['matches']==5360
+          assert manifest['draw_possibility_historical_reference']['matches']==5340
+          assert manifest['draw_possibility_historical_reference']['sha256']=='4b5c751b22608026fb18eb190279c13b41d50ab88055057787c041ae4b841454'
+
+          for spec in manifest['shadow_files'].values():
+              path=Path(spec['path'])
+              actual=hashlib.sha256(path.read_bytes()).hexdigest()
+              assert actual==spec['sha256'], (path,actual,spec['sha256'])
+              assert spec['decision_weight']==0.0
+
+          print(json.dumps(manifest,indent=2,sort_keys=True))
+          PY
+
+      - name: Materialize exact frozen slate sample
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest=json.loads(Path('prospective/shadows/2026-09-18-20/manifest.json').read_text())
+          wanted=set(manifest['prediction_record_ids'])
+
+          predictions=[
+              json.loads(line)
+              for line in Path('prospective/ledger.jsonl').read_text().splitlines()
+              if line.strip()
+          ]
+          settlements=[
+              json.loads(line)
+              for line in Path('prospective/settlements.jsonl').read_text().splitlines()
+              if line.strip()
+          ]
+
+          selected=[row for row in predictions if row['record_id'] in wanted]
+          selected_settlements=[row for row in settlements if row['prediction_record_id'] in wanted]
+
+          assert len(selected)==10
+          assert {row['record_id'] for row in selected}==wanted
+          assert all(row['snapshot_retrieved_at_utc']==manifest['snapshot_retrieved_at_utc'] for row in selected)
+          assert all('2026-09-18' <= row['commence_time_utc'][:10] <= '2026-09-20' for row in selected)
+          assert 0 <= len(selected_settlements) <= 10
+
+          Path('/tmp/slate_ledger.jsonl').write_text(
+              ''.join(json.dumps(row,sort_keys=True,separators=(',',':'))+'\n' for row in selected)
+          )
+          Path('/tmp/slate_settlements.jsonl').write_text(
+              ''.join(json.dumps(row,sort_keys=True,separators=(',',':'))+'\n' for row in selected_settlements)
+          )
+
+          print('FROZEN_PREDICTIONS',len(selected))
+          print('SETTLED',len(selected_settlements))
+          print('UNSETTLED',10-len(selected_settlements))
+          PY
+
+      - name: Run predeclared slate scorers
+        run: |
+          python -m football1.prospective_report \
+            --ledger /tmp/slate_ledger.jsonl \
+            --settlements /tmp/slate_settlements.jsonl \
+            --output /tmp/primary.json
+
+          python -m football1.recency_prospective_report \
+            --ledger /tmp/slate_ledger.jsonl \
+            --settlements /tmp/slate_settlements.jsonl \
+            --shadow prospective/shadows/2026-09-18-20/recency_30d.jsonl \
+            --shadow prospective/shadows/2026-09-18-20/recency_15d.jsonl \
+            --output /tmp/recency.json
+
+          python -m football1.draw_possibility_prospective_report \
+            --shadow prospective/shadows/2026-09-18-20/draw_possibility.jsonl \
+            --ledger /tmp/slate_ledger.jsonl \
+            --settlements /tmp/slate_settlements.jsonl \
+            --output /tmp/draw.json
+
+          python -m football1.prospective_error_anatomy \
+            --ledger /tmp/slate_ledger.jsonl \
+            --settlements /tmp/slate_settlements.jsonl \
+            --output /tmp/error_anatomy.json
+
+          python -m football1.prospective_portfolio_report \
+            --ledger /tmp/slate_ledger.jsonl \
+            --settlements /tmp/slate_settlements.jsonl \
+            --output /tmp/portfolio.json
+
+      - name: Freeze judging contract and report current stage
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          primary=json.load(open('/tmp/primary.json'))
+          recency=json.load(open('/tmp/recency.json'))
+          draw=json.load(open('/tmp/draw.json'))
+          errors=json.load(open('/tmp/error_anatomy.json'))
+          portfolio=json.load(open('/tmp/portfolio.json'))
+
+          settled=primary['settled_records']
+          assert primary['prediction_records']==10
+          assert 0 <= settled <= 10
+          assert recency['shadow_event_count']==10
+          assert recency['settled_common_event_count']==settled
+          assert draw['shadow_records']==10
+          assert draw['settled_shadow_records']==settled
+          assert errors['settled_matches']==settled
+          assert portfolio['settled_records']==settled
+          assert portfolio['official_research_portfolio']['portfolio']['bets_placed']==0
+
+          if settled==0:
+              stage='prospective_frozen'
+          elif settled<10:
+              stage='prospective_partial'
+          else:
+              stage='prospective_complete'
+
+          contract={
+              'slate':'2026-09-18_to_2026-09-20',
+              'stage':stage,
+              'prediction_records':10,
+              'settled_records':settled,
+              'primary_metrics':['multiclass_log_loss','multiclass_brier'],
+              'recency_comparison':['market_consensus','original_equal_weight_football1','30_day','15_day'],
+              'draw_possibility_metrics':[
+                  'predeclared_top_1',
+                  'predeclared_top_2',
+                  'fixed_2pp_5pp_10pp_flags',
+                  'ranking_auc_vs_market_pdraw_when_complete',
+              ],
+              'probability_error_metrics':[
+                  'help_hurt_realized_outcome',
+                  'mean_probability_move_on_realized_outcome',
+                  'log_loss_delta_vs_market',
+                  'draw_specific_same_metrics',
+              ],
+              'portfolio_policy':'official_no_validated_betting_rule_zero_compulsory_bets',
+              'decision_weight':0.0,
+              'prohibited':[
+                  'no threshold selected after results',
+                  'no half-life changed after results',
+                  'no Draw Possibility definition changed after results',
+                  'no draw probability override',
+                  'no stake activation',
+              ],
+          }
+          Path('/tmp/slate_contract.json').write_text(json.dumps(contract,indent=2,sort_keys=True)+'\n')
+
+          print(json.dumps(contract,indent=2,sort_keys=True))
+          print('PRIMARY',json.dumps(primary['probability_scoring'],sort_keys=True))
+          print('RECENCY',json.dumps(recency['models'],sort_keys=True))
+          print('DRAW_STAGE',draw['status'],'settled=',draw['settled_shadow_records'])
+          print('ERROR_OVERALL',json.dumps(errors['overall'],sort_keys=True))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-prospective-slate-evaluation-2026-09-18-20
+          path: |
+            /tmp/slate_contract.json
+            /tmp/primary.json
+            /tmp/recency.json
+            /tmp/draw.json
+            /tmp/error_anatomy.json
+            /tmp/portfolio.json
+          if-no-files-found: error
+          retention-days: 90
