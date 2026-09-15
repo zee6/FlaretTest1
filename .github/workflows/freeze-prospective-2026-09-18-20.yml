@@ -1,0 +1,368 @@
+name: Freeze EPL Prospective Slate 2026-09-18 to 20
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/freeze-prospective-2026-09-18-20.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: freeze-prospective-2026-09-18-20
+  cancel-in-progress: false
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Football 1
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Build current walk-forward EPL database
+        run: |
+          set -e
+          ok=0
+          for attempt in 1 2 3; do
+            echo "Football-Data download attempt $attempt"
+            rm -rf data/raw/football-data
+            if football1-download-epl --from-season 2012 --to-season 2026; then
+              ok=1
+              break
+            fi
+            sleep 5
+          done
+          test "$ok" = "1"
+          football1-build-db --input-dir data/raw/football-data --output data/processed/football1.sqlite
+          python - <<'PY'
+          import sqlite3
+          from pathlib import Path
+
+          db=Path('data/processed/football1.sqlite')
+          conn=sqlite3.connect(db)
+          count, latest=conn.execute('select count(*), max(match_date) from matches').fetchone()
+          current=conn.execute('select count(*) from matches where season_start_year=2026').fetchone()[0]
+          conn.close()
+
+          print('MATCHES', count)
+          print('CURRENT_SEASON_MATCHES', current)
+          print('LATEST_MATCH_DATE', latest)
+          assert count == 5360, (count, latest)
+          assert current == 40, current
+          assert latest == '2026-09-14', latest
+          PY
+          echo "CURRENT_DB_SHA256=$(sha256sum data/processed/football1.sqlite | awk '{print $1}')"
+
+      - name: Fetch one live UK 1X2 snapshot
+        env:
+          THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
+        run: |
+          test -n "$THE_ODDS_API_KEY" || (echo 'THE_ODDS_API_KEY secret is missing' && exit 1)
+          football1-live-odds \
+            --regions uk \
+            --markets h2h \
+            --odds-format decimal \
+            --output data/live/epl_odds_snapshot_all.json
+
+      - name: Restrict snapshot to the exact 18-20 September slate
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          path=Path('data/live/epl_odds_snapshot_all.json')
+          snapshot=json.loads(path.read_text())
+          lo=datetime.fromisoformat('2026-09-18T00:00:00+00:00')
+          hi=datetime.fromisoformat('2026-09-21T00:00:00+00:00')
+
+          def dt(value):
+              return datetime.fromisoformat(value.replace('Z','+00:00')).astimezone(timezone.utc)
+
+          expected={
+              ('Brentford','Chelsea'),
+              ('Tottenham Hotspur','Aston Villa'),
+              ('Brighton and Hove Albion','Arsenal'),
+              ('Everton','Ipswich Town'),
+              ('Newcastle United','Hull City'),
+              ('Nottingham Forest','Coventry City'),
+              ('Bournemouth','Liverpool'),
+              ('Leeds United','Crystal Palace'),
+              ('Manchester City','Sunderland'),
+              ('Fulham','Manchester United'),
+          }
+
+          events=[e for e in snapshot['events'] if lo <= dt(e['commence_time']) < hi]
+          ids={str(e['id']) for e in events}
+          summaries=[s for s in snapshot['summary'] if str(s['event_id']) in ids]
+          pairs={(e['home_team'],e['away_team']) for e in events}
+
+          assert len(events) == 10, len(events)
+          assert len(summaries) == 10, len(summaries)
+          assert pairs == expected, (pairs, expected)
+          assert all(s['consensus_fair_probability'] is not None for s in summaries)
+          assert all(s['complete_h2h_bookmaker_count'] > 0 for s in summaries)
+          assert all(all(s['best_decimal_odds'].get(k) is not None for k in ('home','draw','away')) for s in summaries)
+
+          snapshot['events']=events
+          snapshot['summary']=summaries
+          snapshot['event_count']=10
+          out=Path('data/live/epl_odds_snapshot_2026-09-18-20.json')
+          out.parent.mkdir(parents=True,exist_ok=True)
+          out.write_text(json.dumps(snapshot,indent=2,sort_keys=True)+'\n')
+
+          print('RETRIEVED_AT', snapshot['retrieved_at_utc'])
+          for s in sorted(summaries,key=lambda x:x['commence_time']):
+              print('FIXTURE', s['commence_time'], s['home_team'], 'vs', s['away_team'],
+                    'books=',s['complete_h2h_bookmaker_count'],
+                    'market=',s['consensus_fair_probability'])
+          PY
+
+      - name: Archive quotes and lock primary predictions
+        run: |
+          football1-odds-archive \
+            --snapshot data/live/epl_odds_snapshot_2026-09-18-20.json \
+            --archive prospective/odds_snapshots.jsonl
+
+          football1-prospective \
+            --database data/processed/football1.sqlite \
+            --snapshot data/live/epl_odds_snapshot_2026-09-18-20.json \
+            --ledger prospective/ledger.jsonl \
+            --alpha 0.10
+
+          football1-prospective-consensus-movement-lock \
+            --database data/processed/football1.sqlite \
+            --snapshot data/live/epl_odds_snapshot_2026-09-18-20.json \
+            --ledger prospective/movement_predictions.jsonl
+
+      - name: Verify exactly ten new immutable prediction locks
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from football1.prospective import prediction_content_hash
+
+          snapshot=json.loads(Path('data/live/epl_odds_snapshot_2026-09-18-20.json').read_text())
+          retrieved=snapshot['retrieved_at_utc']
+          rows=[json.loads(x) for x in Path('prospective/ledger.jsonl').read_text().splitlines() if x.strip()]
+          new=[r for r in rows if r['snapshot_retrieved_at_utc']==retrieved]
+
+          assert len(rows) == 30, len(rows)
+          assert len(new) == 10, len(new)
+          assert len({r['event_id'] for r in new}) == 10
+          assert all(r['model']['strategy_threshold'] is None for r in new)
+          assert all(r['model']['historical_data_cutoff']=='2026-09-14' for r in new)
+          assert all(int(r['model']['training_matches']) == 5360 for r in new)
+
+          for r in new:
+              unsigned=dict(r)
+              stored=unsigned.pop('content_sha256')
+              assert stored==prediction_content_hash(unsigned)
+              assert '2026-09-18' <= r['commence_time_utc'][:10] <= '2026-09-20'
+              print('LOCK', r['commence_time_utc'], r['home_team_provider'], 'vs', r['away_team_provider'],
+                    'market=',r['market_anchor']['probability'],
+                    'football1=',r['model']['probability'])
+          PY
+
+      - name: Freeze rolling 30-day and 15-day recency shadows
+        run: |
+          mkdir -p prospective/shadows/2026-09-18-20
+          LOCKED_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+
+          football1-recency-shadow \
+            --database data/processed/football1.sqlite \
+            --source-ledger prospective/ledger.jsonl \
+            --output prospective/shadows/2026-09-18-20/recency_30d.jsonl \
+            --locked-at-utc "$LOCKED_AT" \
+            --half-life-days 30
+
+          football1-recency-shadow \
+            --database data/processed/football1.sqlite \
+            --source-ledger prospective/ledger.jsonl \
+            --output prospective/shadows/2026-09-18-20/recency_15d.jsonl \
+            --locked-at-utc "$LOCKED_AT" \
+            --half-life-days 15
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          for name,half in [('recency_30d.jsonl',30.0),('recency_15d.jsonl',15.0)]:
+              path=Path('prospective/shadows/2026-09-18-20')/name
+              rows=[json.loads(x) for x in path.read_text().splitlines() if x.strip()]
+              assert len(rows)==10, (name,len(rows))
+              assert len({r['event_id'] for r in rows})==10
+              assert all(r['decision_weight']==0.0 for r in rows)
+              assert all(r['recency_policy']['half_life_days']==half for r in rows)
+              assert all(r['historical_training']['historical_data_cutoff']=='2026-09-14' for r in rows)
+              assert all(r['commence_time_utc'][:10] >= '2026-09-18' for r in rows)
+              print(name,'records=',len(rows),'locked_at=',rows[0]['shadow_locked_at_utc'])
+          PY
+
+      - name: Recover frozen Draw Possibility historical reference
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p frozen-audit
+          gh run download 33924106948 \
+            --repo zee6/FlaretTest1 \
+            --name epl-audit-output \
+            --dir frozen-audit
+          DB="$(find frozen-audit -name football1.sqlite -type f -print -quit)"
+          test -n "$DB"
+          test "$(sha256sum "$DB" | awk '{print $1}')" = "4b5c751b22608026fb18eb190279c13b41d50ab88055057787c041ae4b841454"
+          cp "$DB" data/processed/football1_draw_reference.sqlite
+
+      - name: Freeze unchanged Draw Possibility shadow
+        run: |
+          LOCKED_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          python -m football1.draw_possibility_shadow \
+            --database data/processed/football1_draw_reference.sqlite \
+            --source-ledger prospective/ledger.jsonl \
+            --output prospective/shadows/2026-09-18-20/draw_possibility.jsonl \
+            --locked-at-utc "$LOCKED_AT"
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path=Path('prospective/shadows/2026-09-18-20/draw_possibility.jsonl')
+          rows=[json.loads(x) for x in path.read_text().splitlines() if x.strip()]
+          assert len(rows)==10, len(rows)
+          assert len({r['event_id'] for r in rows})==10
+          assert all(r['decision_weight']==0.0 for r in rows)
+          assert all(r['draw_possibility']['is_probability'] is False for r in rows)
+          assert all(r['policy']['betting_rule'] is None for r in rows)
+          assert all(r['policy']['selection_threshold'] is None for r in rows)
+          assert all(r['historical_reference']['matches']==5340 for r in rows)
+
+          for rank,r in enumerate(sorted(rows,key=lambda x:x['draw_possibility']['balance_percentile_0_to_100'],reverse=True),start=1):
+              d=r['draw_possibility']
+              print('DRAW_RANK',rank,r['teams']['home'],'vs',r['teams']['away'],
+                    'gap=',round(d['home_away_probability_gap'],6),
+                    'internal_rank=',round(d['balance_percentile_0_to_100'],2),
+                    'pDraw=',round(r['market_probability']['draw'],4),
+                    'flags=',d['fixed_predeclared_balance_flags'])
+          PY
+
+      - name: Write immutable pre-match manifest
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import sqlite3
+          from pathlib import Path
+
+          base=Path('prospective/shadows/2026-09-18-20')
+          snapshot=json.loads(Path('data/live/epl_odds_snapshot_2026-09-18-20.json').read_text())
+          retrieved=snapshot['retrieved_at_utc']
+          predictions=[json.loads(x) for x in Path('prospective/ledger.jsonl').read_text().splitlines() if x.strip()]
+          new=[r for r in predictions if r['snapshot_retrieved_at_utc']==retrieved]
+
+          conn=sqlite3.connect('data/processed/football1.sqlite')
+          match_count, latest=conn.execute('select count(*), max(match_date) from matches').fetchone()
+          conn.close()
+
+          def sha(path):
+              return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+          manifest={
+              'schema_version':1,
+              'slate':'2026-09-18_to_2026-09-20',
+              'status':'prospective_frozen_before_kickoff',
+              'snapshot_retrieved_at_utc':retrieved,
+              'fixture_count':10,
+              'primary_model_id':'fixed_market_offset_football_slant_v1_live_consensus_anchor',
+              'primary_decision_threshold':None,
+              'rolling_walk_forward_database':{
+                  'matches':match_count,
+                  'historical_data_cutoff':latest,
+                  'sha256':sha('data/processed/football1.sqlite'),
+                  'policy':'existing live workflow updated with all completed EPL matches available before the snapshot',
+              },
+              'draw_possibility_historical_reference':{
+                  'matches':5340,
+                  'data_cutoff':'2026-08-31',
+                  'sha256':'4b5c751b22608026fb18eb190279c13b41d50ab88055057787c041ae4b841454',
+                  'policy':'frozen original reference retained so the structural ranking scale does not drift after observed results',
+              },
+              'prediction_record_ids':[r['record_id'] for r in new],
+              'prediction_content_sha256':[r['content_sha256'] for r in new],
+              'shadow_files':{
+                  'recency_30d':{
+                      'path':str(base/'recency_30d.jsonl'),
+                      'sha256':sha(base/'recency_30d.jsonl'),
+                      'decision_weight':0.0,
+                      'data_policy':'rolling walk-forward through 2026-09-14',
+                  },
+                  'recency_15d':{
+                      'path':str(base/'recency_15d.jsonl'),
+                      'sha256':sha(base/'recency_15d.jsonl'),
+                      'decision_weight':0.0,
+                      'data_policy':'rolling walk-forward through 2026-09-14',
+                  },
+                  'draw_possibility':{
+                      'path':str(base/'draw_possibility.jsonl'),
+                      'sha256':sha(base/'draw_possibility.jsonl'),
+                      'decision_weight':0.0,
+                      'data_policy':'frozen 5,340-match structural reference',
+                      'is_probability':False,
+                  },
+              },
+              'prohibited':[
+                  'no probability override from Draw Possibility',
+                  'no betting threshold selected from prior prospective outcomes',
+                  'no recency activation from one prior ten-match batch',
+                  'no stake rule activation',
+                  'no retrospective fixture selection',
+              ],
+          }
+          (base/'manifest.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(manifest,indent=2,sort_keys=True))
+          PY
+
+      - name: Commit immutable prospective locks
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            prospective/ledger.jsonl \
+            prospective/movement_predictions.jsonl \
+            prospective/odds_snapshots.jsonl \
+            prospective/shadows/2026-09-18-20/recency_30d.jsonl \
+            prospective/shadows/2026-09-18-20/recency_15d.jsonl \
+            prospective/shadows/2026-09-18-20/draw_possibility.jsonl \
+            prospective/shadows/2026-09-18-20/manifest.json
+
+          test -n "$(git diff --cached --name-only)"
+          git commit -m "Freeze prospective EPL slate 18-20 September 2026"
+          git push origin HEAD:master
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-prospective-lock-2026-09-18-20
+          path: |
+            data/live/epl_odds_snapshot_2026-09-18-20.json
+            prospective/shadows/2026-09-18-20/manifest.json
+            prospective/shadows/2026-09-18-20/recency_30d.jsonl
+            prospective/shadows/2026-09-18-20/recency_15d.jsonl
+            prospective/shadows/2026-09-18-20/draw_possibility.jsonl
+          if-no-files-found: error
+          retention-days: 90
