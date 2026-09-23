@@ -40,8 +40,8 @@ struct ContentView: View {
                 } else {
                     NoUpcomingSlateView()
                 }
-                .toolbar(.hidden, for: .navigationBar)
             }
+            .toolbar(.hidden, for: .navigationBar)
             .tabItem { Label("Match", systemImage: "scope") }
 
             NavigationStack {
@@ -56,8 +56,8 @@ struct ContentView: View {
                         title: "No current match to assess"
                     )
                 }
-                .toolbar(.hidden, for: .navigationBar)
             }
+            .toolbar(.hidden, for: .navigationBar)
             .tabItem { Label("Reality", systemImage: "eye") }
 
             NavigationStack {
