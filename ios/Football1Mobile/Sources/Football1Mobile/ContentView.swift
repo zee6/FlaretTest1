@@ -21,6 +21,7 @@ struct ContentView: View {
     @State private var selectedFixtureID = MobilePreviewData.fixtures[0].id
     @State private var selectedOutcomeID = MobilePreviewData.fixtures[0].mostLikelyOutcome.id
     @State private var loadMessage: String?
+    @State private var hasUpcomingSlate = true
 
     private var selectedFixture: MobileFixture {
         fixtures.first { $0.id == selectedFixtureID } ?? fixtures[0]
@@ -29,21 +30,32 @@ struct ContentView: View {
     var body: some View {
         TabView {
             NavigationStack {
-                LiveDashboardView(
-                    fixtures: fixtures,
-                    selectedFixtureID: $selectedFixtureID,
-                    selectedOutcomeID: $selectedOutcomeID,
-                    loadMessage: loadMessage
-                )
+                if hasUpcomingSlate {
+                    LiveDashboardView(
+                        fixtures: fixtures,
+                        selectedFixtureID: $selectedFixtureID,
+                        selectedOutcomeID: $selectedOutcomeID,
+                        loadMessage: loadMessage
+                    )
+                } else {
+                    NoUpcomingSlateView()
+                }
                 .toolbar(.hidden, for: .navigationBar)
             }
             .tabItem { Label("Match", systemImage: "scope") }
 
             NavigationStack {
-                RealityView(
-                    fixtures: fixtures,
-                    selectedFixtureID: $selectedFixtureID
-                )
+                if hasUpcomingSlate {
+                    RealityView(
+                        fixtures: fixtures,
+                        selectedFixtureID: $selectedFixtureID
+                    )
+                } else {
+                    NoUpcomingSlateView(
+                        eyebrow: "Reality",
+                        title: "No current match to assess"
+                    )
+                }
                 .toolbar(.hidden, for: .navigationBar)
             }
             .tabItem { Label("Reality", systemImage: "eye") }
@@ -81,15 +93,64 @@ struct ContentView: View {
         do {
             let live = try await MobileLiveData.loadProspectiveFixtures()
             guard !live.isEmpty else {
-                loadMessage = "No future locked predictions are currently in the ledger. Showing interface preview data."
+                hasUpcomingSlate = false
+                loadMessage = nil
                 return
             }
+            hasUpcomingSlate = true
             fixtures = live
             selectedFixtureID = live[0].id
             selectedOutcomeID = live[0].mostLikelyOutcome.id
             loadMessage = nil
         } catch {
-            loadMessage = "Could not read the public prospective ledger. Showing interface preview data."
+            hasUpcomingSlate = false
+            loadMessage = "Could not read the public prospective ledger."
+        }
+    }
+}
+
+private struct NoUpcomingSlateView: View {
+    var eyebrow = "Football 1"
+    var title = "No upcoming EPL slate is locked"
+
+    var body: some View {
+        ZStack {
+            F1Background()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    BrandHeader(
+                        eyebrow: eyebrow,
+                        title: title,
+                        subtitle: "Football 1 only shows genuine pre-kickoff prospective predictions here."
+                    )
+                    .padding(.top, 8)
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack(spacing: 7) {
+                            Circle()
+                                .fill(F1Theme.secondary)
+                                .frame(width: 7, height: 7)
+                            Text("NO ACTIVE PROSPECTIVE FIXTURES")
+                                .font(.caption2.weight(.bold))
+                                .tracking(0.8)
+                                .foregroundStyle(F1Theme.secondary)
+                        }
+
+                        Text("There are no future EPL matches currently locked in the prospective ledger.")
+                            .font(.headline)
+                            .foregroundStyle(F1Theme.text)
+
+                        Text("The app will populate this view automatically when the next EPL slate has been frozen before kickoff. Old preview fixtures are deliberately not shown as if they were current.")
+                            .font(.subheadline)
+                            .foregroundStyle(F1Theme.secondary)
+                    }
+                    .f1Card(strong: true)
+
+                    Spacer(minLength: 24)
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 12)
+            }
         }
     }
 }
