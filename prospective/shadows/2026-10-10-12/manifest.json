@@ -1,0 +1,68 @@
+{
+  "draw_possibility_historical_reference": {
+    "data_cutoff": "2026-08-31",
+    "matches": 5340,
+    "policy": "frozen original reference retained so the structural ranking scale does not drift after observed results",
+    "sha256": "4b5c751b22608026fb18eb190279c13b41d50ab88055057787c041ae4b841454"
+  },
+  "fixture_count": 9,
+  "missing_shadows": {
+    "draw_possibility": "Not generated: 4 Sep frozen reference artifact no longer downloadable. Original definition/reference unchanged; no replacement or post-hoc refit."
+  },
+  "prediction_content_sha256": [
+    "eb1b640c003134b889f94e6ba6e267919f0f616d3d037a9361229b78350ce46b",
+    "60f2016f9503743b7f23beaad81734f29170783ea7feb1c22d4e58832039f728",
+    "2e8c2869c32c507ff8295353a8dd93a5677db437ac7f59a410a948a10dfb488c",
+    "b76c89ffc2ac1138182868d0701c7de9fa1d3c65c2891c1070813ab79b5ef317",
+    "ad7bf8afc52e6f45f27217b95b9296bcf1d629bdde1d837a70cd894d3cba2c81",
+    "e0fbf0ead57b5d5ca1552d0d395bea7b23bbaedcbd7d7462cdb4f3f6af7e8d5c",
+    "921fa183429a1065f66f9e9f7aa14570686f245bf16cbd9eed80981ef1fab21a",
+    "d820d44d29e224df06679de02e441453e90a7a9c004e49f58c029433f0ae8b30",
+    "40cd1501666bd43f5a93de5f53996e07439b4c3039111f64b27c00748327df8c"
+  ],
+  "prediction_record_ids": [
+    "4e8416648eae644cf67d6c44",
+    "68b83c619a9e22535b78efec",
+    "8a14b352f75026d3a41867f3",
+    "9b34c866239fe8c5b4620136",
+    "a78649b05d4766d7a69ea107",
+    "aedc9a1a78ae57d247818778",
+    "569ac958c81e16ffb451a8ae",
+    "10a0d7662dc4aa77b4470119",
+    "ba0087491ca53cc1b98239d2"
+  ],
+  "primary_decision_threshold": null,
+  "primary_model_id": "fixed_market_offset_football_slant_v1_live_consensus_anchor",
+  "prohibited": [
+    "no probability override from Draw Possibility",
+    "no betting threshold selected from prior prospective outcomes",
+    "no recency activation from one prior ten-match batch",
+    "no stake rule activation",
+    "no retrospective fixture selection"
+  ],
+  "rolling_walk_forward_database": {
+    "historical_data_cutoff": "2026-09-20",
+    "matches": 5370,
+    "policy": "existing live workflow updated with all completed EPL matches available before the snapshot",
+    "sha256": "e3c5064be6b7d2f5c3e6033498fd567420da05b1fe759157a1ad1f0e9e71a56a"
+  },
+  "schema_version": 1,
+  "scope": "partial_rest_of_matchweek_6_only; Arsenal-Leeds started before any new snapshot and is excluded",
+  "shadow_files": {
+    "recency_15d": {
+      "data_policy": "rolling walk-forward through 2026-09-20",
+      "decision_weight": 0.0,
+      "path": "prospective/shadows/2026-10-10-12/recency_15d.jsonl",
+      "sha256": "d0fb315dbc5a6f1c35fd0961f1802508f61036ee825b34b9dbdd4d9e77065996"
+    },
+    "recency_30d": {
+      "data_policy": "rolling walk-forward through 2026-09-20",
+      "decision_weight": 0.0,
+      "path": "prospective/shadows/2026-10-10-12/recency_30d.jsonl",
+      "sha256": "cfa2415e6dcd3c0d158adaae47a6c411b139c1b13afd7b817d645c664f05ae1c"
+    }
+  },
+  "slate": "2026-10-10_to_2026-10-12",
+  "snapshot_retrieved_at_utc": "2026-10-10T11:51:51.936218+00:00",
+  "status": "prospective_frozen_before_kickoff"
+}
