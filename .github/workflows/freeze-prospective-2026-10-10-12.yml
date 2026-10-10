@@ -1,4 +1,4 @@
-name: Freeze EPL Prospective Slate 2026-10-10 to 20
+name: Freeze EPL Partial Prospective Slate 2026-10-10 to 12
 
 on:
   push:
@@ -81,7 +81,7 @@ jobs:
             --odds-format decimal \
             --output data/live/epl_odds_snapshot_all.json
 
-      - name: Restrict snapshot to the exact 18-20 September slate
+      - name: Restrict snapshot to the remaining nine October 10-12 fixtures
         run: |
           python - <<'PY'
           import json
@@ -153,7 +153,7 @@ jobs:
             --snapshot data/live/epl_odds_snapshot_2026-10-10-12.json \
             --ledger prospective/movement_predictions.jsonl
 
-      - name: Verify exactly ten new immutable prediction locks
+      - name: Verify nine new immutable prediction locks
         run: |
           python - <<'PY'
           import json
@@ -170,7 +170,7 @@ jobs:
           assert len({r['event_id'] for r in new}) == 9
           assert all(r['model']['strategy_threshold'] is None for r in new)
           assert all(r['model']['historical_data_cutoff']=='2026-09-20' for r in new)
-          assert all(int(r['model']['training_matches']) == 5360 for r in new)
+          assert all(int(r['model']['training_matches']) == 5370 for r in new)
 
           for r in new:
               unsigned=dict(r)
@@ -354,7 +354,7 @@ jobs:
             prospective/shadows/2026-10-10-12/manifest.json
 
           test -n "$(git diff --cached --name-only)"
-          git commit -m "Freeze prospective EPL slate 18-20 September 2026"
+          git commit -m "Freeze partial prospective EPL slate 10-12 October 2026"
           git push origin HEAD:master
 
       - uses: actions/upload-artifact@v4
