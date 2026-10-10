@@ -244,7 +244,7 @@ jobs:
               'status':'prospective_frozen_before_kickoff',
               'snapshot_retrieved_at_utc':retrieved,
               'fixture_count':9,
-              'scope':'partial_rest_of_matchweek_6_only; Arsenal-Leeds started before any new snapshot and is excluded',,
+              'scope':'partial_rest_of_matchweek_6_only; Arsenal-Leeds started before any new snapshot and is excluded',
               'primary_model_id':'fixed_market_offset_football_slant_v1_live_consensus_anchor',
               'primary_decision_threshold':None,
               'rolling_walk_forward_database':{
