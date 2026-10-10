@@ -1,10 +1,19 @@
 # Football 1 — Maintained Project State
 
-**Status date:** 7 September 2026  
+**Status date:** 10 October 2026 (continuity update; original inventory below dated 7 September)
+
 **Development credit:** Godo and Dave  
 **Repository:** `zee6/FlaretTest1`
 
 This document is the maintained status map for Football 1. It consolidates the existing implementation, earlier research decisions, and the additional product/research decisions agreed on 7 September 2026.
+
+## 10 October continuity update
+
+The repository checkpoint contains 39 immutable predictions, 30 September settlements and nine October predictions frozen before their respective kickoffs. Arsenal–Leeds was excluded because it had already started before the snapshot. October's original Draw Possibility reference could not be recovered, so that shadow is explicitly unavailable; no replacement or retrospective ranking is introduced.
+
+The October evaluator now verifies the exact saved manifest, predictions and recency shadows, then reuses the existing primary, recency, error-anatomy and portfolio scorers for zero/partial/complete settlements. Official betting remains inactive. See [October continuity and evaluation](OCTOBER_2026_CONTINUITY.md) for scope, integrity checks and the next operational steps.
+
+Football 1 remains a working title. [Naming and migration notes](PROJECT_NAMING.md) retain the candidate names and map changes across web, Apple apps, Python, repository links and CI while preserving frozen research identity. No rename has been selected or applied.
 
 It is **additive**, not a replacement for earlier frozen research documents such as `PHASE1C_RESULTS.md` and `PROSPECTIVE_PROTOCOL.md`.
 
