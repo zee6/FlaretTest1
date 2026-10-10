@@ -214,3 +214,5 @@ jobs:
             /tmp/portfolio.json
           if-no-files-found: error
           retention-days: 90
+
+# October 2026 retrospective score validation: append-only 18-20 September settlements verified against published results.
