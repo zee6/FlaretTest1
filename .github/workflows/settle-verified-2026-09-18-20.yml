@@ -1,0 +1,122 @@
+name: Settle verified 18-20 September EPL prospective slate
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/settle-verified-2026-09-18-20.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: settle-verified-2026-09-18-20
+  cancel-in-progress: false
+
+jobs:
+  settle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install and test
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+          pytest -q
+
+      - name: Validate frozen prediction IDs and append verified final scores
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+          from football1.settlement import (
+              _load_predictions, _load_settlements, make_settlement_record,
+              settlement_content_hash, append_settlements,
+          )
+
+          # Independent published final scores verified 10 October 2026.
+          # A direct Odds API score fetch is no longer possible after its
+          # three-day lookback; do not pretend this is a provider feed.
+          RESULTS = {
+              ('Brentford', 'Chelsea'): (3, 0),
+              ('Tottenham Hotspur', 'Aston Villa'): (2, 3),
+              ('Brighton and Hove Albion', 'Arsenal'): (3, 0),
+              ('Everton', 'Ipswich Town'): (1, 0),
+              ('Newcastle United', 'Hull City'): (2, 1),
+              ('Nottingham Forest', 'Coventry City'): (0, 1),
+              ('Bournemouth', 'Liverpool'): (0, 1),
+              ('Leeds United', 'Crystal Palace'): (0, 0),
+              ('Manchester City', 'Sunderland'): (5, 3),
+              ('Fulham', 'Manchester United'): (1, 1),
+          }
+          verified_sources = [
+              'https://www.football.co.uk/match-reports/premier-league/',
+              'https://www.rte.ie/sport/results/soccer/premier-league/36781/results/',
+              'https://www.soccerbase.com/matches/results.sd?date=2026-09-20',
+          ]
+          prediction_path = Path('prospective/ledger.jsonl')
+          settlement_path = Path('prospective/settlements.jsonl')
+          manifest = json.loads(Path('prospective/shadows/2026-09-18-20/manifest.json').read_text())
+          predictions = _load_predictions(prediction_path)
+          existing = _load_settlements(settlement_path)
+          wanted = [
+              p for p in predictions
+              if '2026-09-18' <= str(p['commence_time_utc'])[:10] <= '2026-09-20'
+          ]
+          assert len(wanted) == 10, len(wanted)
+          assert {p['record_id'] for p in wanted} == set(manifest['prediction_record_ids'])
+          assert {(p['home_team_provider'], p['away_team_provider']) for p in wanted} == set(RESULTS)
+          assert not set(manifest['prediction_record_ids']).intersection(
+              {r['prediction_record_id'] for r in existing}
+          ), 'Refusing to duplicate or overwrite settlements'
+          retrieved = datetime.now(timezone.utc).isoformat()
+          records = []
+          for prediction in wanted:
+              home = prediction['home_team_provider']
+              away = prediction['away_team_provider']
+              hg, ag = RESULTS[(home, away)]
+              # Construct only the verified score shape required by the existing
+              # deterministic scorer; provenance below states this is manual.
+              score_event = {
+                  'id': prediction['event_id'], 'completed': True,
+                  'last_update': None,
+                  'scores': [
+                      {'name': home, 'score': str(hg)},
+                      {'name': away, 'score': str(ag)},
+                  ],
+              }
+              row = make_settlement_record(
+                  prediction, score_event, scores_retrieved_at_utc=retrieved
+              )
+              row['result_verification'] = {
+                  'source_type': 'retrospectively_verified_published_final_scores',
+                  'source_urls': verified_sources,
+                  'verified_at_utc': retrieved,
+                  'note': 'Manually transcribed public results outside provider three-day window; event ID taken from immutable prediction; no claim of fresh provider score payload.',
+              }
+              row.pop('content_sha256')
+              row['content_sha256'] = settlement_content_hash(row)
+              records.append(row)
+          added = append_settlements(settlement_path, records)
+          assert added == 10, added
+          assert len(_load_settlements(settlement_path)) == len(existing) + 10
+          print('VERIFIED_SETTLEMENTS_ADDED', added)
+          for r in records:
+              print(r['home_team_provider'], r['home_score'], '-', r['away_score'], r['away_team_provider'], r['result'])
+          PY
+
+      - name: Commit appended settlements without modifying prediction ledger
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add prospective/settlements.jsonl
+          test "$(git diff --cached --name-only)" = "prospective/settlements.jsonl"
+          git commit -m "Settle 18-20 September EPL predictions from verified final scores"
+          git push origin HEAD:master
