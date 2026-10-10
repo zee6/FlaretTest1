@@ -217,52 +217,6 @@ jobs:
               print(name,'records=',len(rows),'locked_at=',rows[0]['shadow_locked_at_utc'])
           PY
 
-      - name: Recover frozen Draw Possibility historical reference
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          mkdir -p frozen-audit
-          gh run download 33924106948 \
-            --repo zee6/FlaretTest1 \
-            --name epl-audit-output \
-            --dir frozen-audit
-          DB="$(find frozen-audit -name football1.sqlite -type f -print -quit)"
-          test -n "$DB"
-          test "$(sha256sum "$DB" | awk '{print $1}')" = "4b5c751b22608026fb18eb190279c13b41d50ab88055057787c041ae4b841454"
-          cp "$DB" data/processed/football1_draw_reference.sqlite
-
-      - name: Freeze unchanged Draw Possibility shadow
-        run: |
-          LOCKED_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-          python -m football1.draw_possibility_shadow \
-            --database data/processed/football1_draw_reference.sqlite \
-            --source-ledger prospective/ledger.jsonl \
-            --output prospective/shadows/2026-10-10-12/draw_possibility.jsonl \
-            --locked-at-utc "$LOCKED_AT"
-
-          python - <<'PY'
-          import json
-          from pathlib import Path
-
-          path=Path('prospective/shadows/2026-10-10-12/draw_possibility.jsonl')
-          rows=[json.loads(x) for x in path.read_text().splitlines() if x.strip()]
-          assert len(rows)==9, len(rows)
-          assert len({r['event_id'] for r in rows})==9
-          assert all(r['decision_weight']==0.0 for r in rows)
-          assert all(r['draw_possibility']['is_probability'] is False for r in rows)
-          assert all(r['policy']['betting_rule'] is None for r in rows)
-          assert all(r['policy']['selection_threshold'] is None for r in rows)
-          assert all(r['historical_reference']['matches']==5340 for r in rows)
-
-          for rank,r in enumerate(sorted(rows,key=lambda x:x['draw_possibility']['balance_percentile_0_to_100'],reverse=True),start=1):
-              d=r['draw_possibility']
-              print('DRAW_RANK',rank,r['teams']['home'],'vs',r['teams']['away'],
-                    'gap=',round(d['home_away_probability_gap'],6),
-                    'internal_rank=',round(d['balance_percentile_0_to_100'],2),
-                    'pDraw=',round(r['market_probability']['draw'],4),
-                    'flags=',d['fixed_predeclared_balance_flags'])
-          PY
-
       - name: Write immutable pre-match manifest
         run: |
           python - <<'PY'
@@ -307,6 +261,9 @@ jobs:
               },
               'prediction_record_ids':[r['record_id'] for r in new],
               'prediction_content_sha256':[r['content_sha256'] for r in new],
+              'missing_shadows': {
+                  'draw_possibility':'Not generated: 4 Sep frozen reference artifact no longer downloadable. Original definition/reference unchanged; no replacement or post-hoc refit.',
+              },
               'shadow_files':{
                   'recency_30d':{
                       'path':str(base/'recency_30d.jsonl'),
@@ -320,13 +277,7 @@ jobs:
                       'decision_weight':0.0,
                       'data_policy':'rolling walk-forward through 2026-09-20',
                   },
-                  'draw_possibility':{
-                      'path':str(base/'draw_possibility.jsonl'),
-                      'sha256':sha(base/'draw_possibility.jsonl'),
-                      'decision_weight':0.0,
-                      'data_policy':'frozen 5,340-match structural reference',
-                      'is_probability':False,
-                  },
+
               },
               'prohibited':[
                   'no probability override from Draw Possibility',
@@ -350,7 +301,6 @@ jobs:
             prospective/odds_snapshots.jsonl \
             prospective/shadows/2026-10-10-12/recency_30d.jsonl \
             prospective/shadows/2026-10-10-12/recency_15d.jsonl \
-            prospective/shadows/2026-10-10-12/draw_possibility.jsonl \
             prospective/shadows/2026-10-10-12/manifest.json
 
           test -n "$(git diff --cached --name-only)"
@@ -365,6 +315,5 @@ jobs:
             prospective/shadows/2026-10-10-12/manifest.json
             prospective/shadows/2026-10-10-12/recency_30d.jsonl
             prospective/shadows/2026-10-10-12/recency_15d.jsonl
-            prospective/shadows/2026-10-10-12/draw_possibility.jsonl
           if-no-files-found: error
           retention-days: 90
