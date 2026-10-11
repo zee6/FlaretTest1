@@ -46,8 +46,17 @@ jobs:
             --output /tmp/prospective-portfolio.json
           python - <<'PY'
           import json
+          from pathlib import Path
+          from football1.settlement import _load_predictions, _load_settlements
+
           r=json.load(open('/tmp/prospective-portfolio.json'))
-          assert r['settled_records'] == 20
+          # The live ledger grows. Reconcile to verified immutable records,
+          # rather than retaining September's one-time 20-settlement count.
+          predictions=_load_predictions(Path('prospective/ledger.jsonl'))
+          settlements=_load_settlements(Path('prospective/settlements.jsonl'))
+          assert r['settled_records'] == len(settlements)
+          assert len(settlements) <= len(predictions)
+          assert r['shadow_selection_counts']['raw_max_ev_every_settled_match'] == len(settlements)
           official=r['official_research_portfolio']['portfolio']
           assert official['bets_placed'] == 0
           assert official['final_bankroll'] == 1000.0

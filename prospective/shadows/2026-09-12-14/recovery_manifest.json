@@ -1,0 +1,66 @@
+{
+  "decision_weight": 0.0,
+  "evaluation_scope": "original first two September batches only; no later snapshots or slates",
+  "missing_historical_database": {
+    "sha256": "4b5c751b22608026fb18eb190279c13b41d50ab88055057787c041ae4b841454",
+    "source_run_id": 33924106948,
+    "status": "original_artifact_no_longer_available"
+  },
+  "prediction_content_sha256_by_id": {
+    "04d1b8fbf482c96611be9047": "d2647867f863f0ac49773f19bddc43650d7f624297f23ab5156f96106b2de8d0",
+    "0884a4553bbd84b3cd1f2300": "93e44d7c1306e5eaec2d8982ec229d4047ebe01cdf2d6239045e714e325ac499",
+    "1f6a79715e0515e5075cdbbd": "f47a9fcd3afdd8dd509c39cf3b3b05fae5816ea1c313e7a6a4238cfacc14e3c6",
+    "2d3ce074b2998ff9c1aee0fc": "7e9d5618bf514e005103cdc8b476677592170c8d7b3f2f8fcabece7512845fe8",
+    "3f1582f94801c4bc7745a9bb": "1c5c6345ff5c5ccc105b5ed8d1762bb3ef3d4ce846a516fb99bf537145d6ed6d",
+    "4d654dfa0aa29d01787064db": "a092f5d7a1fd8ff71d8dd9a4457716b417bc2aaf6a7794ed724bf563f0480023",
+    "57354c47429a0c3b26369d49": "5ae1ab2c6dcfa20a6c6eb81a7c86886548d45aaf5cb40a9cc89a7d031ea1f184",
+    "64b1726ffb232b8c7712a827": "171a97b0ad2abf29ca145f199d96de2a6481273782c7476c1686f0d07d9bbe7c",
+    "66744e8d1836d883cefc9362": "c4bddef4584882e74304324544522f2fc29139595627c2707f364eb3881efb1e",
+    "66e53066b824a411a11e17e3": "94fd8ad5d9c61fcd348c77bd07cc14a7a39c3e74e3356f95f31a6b284732bf41",
+    "73794f47d2d0f51fcf886b43": "82117a3ce43c71b521f382ff51916fe2e31b875fd482dff9e1c21c69581bdbcd",
+    "7be2b23e225e8d42302dcc2a": "0b8c1f4549961d4c68fb6dde5cfe182f5a798f036e4fbbf0842957e5ed6e955c",
+    "7e608777dba797f11b61d10c": "5a551377113afb3d09c42f6055a973fd24b432de3ee0f57b70818544bfdc7915",
+    "950d101014b5e4bce6545fa0": "caf48f16fe12b8b39fc8946c074673d845b7dea38fe62cf3e51495bf557cdf81",
+    "9a6eb1a078f7b4205e1f0ecc": "9181b25c613976f27c92eb6b4ef0d9775f18388e40dccd06cebb31775c257063",
+    "a3fb8ec6313df38a5b46fc02": "2545f31dec8d30854e968c970aa31eda33ba5d985952afa3aa40b0f2e89da206",
+    "c3db725e1dd419c1411dff93": "276b2b71fa568611a569549a2a1c1688b8bfa215df06d72731e2a40de25291f7",
+    "c9ab4b5ecd9f9dc49698f98c": "1bcefedeb172b28f9eb32de1a6d0fc8d8d472fa83faa4b641dfd320c6caf97f7",
+    "e70b9756a066959473389a90": "55da886a79aaa70af028ba549e8ee3d51e7939a8a62c2ed55d8efac3a5d6118b",
+    "f70cd1087f6c164dafe16d89": "305490573379232023ddf2fd500d18e99931f3a4546bb3db6564da33b944d1b9"
+  },
+  "recovered_files": {
+    "draw_possibility": {
+      "original_member": "draw_possibility_shadow.jsonl",
+      "path": "prospective/shadows/2026-09-12-14/draw_possibility.jsonl",
+      "records": 10,
+      "sha256": "915b174364b631db6fcdfb6e675855dcf527ec18e214daea701ee7d7d6db17ed",
+      "source_artifact_id": 10101426769,
+      "source_run_id": 34345280458,
+      "status": "original_bytes_recovered",
+      "zip_sha256": "88f9afc81eef46d375cfd0d1d8efdf7a156f73e6214082f640bc0ae695d16300"
+    },
+    "recency_15d": {
+      "original_member": "recency_shadow_15d.jsonl",
+      "path": "prospective/shadows/2026-09-12-14/recency_15d.jsonl",
+      "records": 10,
+      "sha256": "c3fcbe7ebd207f3fffd19f0b07b1bf2d3ed763d2343b7e7c59055f589729aef5",
+      "source_artifact_id": 10098282526,
+      "source_run_id": 34337404778,
+      "status": "original_bytes_recovered",
+      "zip_sha256": "7e311f6552a7b1df7718a593ddc802db62706b8a45ecf6cb676acda36b3b4990"
+    }
+  },
+  "recovered_on_utc": "2026-10-11",
+  "schema_version": 1,
+  "source_repository_commit": "e8b5570fc66997384a80db5e7ea92c6c9fb1f8de",
+  "status": "partial_archive_recovery_not_new_forecast_lock",
+  "unavailable_files": {
+    "recency_30d": {
+      "policy": "No refit, interpolation, later 30-day lock, or replacement with September 18-20 shadows.",
+      "sha256": "28de0ae556d1e9f24ee7491118a7ab06ba439563a808b6f49eaa7a581120400c",
+      "source_artifact_id": 10097381591,
+      "source_run_id": 34335029540,
+      "status": "original_artifact_no_longer_available"
+    }
+  }
+}

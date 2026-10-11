@@ -1,6 +1,6 @@
 # Football 1 — Maintained Project State
 
-**Status date:** 10 October 2026 (continuity update; original inventory below dated 7 September)
+**Status date:** 11 October 2026 (continuity update; original inventory below dated 7 September)
 
 **Development credit:** Godo and Dave  
 **Repository:** `zee6/FlaretTest1`
@@ -14,6 +14,10 @@ The repository checkpoint contains 39 immutable predictions, 30 September settle
 The October evaluator now verifies the exact saved manifest, predictions and recency shadows, then reuses the existing primary, recency, error-anatomy and portfolio scorers for zero/partial/complete settlements. Official betting remains inactive. See [October continuity and evaluation](OCTOBER_2026_CONTINUITY.md) for scope, integrity checks and the next operational steps.
 
 Football 1 remains a working title. [Naming and migration notes](PROJECT_NAMING.md) retain the candidate names and map changes across web, Apple apps, Python, repository links and CI while preserving frozen research identity. No rename has been selected or applied.
+
+On 11 October, the exact original September 12–14 Draw and 15-day recency forecast files were recovered and committed with their original hashes. The original 30-day file and historical database remain unavailable. [September archive recovery](SEPTEMBER_ARCHIVE_RECOVERY.md) records provenance and an offline rerun path that explicitly distinguishes the available evidence from the missing comparison.
+
+Five October forecasts have now been settled from independently verified final scores, giving 39 predictions / 35 settlements / 4 unresolved overall. [October partial results](OCTOBER_2026_PARTIAL_RESULTS.md) preserve the negative interim comparison: primary and both recency models trail the market on this five-match sample. Official betting remains inactive; the separate one-unit max-EV-every-match diagnostic lost all five selections. No forecast, threshold or weight was changed.
 
 It is **additive**, not a replacement for earlier frozen research documents such as `PHASE1C_RESULTS.md` and `PROSPECTIVE_PROTOCOL.md`.
 
