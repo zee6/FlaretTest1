@@ -53,6 +53,8 @@ For each frozen choice, EV is `p_model * decimal_odds - 1`. Net one-unit P&L is 
 
 The scorer recomputes log loss as `-ln(p_actual)` and Brier as the sum of squared H/D/A probability errors. All five stored results, scores, EV selections and all 15 hypothetical outcome P&Ls were checked against the original inputs. The prediction ledger SHA-256 remains `6194c719320129357dd8f69e1acde21d652f7f7493c811aff5a17ad50e7ceed3`. The settlement file retains its previous bytes and appends exactly five records, taking the full project to 39 predictions / 35 settlements / 4 unresolved.
 
+The legacy portfolio workflow initially rejected this growing ledger because it still asserted exactly 20 settlements. Its check now reconciles report and diagnostic counts to the hash-verified settlement file, bounded by the prediction count. The unchanged zero-bet, bankroll and drawdown invariants remain enforced; no portfolio calculation or rule was altered.
+
 Unresolved in this report: Hull–Everton, Crystal Palace–Nottingham Forest, Liverpool–Manchester City and Coventry–Newcastle. Append only independently verified completed results, then rerun:
 
 ```bash
