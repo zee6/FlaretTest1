@@ -7,6 +7,7 @@ on:
     paths:
       - 'src/football1/**'
       - 'tests/**'
+      - 'prospective/**'
       - 'pyproject.toml'
       - '.github/workflows/ci.yml'
 
@@ -26,3 +27,5 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e '.[dev]'
       - run: pytest -q
+      - name: Check mobile results feed is current
+        run: python -m football1.mobile_results --check

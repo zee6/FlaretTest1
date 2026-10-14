@@ -42,11 +42,14 @@ jobs:
 
       - name: Commit settlement ledger if changed
         run: |
+          python -m football1.mobile_results
+          python -m football1.mobile_results --check
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           if [ -f prospective/settlements.jsonl ]; then
             git add prospective/settlements.jsonl
           fi
+          git add prospective/mobile_results.json
           if git diff --cached --quiet; then
             echo 'No new settlements to commit'
           else
