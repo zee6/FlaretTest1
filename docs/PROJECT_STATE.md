@@ -1,6 +1,6 @@
 # Football 1 — Maintained Project State
 
-**Status date:** 11 October 2026 (continuity update; original inventory below dated 7 September)
+**Status date:** 14 October 2026 (iPhone Results update; original inventory below dated 7 September)
 
 **Development credit:** Godo and Dave  
 **Repository:** `zee6/FlaretTest1`
@@ -18,6 +18,8 @@ Football 1 remains a working title. [Naming and migration notes](PROJECT_NAMING.
 On 11 October, the exact original September 12–14 Draw and 15-day recency forecast files were recovered and committed with their original hashes. The original 30-day file and historical database remain unavailable. [September archive recovery](SEPTEMBER_ARCHIVE_RECOVERY.md) records provenance and an offline rerun path that explicitly distinguishes the available evidence from the missing comparison.
 
 Five October forecasts have now been settled from independently verified final scores, giving 39 predictions / 35 settlements / 4 unresolved overall. [October partial results](OCTOBER_2026_PARTIAL_RESULTS.md) preserve the negative interim comparison: primary and both recency models trail the market on this five-match sample. Official betting remains inactive; the separate one-unit max-EV-every-match diagnostic lost all five selections. No forecast, threshold or weight was changed.
+
+The iPhone Results tab now exposes recorded batches, scores, frozen primary/market probabilities, probability scoring and the separate hypothetical one-unit diagnostic. Its deterministic `prospective/mobile_results.json` feed is generated from semantically validated ledgers; CI checks freshness. Official portfolio status remains inactive with zero bets. This screen does not yet display recency or Draw shadow comparisons. See the [iPhone guide](../ios/Football1Mobile/README.md) for Xcode, refresh and simulator-preview instructions.
 
 It is **additive**, not a replacement for earlier frozen research documents such as `PHASE1C_RESULTS.md` and `PROSPECTIVE_PROTOCOL.md`.
 

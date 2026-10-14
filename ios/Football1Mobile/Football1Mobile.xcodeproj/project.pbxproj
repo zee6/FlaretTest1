@@ -11,6 +11,9 @@
 		A20000000000000000000002 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000002 /* Models.swift */; };
 		A20000000000000000000003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000003 /* ContentView.swift */; };
 		A20000000000000000000005 /* EloResearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000005 /* EloResearch.swift */; };
+		A20000000000000000000006 /* ResultsData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000006 /* ResultsData.swift */; };
+		A20000000000000000000007 /* ResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000007 /* ResultsView.swift */; };
+		A20000000000000000000008 /* mobile_results.json in Resources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000008 /* mobile_results.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,6 +22,9 @@
 		B20000000000000000000003 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B20000000000000000000004 /* Football 1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Football 1.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B20000000000000000000005 /* EloResearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EloResearch.swift; sourceTree = "<group>"; };
+		B20000000000000000000006 /* ResultsData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsData.swift; sourceTree = "<group>"; };
+		B20000000000000000000007 /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsView.swift; sourceTree = "<group>"; };
+		B20000000000000000000008 /* mobile_results.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = ../../prospective/mobile_results.json; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,6 +43,7 @@
 			children = (
 				D20000000000000000000002 /* Sources */,
 				D20000000000000000000003 /* Products */,
+				B20000000000000000000008 /* mobile_results.json */,
 			);
 			sourceTree = "<group>";
 		};
@@ -47,6 +54,8 @@
 				B20000000000000000000002 /* Models.swift */,
 				B20000000000000000000003 /* ContentView.swift */,
 				B20000000000000000000005 /* EloResearch.swift */,
+				B20000000000000000000007 /* ResultsView.swift */,
+				B20000000000000000000006 /* ResultsData.swift */,
 			);
 			path = Sources/Football1Mobile;
 			sourceTree = "<group>";
@@ -117,6 +126,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A20000000000000000000008 /* mobile_results.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,6 +141,8 @@
 				A20000000000000000000002 /* Models.swift in Sources */,
 				A20000000000000000000003 /* ContentView.swift in Sources */,
 				A20000000000000000000005 /* EloResearch.swift in Sources */,
+				A20000000000000000000007 /* ResultsView.swift in Sources */,
+				A20000000000000000000006 /* ResultsData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

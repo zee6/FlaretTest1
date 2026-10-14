@@ -1,6 +1,6 @@
 import SwiftUI
 
-private enum F1Theme {
+enum F1Theme {
     static let background = Color(red: 0.025, green: 0.032, blue: 0.050)
     static let backgroundLift = Color(red: 0.045, green: 0.055, blue: 0.080)
     static let panel = Color.white.opacity(0.060)
@@ -17,6 +17,7 @@ private enum F1Theme {
 }
 
 struct ContentView: View {
+    @State private var selectedTab = ResultsFeed.usesBundledPreview ? "results" : "match"
     @State private var fixtures = MobilePreviewData.fixtures
     @State private var selectedFixtureID = MobilePreviewData.fixtures[0].id
     @State private var selectedOutcomeID = MobilePreviewData.fixtures[0].mostLikelyOutcome.id
@@ -28,7 +29,7 @@ struct ContentView: View {
     }
 
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             NavigationStack {
                 if hasUpcomingSlate {
                     LiveDashboardView(
@@ -43,6 +44,7 @@ struct ContentView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .tabItem { Label("Match", systemImage: "scope") }
+            .tag("match")
 
             NavigationStack {
                 if hasUpcomingSlate {
@@ -59,12 +61,21 @@ struct ContentView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .tabItem { Label("Reality", systemImage: "eye") }
+            .tag("reality")
+
+            NavigationStack {
+                ResultsDashboard()
+                    .toolbar(.hidden, for: .navigationBar)
+            }
+            .tabItem { Label("Results", systemImage: "list.bullet.rectangle") }
+            .tag("results")
 
             NavigationStack {
                 ModelStatusView()
                     .toolbar(.hidden, for: .navigationBar)
             }
             .tabItem { Label("Models", systemImage: "circle.hexagongrid") }
+            .tag("models")
 
             NavigationStack {
                 EloResearchDashboard(
@@ -75,6 +86,7 @@ struct ContentView: View {
                 .navigationBarTitleDisplayMode(.inline)
             }
             .tabItem { Label("Research", systemImage: "chart.xyaxis.line") }
+            .tag("research")
         }
         .tint(F1Theme.accent)
         .preferredColorScheme(.dark)
@@ -155,7 +167,7 @@ private struct NoUpcomingSlateView: View {
     }
 }
 
-private struct F1Background: View {
+struct F1Background: View {
     var body: some View {
         ZStack {
             F1Theme.background
@@ -173,7 +185,7 @@ private struct F1Background: View {
     }
 }
 
-private struct BrandHeader: View {
+struct BrandHeader: View {
     let eyebrow: String
     let title: String
     let subtitle: String?
@@ -1082,7 +1094,7 @@ private struct GlossaryLine: View {
     }
 }
 
-private extension View {
+extension View {
     func f1Card(strong: Bool = false) -> some View {
         self
             .frame(maxWidth: .infinity, alignment: .leading)

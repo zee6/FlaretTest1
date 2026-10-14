@@ -156,9 +156,11 @@ jobs:
 
       - name: Commit normalized prospective records
         run: |
+          python -m football1.mobile_results
+          python -m football1.mobile_results --check
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add prospective/ledger.jsonl prospective/movement_predictions.jsonl
+          git add prospective/ledger.jsonl prospective/movement_predictions.jsonl prospective/mobile_results.json
           if [ -f prospective/odds_snapshots.jsonl ]; then
             git add prospective/odds_snapshots.jsonl
           fi
