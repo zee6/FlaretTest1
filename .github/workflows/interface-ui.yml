@@ -79,18 +79,27 @@ jobs:
           python3 - <<'PY'
           import json, subprocess, time
           from pathlib import Path
+          def run(*command, timeout=120):
+              print('RUN', *command, flush=True)
+              subprocess.run(command, check=True, timeout=timeout)
+          runtimes = json.loads(subprocess.check_output(['xcrun', 'simctl', 'list', 'runtimes', '--json']))['runtimes']
+          ios = [runtime for runtime in runtimes if runtime.get('isAvailable') and runtime['name'].startswith('iOS')]
+          runtime = max(ios, key=lambda item: tuple(int(part) for part in item['version'].split('.')))
           devices = json.loads(subprocess.check_output(['xcrun', 'simctl', 'list', 'devices', 'available', '--json']))
-          phone = next(device for group in devices['devices'].values() for device in group if 'iPhone' in device['name'])
+          phone = next(device for device in devices['devices'][runtime['identifier']] if 'iPhone' in device['name'])
           udid = phone['udid']
+          print('SIMULATOR', runtime['name'], phone['name'], udid, flush=True)
+          run('open', '-a', 'Simulator', '--args', '-CurrentDeviceUDID', udid)
           if phone['state'] != 'Booted':
-              subprocess.run(['xcrun', 'simctl', 'boot', udid], check=True)
-          subprocess.run(['xcrun', 'simctl', 'bootstatus', udid, '-b'], check=True)
+              # Opening Simulator may already have started this device.
+              subprocess.run(['xcrun', 'simctl', 'boot', udid], timeout=120)
+          run('xcrun', 'simctl', 'bootstatus', udid, '-b', timeout=240)
           app = Path('ios/Football1Mobile/.derivedData/Build/Products/Debug-iphonesimulator/Football 1.app')
-          subprocess.run(['xcrun', 'simctl', 'install', udid, str(app)], check=True)
-          subprocess.run(['xcrun', 'simctl', 'status_bar', udid, 'override', '--time', '9:41', '--batteryState', 'charged', '--batteryLevel', '100'], check=True)
-          subprocess.run(['xcrun', 'simctl', 'launch', udid, 'com.riskbrain.Football1Mobile', '--results-preview'], check=True)
+          run('xcrun', 'simctl', 'install', udid, str(app))
+          run('xcrun', 'simctl', 'status_bar', udid, 'override', '--time', '9:41', '--batteryState', 'charged', '--batteryLevel', '100')
+          run('xcrun', 'simctl', 'launch', udid, 'com.riskbrain.Football1Mobile', '--results-preview')
           time.sleep(5)
-          subprocess.run(['xcrun', 'simctl', 'io', udid, 'screenshot', 'iphone-results.png'], check=True)
+          run('xcrun', 'simctl', 'io', udid, 'screenshot', 'iphone-results.png')
           PY
       - uses: actions/upload-artifact@v4
         with:
