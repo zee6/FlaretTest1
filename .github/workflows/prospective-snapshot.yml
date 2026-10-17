@@ -68,6 +68,80 @@ jobs:
             --snapshot data/live/epl_odds_snapshot.json \
             --ledger prospective/movement_predictions.jsonl
 
+      - name: Freeze the 17-19 October recency observers and manifest
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+          from football1.prospective import prediction_content_hash
+          from football1.recency_shadow import build_shadow_records, append_shadow_records, content_hash
+          
+          def time(value):
+              return datetime.fromisoformat(value.replace('Z', '+00:00'))
+          
+          database = Path('data/processed/football1.sqlite')
+          snapshot = json.loads(Path('data/live/epl_odds_snapshot.json').read_text())
+          retrieved = snapshot['retrieved_at_utc']
+          all_rows = [json.loads(line) for line in Path('prospective/ledger.jsonl').read_text().splitlines() if line.strip()]
+          rows = [row for row in all_rows if row['snapshot_retrieved_at_utc'] == retrieved and '2026-10-17' <= row['commence_time_utc'][:10] <= '2026-10-19']
+          assert len(rows) == len({row['event_id'] for row in rows}) == 10, f'Expected ten current-slate forecasts, found {len(rows)}'
+          rows.sort(key=lambda row: (row['commence_time_utc'], row['record_id']))
+          for row in rows:
+              unsigned = dict(row)
+              stored = unsigned.pop('content_sha256')
+              assert stored == prediction_content_hash(unsigned)
+              assert time(retrieved) < time(row['commence_time_utc'])
+              assert row['model']['historical_data_cutoff'] < retrieved[:10]
+              assert row['model']['strategy_threshold'] is None
+          
+          directory = Path('prospective/shadows/2026-10-17-19')
+          assert not directory.exists(), 'Never overwrite a frozen slate'
+          directory.mkdir(parents=True)
+          shadows = {}
+          for half_life in (15, 30):
+              locked = datetime.now(timezone.utc).isoformat()
+              records, metadata = build_shadow_records(database, rows, locked_at_utc=locked, half_life_days=half_life)
+              assert len(records) == 10 and metadata['skipped_already_started'] == 0
+              wanted = {row['record_id']: row['content_sha256'] for row in rows}
+              for record in records:
+                  source = record['source_prediction']
+                  assert wanted[source['record_id']] == source['content_sha256']
+                  assert time(retrieved) <= time(record['shadow_locked_at_utc']) < time(record['commence_time_utc'])
+                  assert record['decision_weight'] == 0.0
+                  assert record['recency_policy']['half_life_days'] == half_life
+                  assert record['historical_training']['historical_data_cutoff'] < retrieved[:10]
+                  unsigned = dict(record)
+                  stored = unsigned.pop('content_sha256')
+                  assert stored == content_hash(unsigned)
+              path = directory / f'recency_{half_life}d.jsonl'
+              assert append_shadow_records(path, records) == 10
+              shadows[f'recency_{half_life}d'] = {'path': str(path), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest(), 'locked_at_utc': locked}
+          
+          written = datetime.now(timezone.utc).isoformat()
+          assert all(time(written) < time(row['commence_time_utc']) for row in rows), 'Publication preparation must precede every kickoff'
+          manifest = {
+              'slate': '2026-10-17_to_2026-10-19',
+              'scope': 'Ten original pre-kickoff result forecasts; fixed 15/30-day recency observers; no activated betting rule.',
+              'snapshot_retrieved_at_utc': retrieved,
+              'manifest_written_at_utc': written,
+              'prediction_record_ids': [row['record_id'] for row in rows],
+              'prediction_content_sha256': [row['content_sha256'] for row in rows],
+              'historical_data_cutoff': sorted({row['model']['historical_data_cutoff'] for row in rows}),
+              'historical_database_sha256': hashlib.sha256(database.read_bytes()).hexdigest(),
+              'raw_snapshot_sha256': hashlib.sha256(Path('data/live/epl_odds_snapshot.json').read_bytes()).hexdigest(),
+              'shadow_files': shadows,
+              'missing_shadows': {'draw_possibility': 'The original fixed September historical reference database is unavailable; no changed reference or retrospective replacement is substituted.'},
+              'decision_weight': 0.0,
+              'official_betting_rule': None,
+              'workflow_run_id': os.environ['GITHUB_RUN_ID'],
+          }
+          (directory / 'manifest.json').write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n')
+          print(json.dumps(manifest, indent=2, sort_keys=True))
+          PY
+
       - name: Verify prospective records
         run: |
           python - <<'PY'
@@ -164,7 +238,7 @@ jobs:
           python -m football1.mobile_results --check
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add prospective/ledger.jsonl prospective/movement_predictions.jsonl prospective/mobile_results.json
+          git add prospective/ledger.jsonl prospective/movement_predictions.jsonl prospective/mobile_results.json prospective/shadows/2026-10-17-19
           if [ -f prospective/odds_snapshots.jsonl ]; then
             git add prospective/odds_snapshots.jsonl
           fi
