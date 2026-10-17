@@ -1,11 +1,17 @@
 # Football 1 — Maintained Project State
 
-**Status date:** 14 October 2026 (iPhone Results update; original inventory below dated 7 September)
+**Status date:** 17 October 2026 (prospective readiness and resume checkpoint; original inventory below dated 7 September)
 
 **Development credit:** Godo and Dave  
 **Repository:** `zee6/FlaretTest1`
 
 This document is the maintained status map for Football 1. It consolidates the existing implementation, earlier research decisions, and the additional product/research decisions agreed on 7 September 2026.
+
+## 17 October readiness and resume checkpoint
+
+**Resume from [RESUME_CHECKPOINT.md](RESUME_CHECKPOINT.md).** The successful snapshot run [39022856403](https://github.com/zee6/FlaretTest1/actions/runs/39022856403) froze all ten 17–19 October fixtures at 09:54:42 UTC, before the first kickoff, using 5,380 historical matches through 12 October. Both existing recency observers were saved with original hashes and zero decision weight in `prospective/shadows/2026-10-17-19/`. Draw remains explicitly unavailable because its original fixed historical reference is missing.
+
+The provider also returned ten 23–25 October fixtures, so the existing workflow appended 20 primary and movement forecasts in total. There are now 59 predictions, 35 recorded settlements and 24 unresolved records. Four of those unresolved records are older 10–12 October results awaiting verified settlement. The app's newest snapshot batch spans 17–25 October; the dated manifest covers only this weekend's ten. All earlier ledger bytes were preserved, and official betting remains inactive. The temporary launch trigger is restored to manual-only in the checkpoint change.
 
 ## 10 October continuity update
 
