@@ -2,6 +2,529 @@
   "batches": [
     {
       "diagnostic": {
+        "max_drawdown_units": 0.0,
+        "pnl_units": 0,
+        "roi": null,
+        "stake_units": 0,
+        "wins": 0
+      },
+      "end_date": "2026-10-25",
+      "frozen_at_utc": "2026-10-17T09:54:42.103887+00:00",
+      "id": "2026-10-17T09:54:42.103887+00:00",
+      "matches": [
+        {
+          "away": "Chelsea",
+          "home": "Everton",
+          "id": "10751d60dd7192d4d0c569e5",
+          "kickoff_utc": "2026-10-17T11:30:00Z",
+          "market_probability": {
+            "away": 0.4088676404887365,
+            "draw": 0.2640569568714416,
+            "home": 0.327075402639822
+          },
+          "model_probability": {
+            "away": 0.39098040097934755,
+            "draw": 0.24557406272786209,
+            "home": 0.36344553629279036
+          },
+          "odds": {
+            "away": 2.44,
+            "draw": 3.75,
+            "home": 3.1
+          },
+          "predicted_ev": 0.12668116250765005,
+          "prediction_sha256": "108e5a5a1aca71b39a4350cc17e3d03cd7c7d1c92ec732a97938e2d4a3383104",
+          "selection": "home",
+          "settlement": null
+        },
+        {
+          "away": "Ipswich Town",
+          "home": "Manchester City",
+          "id": "0a1ae72cef2faf75a81a6e0c",
+          "kickoff_utc": "2026-10-17T14:00:00Z",
+          "market_probability": {
+            "away": 0.09030415286356593,
+            "draw": 0.13673697892527722,
+            "home": 0.7729588682111568
+          },
+          "model_probability": {
+            "away": 0.09932606028720133,
+            "draw": 0.13882289219626362,
+            "home": 0.7618510475165351
+          },
+          "odds": {
+            "away": 14.0,
+            "draw": 7.6,
+            "home": 1.25
+          },
+          "predicted_ev": 0.3905648440208185,
+          "prediction_sha256": "8a687408079b1298a437b973d0e641ec758f5bbaa25f214ff01384b129e6455d",
+          "selection": "away",
+          "settlement": null
+        },
+        {
+          "away": "Liverpool",
+          "home": "Brentford",
+          "id": "1373da2b6f7f9595cd1e6136",
+          "kickoff_utc": "2026-10-17T14:00:00Z",
+          "market_probability": {
+            "away": 0.33787555199525354,
+            "draw": 0.26418584689750474,
+            "home": 0.39793860110724166
+          },
+          "model_probability": {
+            "away": 0.35941752657168236,
+            "draw": 0.2624628570560494,
+            "home": 0.37811961637226826
+          },
+          "odds": {
+            "away": 2.98,
+            "draw": 3.7,
+            "home": 2.52
+          },
+          "predicted_ev": 0.07106422918361344,
+          "prediction_sha256": "63ef4a7c84a0a5936c7933835435d9fd829243e77c6462d66e47e277d3cfba83",
+          "selection": "away",
+          "settlement": null
+        },
+        {
+          "away": "Hull City",
+          "home": "Fulham",
+          "id": "a76098c1e785bdb3ae70bb50",
+          "kickoff_utc": "2026-10-17T14:00:00Z",
+          "market_probability": {
+            "away": 0.18646420972356106,
+            "draw": 0.23648332590035862,
+            "home": 0.5770524643760803
+          },
+          "model_probability": {
+            "away": 0.17798540386099257,
+            "draw": 0.23051625220171532,
+            "home": 0.5914983439372921
+          },
+          "odds": {
+            "away": 5.6,
+            "draw": 4.2,
+            "home": 1.69
+          },
+          "predicted_ev": -0.00036779874597647755,
+          "prediction_sha256": "b071a0e3922cac874623c36a1ba694e547679481d2d4ad9daa92ef3868667b4a",
+          "selection": "home",
+          "settlement": null
+        },
+        {
+          "away": "Aston Villa",
+          "home": "Newcastle United",
+          "id": "0f275529e564a0e53b3a6e92",
+          "kickoff_utc": "2026-10-17T16:30:00Z",
+          "market_probability": {
+            "away": 0.32240348479424413,
+            "draw": 0.2585118927624608,
+            "home": 0.4190846224432951
+          },
+          "model_probability": {
+            "away": 0.33958752973889417,
+            "draw": 0.25561730899372,
+            "home": 0.40479516126738596
+          },
+          "odds": {
+            "away": 3.05,
+            "draw": 3.85,
+            "home": 2.38
+          },
+          "predicted_ev": 0.03574196570362709,
+          "prediction_sha256": "5a1d58ddd518857ea42f46720cf20ab353354ca8cda50fc7d916d743c6f97cc1",
+          "selection": "away",
+          "settlement": null
+        },
+        {
+          "away": "Sunderland",
+          "home": "Bournemouth",
+          "id": "25d37a3bfbb9239aa9f6529b",
+          "kickoff_utc": "2026-10-18T13:00:00Z",
+          "market_probability": {
+            "away": 0.2766006787011459,
+            "draw": 0.27347186293278175,
+            "home": 0.44992745836607223
+          },
+          "model_probability": {
+            "away": 0.27139001906406757,
+            "draw": 0.27182491639779965,
+            "home": 0.4567850645381327
+          },
+          "odds": {
+            "away": 3.7,
+            "draw": 3.6,
+            "home": 2.2
+          },
+          "predicted_ev": 0.004927141983892103,
+          "prediction_sha256": "87ae51c69d400ad0efc14bc32c63eb71b74a1b0924de4ec938bbe3f4161d57b8",
+          "selection": "home",
+          "settlement": null
+        },
+        {
+          "away": "Manchester United",
+          "home": "Leeds United",
+          "id": "6f059dd21a1d1000a8fa188d",
+          "kickoff_utc": "2026-10-18T13:00:00Z",
+          "market_probability": {
+            "away": 0.327393055263327,
+            "draw": 0.26508727773606056,
+            "home": 0.40751966700061243
+          },
+          "model_probability": {
+            "away": 0.3443966863578658,
+            "draw": 0.25716113830259174,
+            "home": 0.3984421753395425
+          },
+          "odds": {
+            "away": 3.05,
+            "draw": 3.7,
+            "home": 2.44
+          },
+          "predicted_ev": 0.05040989339149071,
+          "prediction_sha256": "92e438d7f6e9a32e28cb074656d5f8cb770d7cb56cfa9289479a12aa414772dc",
+          "selection": "away",
+          "settlement": null
+        },
+        {
+          "away": "Crystal Palace",
+          "home": "Brighton and Hove Albion",
+          "id": "954875d13db28788adc00abc",
+          "kickoff_utc": "2026-10-18T13:00:00Z",
+          "market_probability": {
+            "away": 0.16682892703246327,
+            "draw": 0.20965749503226508,
+            "home": 0.6235135779352716
+          },
+          "model_probability": {
+            "away": 0.1602042776572586,
+            "draw": 0.19710786052392365,
+            "home": 0.6426878618188178
+          },
+          "odds": {
+            "away": 6.4,
+            "draw": 4.9,
+            "home": 1.55
+          },
+          "predicted_ev": 0.025307377006454912,
+          "prediction_sha256": "3a7bc3c330c4de5d109b143afa805cc3dfb875cc6c8e938e099c8a370158c0dc",
+          "selection": "away",
+          "settlement": null
+        },
+        {
+          "away": "Arsenal",
+          "home": "Nottingham Forest",
+          "id": "a7905631df7801f9b0f7a3f7",
+          "kickoff_utc": "2026-10-18T15:30:00Z",
+          "market_probability": {
+            "away": 0.583442467477081,
+            "draw": 0.2468458132896545,
+            "home": 0.16971171923326453
+          },
+          "model_probability": {
+            "away": 0.5575116823383277,
+            "draw": 0.24912407849078722,
+            "home": 0.1933642391708852
+          },
+          "odds": {
+            "away": 1.69,
+            "draw": 4.0,
+            "home": 6.2
+          },
+          "predicted_ev": 0.19885828285948826,
+          "prediction_sha256": "25d3ae64b1e25eedaa25a41327b9ed71c84fe8c34d3cc7da7d0705689f70df28",
+          "selection": "home",
+          "settlement": null
+        },
+        {
+          "away": "Coventry City",
+          "home": "Tottenham Hotspur",
+          "id": "474ddc77a4f0cc4542fec83a",
+          "kickoff_utc": "2026-10-19T19:00:00Z",
+          "market_probability": {
+            "away": 0.14932538627398653,
+            "draw": 0.2084204936125466,
+            "home": 0.6422541201134668
+          },
+          "model_probability": {
+            "away": 0.1426063186336393,
+            "draw": 0.19834094190076776,
+            "home": 0.659052739465593
+          },
+          "odds": {
+            "away": 7.4,
+            "draw": 4.8,
+            "home": 1.52
+          },
+          "predicted_ev": 0.05528675788893089,
+          "prediction_sha256": "3290d8e96a1e22fdd9fbedbfe5911b6467ebddccc260572132295c6c8703fda0",
+          "selection": "away",
+          "settlement": null
+        },
+        {
+          "away": "Nottingham Forest",
+          "home": "Ipswich Town",
+          "id": "4fda201e19f445a5a636905a",
+          "kickoff_utc": "2026-10-23T19:00:00Z",
+          "market_probability": {
+            "away": 0.4229721348995318,
+            "draw": 0.26949766047860674,
+            "home": 0.3075302046218614
+          },
+          "model_probability": {
+            "away": 0.4415209039160554,
+            "draw": 0.27451354335958666,
+            "home": 0.2839655527243579
+          },
+          "odds": {
+            "away": 2.28,
+            "draw": 3.6,
+            "home": 3.3
+          },
+          "predicted_ev": 0.006667660928606267,
+          "prediction_sha256": "23574bf76abcc63da5bf37456de74baa8cf4bc1e938123ce28c24b0d1778fee8",
+          "selection": "away",
+          "settlement": null
+        },
+        {
+          "away": "Manchester City",
+          "home": "Aston Villa",
+          "id": "d29084d94beb56d8d52621af",
+          "kickoff_utc": "2026-10-24T11:30:00Z",
+          "market_probability": {
+            "away": 0.5528994685635729,
+            "draw": 0.23156912620764847,
+            "home": 0.21553140522877864
+          },
+          "model_probability": {
+            "away": 0.5316685928285031,
+            "draw": 0.22976064708960792,
+            "home": 0.23857076008188902
+          },
+          "odds": {
+            "away": 1.73,
+            "draw": 4.3,
+            "home": 4.7
+          },
+          "predicted_ev": 0.1212825723848785,
+          "prediction_sha256": "3ca441ff84670845313d1cbd08b809a34239614d761f94dcb59d25858203cccf",
+          "selection": "home",
+          "settlement": null
+        },
+        {
+          "away": "Fulham",
+          "home": "Coventry City",
+          "id": "1e3d335abf57b99cbd9a72e8",
+          "kickoff_utc": "2026-10-24T14:00:00Z",
+          "market_probability": {
+            "away": 0.40634798042656445,
+            "draw": 0.26799417547627125,
+            "home": 0.3256578440971643
+          },
+          "model_probability": {
+            "away": 0.41683401258317176,
+            "draw": 0.26847673167904806,
+            "home": 0.31468925573778006
+          },
+          "odds": {
+            "away": 2.4,
+            "draw": 3.6,
+            "home": 2.96
+          },
+          "predicted_ev": 0.0004016301996121463,
+          "prediction_sha256": "52c1faf8925d993acff9289d0865313dcd49c31280bcd537592f61df36eddae1",
+          "selection": "away",
+          "settlement": null
+        },
+        {
+          "away": "Everton",
+          "home": "Arsenal",
+          "id": "9c01beccd6fdc7c115d8a341",
+          "kickoff_utc": "2026-10-24T14:00:00Z",
+          "market_probability": {
+            "away": 0.1215212911504141,
+            "draw": 0.20596463390616776,
+            "home": 0.6725140749434181
+          },
+          "model_probability": {
+            "away": 0.13376194288745405,
+            "draw": 0.20717090818608852,
+            "home": 0.6590671489264573
+          },
+          "odds": {
+            "away": 10.0,
+            "draw": 4.8,
+            "home": 1.4
+          },
+          "predicted_ev": 0.33761942887454044,
+          "prediction_sha256": "8ac0418ac697b0681bb52007e470994b4e1726e111bb51e44d44459530ebc651",
+          "selection": "away",
+          "settlement": null
+        },
+        {
+          "away": "Tottenham Hotspur",
+          "home": "Chelsea",
+          "id": "e5fd59214762267a8335188d",
+          "kickoff_utc": "2026-10-24T16:30:00Z",
+          "market_probability": {
+            "away": 0.24125531732675456,
+            "draw": 0.23962740532287247,
+            "home": 0.5191172773503729
+          },
+          "model_probability": {
+            "away": 0.2631605006968595,
+            "draw": 0.25498323421194885,
+            "home": 0.48185626509119167
+          },
+          "odds": {
+            "away": 4.2,
+            "draw": 4.2,
+            "home": 1.88
+          },
+          "predicted_ev": 0.10527410292680983,
+          "prediction_sha256": "35f321cb14fb315722133962b8c22983dda878341de904cda59787468b6b1932",
+          "selection": "away",
+          "settlement": null
+        },
+        {
+          "away": "Brighton and Hove Albion",
+          "home": "Liverpool",
+          "id": "5e6617194aad3c0d197c4d1e",
+          "kickoff_utc": "2026-10-25T14:00:00Z",
+          "market_probability": {
+            "away": 0.2896100038806257,
+            "draw": 0.2450477150177116,
+            "home": 0.4653422811016627
+          },
+          "model_probability": {
+            "away": 0.2767761584171246,
+            "draw": 0.23331996173195638,
+            "home": 0.48990387985091916
+          },
+          "odds": {
+            "away": 3.4,
+            "draw": 4.0,
+            "home": 2.06
+          },
+          "predicted_ev": 0.00920199249289344,
+          "prediction_sha256": "d7b0f89d428f4bcec16da16b4112d4bab2f6e0c24d545658e7a52016d0b98a82",
+          "selection": "home",
+          "settlement": null
+        },
+        {
+          "away": "Newcastle United",
+          "home": "Crystal Palace",
+          "id": "c53b5d7742359011a7f47b12",
+          "kickoff_utc": "2026-10-25T14:00:00Z",
+          "market_probability": {
+            "away": 0.3732110112257547,
+            "draw": 0.26660578027166915,
+            "home": 0.36018320850257624
+          },
+          "model_probability": {
+            "away": 0.3706280321038193,
+            "draw": 0.26218873539256954,
+            "home": 0.3671832325036111
+          },
+          "odds": {
+            "away": 2.6,
+            "draw": 3.75,
+            "home": 2.68
+          },
+          "predicted_ev": -0.015948936890322174,
+          "prediction_sha256": "796f3a6b4e1a60f49d9b11d871cb0e6e91781415709d3bcddc0946ce57a00f44",
+          "selection": "home",
+          "settlement": null
+        },
+        {
+          "away": "Bournemouth",
+          "home": "Manchester United",
+          "id": "ee3ce2f9c7c1f4cc50460934",
+          "kickoff_utc": "2026-10-25T14:00:00Z",
+          "market_probability": {
+            "away": 0.2471060668115639,
+            "draw": 0.23507828128048774,
+            "home": 0.5178156519079483
+          },
+          "model_probability": {
+            "away": 0.25408478296216885,
+            "draw": 0.23070997709754257,
+            "home": 0.5152052399402887
+          },
+          "odds": {
+            "away": 3.9,
+            "draw": 4.25,
+            "home": 1.86
+          },
+          "predicted_ev": -0.009069346447541538,
+          "prediction_sha256": "e56568bff79854088affe9eab3f90ec3807cee56f6a4da45aac83abfd3d763ad",
+          "selection": "away",
+          "settlement": null
+        },
+        {
+          "away": "Brentford",
+          "home": "Hull City",
+          "id": "fffab6b9ffde77a73e47e635",
+          "kickoff_utc": "2026-10-25T14:00:00Z",
+          "market_probability": {
+            "away": 0.5456352712589971,
+            "draw": 0.24338909605637785,
+            "home": 0.21097563268462496
+          },
+          "model_probability": {
+            "away": 0.532480422331473,
+            "draw": 0.24030686937038828,
+            "home": 0.22721270829813872
+          },
+          "odds": {
+            "away": 1.76,
+            "draw": 4.0,
+            "home": 5.0
+          },
+          "predicted_ev": 0.13606354149069366,
+          "prediction_sha256": "0e840108ed689957c13de3f820ffb201684e19beb0bd88fecbd3c8c5e5a5b970",
+          "selection": "home",
+          "settlement": null
+        },
+        {
+          "away": "Leeds United",
+          "home": "Sunderland",
+          "id": "5ce85dd0cccb58211aeba9ee",
+          "kickoff_utc": "2026-10-25T16:30:00Z",
+          "market_probability": {
+            "away": 0.3682242837244021,
+            "draw": 0.2870936458187353,
+            "home": 0.34468207045686255
+          },
+          "model_probability": {
+            "away": 0.35189057075864494,
+            "draw": 0.28184127187594876,
+            "home": 0.36626815736540624
+          },
+          "odds": {
+            "away": 2.7,
+            "draw": 3.4,
+            "home": 2.84
+          },
+          "predicted_ev": 0.040201566917753784,
+          "prediction_sha256": "db8f471a99d126044647078b9e61c965ab6c0f6bf05128ab727b48aa48dcca93",
+          "selection": "home",
+          "settlement": null
+        }
+      ],
+      "pending_count": 20,
+      "scoring": {
+        "market_brier": null,
+        "market_log_loss": null,
+        "model_brier": null,
+        "model_log_loss": null
+      },
+      "settled_count": 0,
+      "start_date": "2026-10-17"
+    },
+    {
+      "diagnostic": {
         "max_drawdown_units": 5.0,
         "pnl_units": -5.0,
         "roi": -1.0,
@@ -1259,7 +1782,7 @@
   "official_policy": "no_validated_betting_rule",
   "schema_version": 1,
   "source_sha256": {
-    "ledger.jsonl": "6194c719320129357dd8f69e1acde21d652f7f7493c811aff5a17ad50e7ceed3",
+    "ledger.jsonl": "4224cfe561591ecec95b49644ba30a3ddeee6b66b783605002fdc454f10dc481",
     "settlements.jsonl": "b88c8d8ad3a7cb3f2043706b5136b9718aab4fb125615ef69a26220d47a6c22f"
   }
 }

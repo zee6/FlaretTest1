@@ -1,0 +1,53 @@
+{
+  "decision_weight": 0.0,
+  "historical_data_cutoff": [
+    "2026-10-12"
+  ],
+  "historical_database_sha256": "1aa8b7f883b46cad55de23e9ebe2332d992757a64fdc3de6fa1b0680793044dd",
+  "manifest_written_at_utc": "2026-10-17T09:54:54.787055+00:00",
+  "missing_shadows": {
+    "draw_possibility": "The original fixed September historical reference database is unavailable; no changed reference or retrospective replacement is substituted."
+  },
+  "official_betting_rule": null,
+  "prediction_content_sha256": [
+    "108e5a5a1aca71b39a4350cc17e3d03cd7c7d1c92ec732a97938e2d4a3383104",
+    "8a687408079b1298a437b973d0e641ec758f5bbaa25f214ff01384b129e6455d",
+    "63ef4a7c84a0a5936c7933835435d9fd829243e77c6462d66e47e277d3cfba83",
+    "b071a0e3922cac874623c36a1ba694e547679481d2d4ad9daa92ef3868667b4a",
+    "5a1d58ddd518857ea42f46720cf20ab353354ca8cda50fc7d916d743c6f97cc1",
+    "87ae51c69d400ad0efc14bc32c63eb71b74a1b0924de4ec938bbe3f4161d57b8",
+    "92e438d7f6e9a32e28cb074656d5f8cb770d7cb56cfa9289479a12aa414772dc",
+    "3a7bc3c330c4de5d109b143afa805cc3dfb875cc6c8e938e099c8a370158c0dc",
+    "25d3ae64b1e25eedaa25a41327b9ed71c84fe8c34d3cc7da7d0705689f70df28",
+    "3290d8e96a1e22fdd9fbedbfe5911b6467ebddccc260572132295c6c8703fda0"
+  ],
+  "prediction_record_ids": [
+    "10751d60dd7192d4d0c569e5",
+    "0a1ae72cef2faf75a81a6e0c",
+    "1373da2b6f7f9595cd1e6136",
+    "a76098c1e785bdb3ae70bb50",
+    "0f275529e564a0e53b3a6e92",
+    "25d37a3bfbb9239aa9f6529b",
+    "6f059dd21a1d1000a8fa188d",
+    "954875d13db28788adc00abc",
+    "a7905631df7801f9b0f7a3f7",
+    "474ddc77a4f0cc4542fec83a"
+  ],
+  "raw_snapshot_sha256": "a289bb97229aefd829a63cde248c17aa852c5bb7aa3054fd5a4226c976287172",
+  "scope": "Ten original pre-kickoff result forecasts; fixed 15/30-day recency observers; no activated betting rule.",
+  "shadow_files": {
+    "recency_15d": {
+      "locked_at_utc": "2026-10-17T09:54:51.553292+00:00",
+      "path": "prospective/shadows/2026-10-17-19/recency_15d.jsonl",
+      "sha256": "684e90200bcd4daa8e4a11346e3a4b7a45d629069697274d06edc0f378eec642"
+    },
+    "recency_30d": {
+      "locked_at_utc": "2026-10-17T09:54:53.164912+00:00",
+      "path": "prospective/shadows/2026-10-17-19/recency_30d.jsonl",
+      "sha256": "c23a2bf5ce61fe091eb9ee314cb2e5dea7fa98974937df51c3ee5e128f66ff65"
+    }
+  },
+  "slate": "2026-10-17_to_2026-10-19",
+  "snapshot_retrieved_at_utc": "2026-10-17T09:54:42.103887+00:00",
+  "workflow_run_id": "39022856403"
+}
