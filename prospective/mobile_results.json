@@ -2,11 +2,11 @@
   "batches": [
     {
       "diagnostic": {
-        "max_drawdown_units": 0.0,
-        "pnl_units": 0,
-        "roi": null,
-        "stake_units": 0,
-        "wins": 0
+        "max_drawdown_units": 1.7999999999999998,
+        "pnl_units": 0.9199999999999999,
+        "roi": 0.10222222222222221,
+        "stake_units": 9,
+        "wins": 4
       },
       "end_date": "2026-10-25",
       "frozen_at_utc": "2026-10-17T09:54:42.103887+00:00",
@@ -35,7 +35,13 @@
           "predicted_ev": 0.12668116250765005,
           "prediction_sha256": "108e5a5a1aca71b39a4350cc17e3d03cd7c7d1c92ec732a97938e2d4a3383104",
           "selection": "home",
-          "settlement": null
+          "settlement": {
+            "away_score": 2,
+            "home_score": 0,
+            "outcome": "away",
+            "pnl_units": -1.0,
+            "recorded_at_utc": "2026-10-19T18:53:17.884810+00:00"
+          }
         },
         {
           "away": "Ipswich Town",
@@ -60,7 +66,13 @@
           "predicted_ev": 0.3905648440208185,
           "prediction_sha256": "8a687408079b1298a437b973d0e641ec758f5bbaa25f214ff01384b129e6455d",
           "selection": "away",
-          "settlement": null
+          "settlement": {
+            "away_score": 2,
+            "home_score": 3,
+            "outcome": "home",
+            "pnl_units": -1.0,
+            "recorded_at_utc": "2026-10-19T18:53:17.884810+00:00"
+          }
         },
         {
           "away": "Liverpool",
@@ -85,7 +97,13 @@
           "predicted_ev": 0.07106422918361344,
           "prediction_sha256": "63ef4a7c84a0a5936c7933835435d9fd829243e77c6462d66e47e277d3cfba83",
           "selection": "away",
-          "settlement": null
+          "settlement": {
+            "away_score": 2,
+            "home_score": 1,
+            "outcome": "away",
+            "pnl_units": 1.98,
+            "recorded_at_utc": "2026-10-19T18:53:17.884810+00:00"
+          }
         },
         {
           "away": "Hull City",
@@ -110,7 +128,13 @@
           "predicted_ev": -0.00036779874597647755,
           "prediction_sha256": "b071a0e3922cac874623c36a1ba694e547679481d2d4ad9daa92ef3868667b4a",
           "selection": "home",
-          "settlement": null
+          "settlement": {
+            "away_score": 0,
+            "home_score": 1,
+            "outcome": "home",
+            "pnl_units": 0.69,
+            "recorded_at_utc": "2026-10-19T18:53:17.884810+00:00"
+          }
         },
         {
           "away": "Aston Villa",
@@ -135,7 +159,13 @@
           "predicted_ev": 0.03574196570362709,
           "prediction_sha256": "5a1d58ddd518857ea42f46720cf20ab353354ca8cda50fc7d916d743c6f97cc1",
           "selection": "away",
-          "settlement": null
+          "settlement": {
+            "away_score": 1,
+            "home_score": 0,
+            "outcome": "away",
+            "pnl_units": 2.05,
+            "recorded_at_utc": "2026-10-19T18:53:17.884810+00:00"
+          }
         },
         {
           "away": "Sunderland",
@@ -160,7 +190,13 @@
           "predicted_ev": 0.004927141983892103,
           "prediction_sha256": "87ae51c69d400ad0efc14bc32c63eb71b74a1b0924de4ec938bbe3f4161d57b8",
           "selection": "home",
-          "settlement": null
+          "settlement": {
+            "away_score": 0,
+            "home_score": 2,
+            "outcome": "home",
+            "pnl_units": 1.2000000000000002,
+            "recorded_at_utc": "2026-10-19T18:53:17.884810+00:00"
+          }
         },
         {
           "away": "Manchester United",
@@ -185,7 +221,13 @@
           "predicted_ev": 0.05040989339149071,
           "prediction_sha256": "92e438d7f6e9a32e28cb074656d5f8cb770d7cb56cfa9289479a12aa414772dc",
           "selection": "away",
-          "settlement": null
+          "settlement": {
+            "away_score": 1,
+            "home_score": 1,
+            "outcome": "draw",
+            "pnl_units": -1.0,
+            "recorded_at_utc": "2026-10-19T18:53:17.884810+00:00"
+          }
         },
         {
           "away": "Crystal Palace",
@@ -210,7 +252,13 @@
           "predicted_ev": 0.025307377006454912,
           "prediction_sha256": "3a7bc3c330c4de5d109b143afa805cc3dfb875cc6c8e938e099c8a370158c0dc",
           "selection": "away",
-          "settlement": null
+          "settlement": {
+            "away_score": 0,
+            "home_score": 5,
+            "outcome": "home",
+            "pnl_units": -1.0,
+            "recorded_at_utc": "2026-10-19T18:53:17.884810+00:00"
+          }
         },
         {
           "away": "Arsenal",
@@ -235,7 +283,13 @@
           "predicted_ev": 0.19885828285948826,
           "prediction_sha256": "25d3ae64b1e25eedaa25a41327b9ed71c84fe8c34d3cc7da7d0705689f70df28",
           "selection": "home",
-          "settlement": null
+          "settlement": {
+            "away_score": 1,
+            "home_score": 0,
+            "outcome": "away",
+            "pnl_units": -1.0,
+            "recorded_at_utc": "2026-10-19T18:53:17.884810+00:00"
+          }
         },
         {
           "away": "Coventry City",
@@ -513,23 +567,23 @@
           "settlement": null
         }
       ],
-      "pending_count": 20,
+      "pending_count": 11,
       "scoring": {
-        "market_brier": null,
-        "market_log_loss": null,
-        "model_brier": null,
-        "model_log_loss": null
+        "market_brier": 0.442921086191071,
+        "market_log_loss": 0.7840337404577707,
+        "model_brier": 0.43862596564511713,
+        "model_log_loss": 0.7786061320736076
       },
-      "settled_count": 0,
+      "settled_count": 9,
       "start_date": "2026-10-17"
     },
     {
       "diagnostic": {
-        "max_drawdown_units": 5.0,
-        "pnl_units": -5.0,
-        "roi": -1.0,
-        "stake_units": 5,
-        "wins": 0
+        "max_drawdown_units": 8.0,
+        "pnl_units": -5.6,
+        "roi": -0.6222222222222222,
+        "stake_units": 9,
+        "wins": 1
       },
       "end_date": "2026-10-12",
       "frozen_at_utc": "2026-10-10T11:51:51.936218+00:00",
@@ -713,7 +767,13 @@
           "predicted_ev": 0.030255696864853965,
           "prediction_sha256": "921fa183429a1065f66f9e9f7aa14570686f245bf16cbd9eed80981ef1fab21a",
           "selection": "away",
-          "settlement": null
+          "settlement": {
+            "away_score": 1,
+            "home_score": 3,
+            "outcome": "home",
+            "pnl_units": -1.0,
+            "recorded_at_utc": "2026-10-19T18:53:17.884810+00:00"
+          }
         },
         {
           "away": "Everton",
@@ -738,7 +798,13 @@
           "predicted_ev": 0.016943465960168824,
           "prediction_sha256": "e0fbf0ead57b5d5ca1552d0d395bea7b23bbaedcbd7d7462cdb4f3f6af7e8d5c",
           "selection": "away",
-          "settlement": null
+          "settlement": {
+            "away_score": 2,
+            "home_score": 2,
+            "outcome": "draw",
+            "pnl_units": -1.0,
+            "recorded_at_utc": "2026-10-19T18:53:17.884810+00:00"
+          }
         },
         {
           "away": "Manchester City",
@@ -763,7 +829,13 @@
           "predicted_ev": 0.1103885016345334,
           "prediction_sha256": "d820d44d29e224df06679de02e441453e90a7a9c004e49f58c029433f0ae8b30",
           "selection": "home",
-          "settlement": null
+          "settlement": {
+            "away_score": 3,
+            "home_score": 0,
+            "outcome": "away",
+            "pnl_units": -1.0,
+            "recorded_at_utc": "2026-10-19T18:53:17.884810+00:00"
+          }
         },
         {
           "away": "Newcastle United",
@@ -788,17 +860,23 @@
           "predicted_ev": 0.12317848750731186,
           "prediction_sha256": "40cd1501666bd43f5a93de5f53996e07439b4c3039111f64b27c00748327df8c",
           "selection": "home",
-          "settlement": null
+          "settlement": {
+            "away_score": 1,
+            "home_score": 4,
+            "outcome": "home",
+            "pnl_units": 2.4,
+            "recorded_at_utc": "2026-10-19T18:53:17.884810+00:00"
+          }
         }
       ],
-      "pending_count": 4,
+      "pending_count": 0,
       "scoring": {
-        "market_brier": 0.6493535784638831,
-        "market_log_loss": 1.0737398863589758,
-        "model_brier": 0.6718185403478297,
-        "model_log_loss": 1.1042362283827358
+        "market_brier": 0.6615007796551851,
+        "market_log_loss": 1.087786147856488,
+        "model_brier": 0.6772050624399536,
+        "model_log_loss": 1.1083463949905699
       },
-      "settled_count": 5,
+      "settled_count": 9,
       "start_date": "2026-10-10"
     },
     {
@@ -1778,11 +1856,11 @@
       "start_date": "2026-09-04"
     }
   ],
-  "last_settlement_at_utc": "2026-10-11T12:58:18.945134+00:00",
+  "last_settlement_at_utc": "2026-10-19T18:53:17.884810+00:00",
   "official_policy": "no_validated_betting_rule",
   "schema_version": 1,
   "source_sha256": {
     "ledger.jsonl": "4224cfe561591ecec95b49644ba30a3ddeee6b66b783605002fdc454f10dc481",
-    "settlements.jsonl": "b88c8d8ad3a7cb3f2043706b5136b9718aab4fb125615ef69a26220d47a6c22f"
+    "settlements.jsonl": "7da7aeb343e6506b8276ceab335a0e58a79e074a444912fc8e0a72954cfdb35e"
   }
 }

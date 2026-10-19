@@ -1,17 +1,25 @@
 # Football 1 — Maintained Project State
 
-**Status date:** 17 October 2026 (prospective readiness and resume checkpoint; original inventory below dated 7 September)
+**Status date:** 19 October 2026 (settlement update and resume checkpoint; original inventory below dated 7 September)
 
 **Development credit:** Godo and Dave  
 **Repository:** `zee6/FlaretTest1`
 
 This document is the maintained status map for Football 1. It consolidates the existing implementation, earlier research decisions, and the additional product/research decisions agreed on 7 September 2026.
 
-## 17 October readiness and resume checkpoint
+## 19 October settlement update and resume checkpoint
+
+**Resume from [RESUME_CHECKPOINT.md](RESUME_CHECKPOINT.md).** Thirteen verified final scores have been appended. Totals are now **59 original predictions / 48 settlements / 11 unresolved**. The exact original 10–12 October slate is complete at **9/9**; the 17–19 October slate is **9/10**, with Tottenham–Coventry unresolved at verification. The other ten unresolved fixtures are the already locked 23–25 October forecasts.
+
+[The dated settlement report](OCTOBER_2026_SETTLEMENT_UPDATE_2026-10-19.md) records all outcomes, provenance, probability comparisons and checked P&L. Football 1 trails the market on the older nine (log loss **1.108346 vs 1.087786**) and is slightly better on this weekend's nine completed matches (**0.778606 vs 0.784034**). Both small samples and the negative earlier findings remain visible. The hypothetical one-unit max-EV diagnostic is **−5.60 units** for 10–12 October and **+0.92 units** for the current partial slate. Official bets, stake and P&L remain zero; no threshold, model or observer weight changed.
+
+The evaluator now accepts an explicit registered slate while retaining the original nine-match default. The current ten-match manifest has its own CI report. The refreshed iPhone Results feed shows **9 settled / 11 pending** in the newest 17–25 October snapshot batch. The prediction, movement, odds and frozen-shadow files are unchanged, and the original 35 settlement lines remain an identical prefix. Local validation passed **345 Python tests**, feed freshness and independent arithmetic/integrity checks.
+
+## 17 October readiness checkpoint (historical)
 
 **Resume from [RESUME_CHECKPOINT.md](RESUME_CHECKPOINT.md).** The successful snapshot run [39022856403](https://github.com/zee6/FlaretTest1/actions/runs/39022856403) froze all ten 17–19 October fixtures at 09:54:42 UTC, before the first kickoff, using 5,380 historical matches through 12 October. Both existing recency observers were saved with original hashes and zero decision weight in `prospective/shadows/2026-10-17-19/`. Draw remains explicitly unavailable because its original fixed historical reference is missing.
 
-The provider also returned ten 23–25 October fixtures, so the existing workflow appended 20 primary and movement forecasts in total. There are now 59 predictions, 35 recorded settlements and 24 unresolved records. Four of those unresolved records are older 10–12 October results awaiting verified settlement. The app's newest snapshot batch spans 17–25 October; the dated manifest covers only this weekend's ten. All earlier ledger bytes were preserved, and official betting remains inactive. The temporary launch trigger is restored to manual-only in the checkpoint change.
+The provider also returned ten 23–25 October fixtures, so the existing workflow appended 20 primary and movement forecasts in total. At the 17 October checkpoint there were 59 predictions, 35 recorded settlements and 24 unresolved records. Four of those unresolved records are older 10–12 October results awaiting verified settlement. The app's newest snapshot batch spans 17–25 October; the dated manifest covers only this weekend's ten. All earlier ledger bytes were preserved, and official betting remains inactive. The temporary launch trigger is restored to manual-only in the checkpoint change.
 
 ## 10 October continuity update
 
@@ -23,7 +31,7 @@ Football 1 remains a working title. [Naming and migration notes](PROJECT_NAMING.
 
 On 11 October, the exact original September 12–14 Draw and 15-day recency forecast files were recovered and committed with their original hashes. The original 30-day file and historical database remain unavailable. [September archive recovery](SEPTEMBER_ARCHIVE_RECOVERY.md) records provenance and an offline rerun path that explicitly distinguishes the available evidence from the missing comparison.
 
-Five October forecasts have now been settled from independently verified final scores, giving 39 predictions / 35 settlements / 4 unresolved overall. [October partial results](OCTOBER_2026_PARTIAL_RESULTS.md) preserve the negative interim comparison: primary and both recency models trail the market on this five-match sample. Official betting remains inactive; the separate one-unit max-EV-every-match diagnostic lost all five selections. No forecast, threshold or weight was changed.
+At the 11 October interim checkpoint, five October forecasts had been settled from independently verified final scores, giving 39 predictions / 35 settlements / 4 unresolved overall. [October partial results](OCTOBER_2026_PARTIAL_RESULTS.md) preserve the negative interim comparison: primary and both recency models trail the market on this five-match sample. Official betting remains inactive; the separate one-unit max-EV-every-match diagnostic lost all five selections. No forecast, threshold or weight was changed.
 
 The iPhone Results tab now exposes recorded batches, scores, frozen primary/market probabilities, probability scoring and the separate hypothetical one-unit diagnostic. Its deterministic `prospective/mobile_results.json` feed is generated from semantically validated ledgers; CI checks freshness. Official portfolio status remains inactive with zero bets. This screen does not yet display recency or Draw shadow comparisons. See the [iPhone guide](../ios/Football1Mobile/README.md) for Xcode, refresh and simulator-preview instructions.
 

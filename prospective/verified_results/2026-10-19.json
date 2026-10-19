@@ -1,0 +1,131 @@
+{
+  "results": [
+    {
+      "away": "Everton",
+      "away_score": 2,
+      "home": "Hull City",
+      "home_score": 2,
+      "match_date": "2026-10-11",
+      "prediction_content_sha256": "e0fbf0ead57b5d5ca1552d0d395bea7b23bbaedcbd7d7462cdb4f3f6af7e8d5c",
+      "prediction_record_id": "aedc9a1a78ae57d247818778"
+    },
+    {
+      "away": "Nottingham Forest",
+      "away_score": 1,
+      "home": "Crystal Palace",
+      "home_score": 3,
+      "match_date": "2026-10-11",
+      "prediction_content_sha256": "921fa183429a1065f66f9e9f7aa14570686f245bf16cbd9eed80981ef1fab21a",
+      "prediction_record_id": "569ac958c81e16ffb451a8ae"
+    },
+    {
+      "away": "Manchester City",
+      "away_score": 3,
+      "home": "Liverpool",
+      "home_score": 0,
+      "match_date": "2026-10-11",
+      "prediction_content_sha256": "d820d44d29e224df06679de02e441453e90a7a9c004e49f58c029433f0ae8b30",
+      "prediction_record_id": "10a0d7662dc4aa77b4470119"
+    },
+    {
+      "away": "Newcastle United",
+      "away_score": 1,
+      "home": "Coventry City",
+      "home_score": 4,
+      "match_date": "2026-10-12",
+      "prediction_content_sha256": "40cd1501666bd43f5a93de5f53996e07439b4c3039111f64b27c00748327df8c",
+      "prediction_record_id": "ba0087491ca53cc1b98239d2"
+    },
+    {
+      "away": "Chelsea",
+      "away_score": 2,
+      "home": "Everton",
+      "home_score": 0,
+      "match_date": "2026-10-17",
+      "prediction_content_sha256": "108e5a5a1aca71b39a4350cc17e3d03cd7c7d1c92ec732a97938e2d4a3383104",
+      "prediction_record_id": "10751d60dd7192d4d0c569e5"
+    },
+    {
+      "away": "Liverpool",
+      "away_score": 2,
+      "home": "Brentford",
+      "home_score": 1,
+      "match_date": "2026-10-17",
+      "prediction_content_sha256": "63ef4a7c84a0a5936c7933835435d9fd829243e77c6462d66e47e277d3cfba83",
+      "prediction_record_id": "1373da2b6f7f9595cd1e6136"
+    },
+    {
+      "away": "Hull City",
+      "away_score": 0,
+      "home": "Fulham",
+      "home_score": 1,
+      "match_date": "2026-10-17",
+      "prediction_content_sha256": "b071a0e3922cac874623c36a1ba694e547679481d2d4ad9daa92ef3868667b4a",
+      "prediction_record_id": "a76098c1e785bdb3ae70bb50"
+    },
+    {
+      "away": "Ipswich Town",
+      "away_score": 2,
+      "home": "Manchester City",
+      "home_score": 3,
+      "match_date": "2026-10-17",
+      "prediction_content_sha256": "8a687408079b1298a437b973d0e641ec758f5bbaa25f214ff01384b129e6455d",
+      "prediction_record_id": "0a1ae72cef2faf75a81a6e0c"
+    },
+    {
+      "away": "Aston Villa",
+      "away_score": 1,
+      "home": "Newcastle United",
+      "home_score": 0,
+      "match_date": "2026-10-17",
+      "prediction_content_sha256": "5a1d58ddd518857ea42f46720cf20ab353354ca8cda50fc7d916d743c6f97cc1",
+      "prediction_record_id": "0f275529e564a0e53b3a6e92"
+    },
+    {
+      "away": "Sunderland",
+      "away_score": 0,
+      "home": "Bournemouth",
+      "home_score": 2,
+      "match_date": "2026-10-18",
+      "prediction_content_sha256": "87ae51c69d400ad0efc14bc32c63eb71b74a1b0924de4ec938bbe3f4161d57b8",
+      "prediction_record_id": "25d37a3bfbb9239aa9f6529b"
+    },
+    {
+      "away": "Crystal Palace",
+      "away_score": 0,
+      "home": "Brighton and Hove Albion",
+      "home_score": 5,
+      "match_date": "2026-10-18",
+      "prediction_content_sha256": "3a7bc3c330c4de5d109b143afa805cc3dfb875cc6c8e938e099c8a370158c0dc",
+      "prediction_record_id": "954875d13db28788adc00abc"
+    },
+    {
+      "away": "Manchester United",
+      "away_score": 1,
+      "home": "Leeds United",
+      "home_score": 1,
+      "match_date": "2026-10-18",
+      "prediction_content_sha256": "92e438d7f6e9a32e28cb074656d5f8cb770d7cb56cfa9289479a12aa414772dc",
+      "prediction_record_id": "6f059dd21a1d1000a8fa188d"
+    },
+    {
+      "away": "Arsenal",
+      "away_score": 1,
+      "home": "Nottingham Forest",
+      "home_score": 0,
+      "match_date": "2026-10-18",
+      "prediction_content_sha256": "25d3ae64b1e25eedaa25a41327b9ed71c84fe8c34d3cc7da7d0705689f70df28",
+      "prediction_record_id": "a7905631df7801f9b0f7a3f7"
+    }
+  ],
+  "source_type": "manually_verified_published_final_scores",
+  "source_urls": [
+    "https://www.footballwebpages.co.uk/premier-league/fixtures-results",
+    "https://www.nbcsports.com/soccer/news/premier-league-schedule-for-2026-27-season-released"
+  ],
+  "structured_epl_results_cross_check": true,
+  "unsettled_current_slate": [
+    "Tottenham Hotspur v Coventry City \u2014 no final score recorded"
+  ],
+  "verified_at_utc": "2026-10-19T18:53:17.884810+00:00"
+}
