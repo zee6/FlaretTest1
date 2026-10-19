@@ -1,0 +1,47 @@
+name: EPL Prospective Slate Evaluation 2026-10-17 to 19
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/prospective-slate-2026-10-17-19.yml'
+      - 'src/football1/**'
+      - 'tests/test_october_slate_report.py'
+      - 'prospective/ledger.jsonl'
+      - 'prospective/settlements.jsonl'
+      - 'prospective/shadows/2026-10-17-19/**'
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/prospective-slate-2026-10-17-19.yml'
+      - 'src/football1/**'
+      - 'tests/test_october_slate_report.py'
+      - 'prospective/ledger.jsonl'
+      - 'prospective/settlements.jsonl'
+      - 'prospective/shadows/2026-10-17-19/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install research dependencies
+        run: pip install -e '.[dev]'
+      - name: Run tests
+        run: pytest -q
+      - name: Verify frozen evidence and evaluate the exact ten-match sample
+        run: |
+          python -m football1.october_slate_report --slate 2026-10-17-19 --output /tmp/october-slate-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: epl-prospective-slate-evaluation-2026-10-17-19
+          path: /tmp/october-slate-report.json
+          if-no-files-found: error
+          retention-days: 90
