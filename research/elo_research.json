@@ -65,11 +65,11 @@
       "team": "Brentford"
     },
     {
-      "change_5_matches": -8.776102000582796,
+      "change_5_matches": 4.334567588866776,
       "rank": 10,
-      "rating": 1515.8588959177976,
-      "season_change": -0.2730947316449601,
-      "team": "Newcastle"
+      "rating": 1520.8711791854064,
+      "season_change": 15.240913377824427,
+      "team": "Everton"
     },
     {
       "change_5_matches": -14.48399097170045,
@@ -79,11 +79,11 @@
       "team": "Leeds"
     },
     {
-      "change_5_matches": -7.634014376224968,
+      "change_5_matches": -13.08753934653987,
       "rank": 12,
-      "rating": 1508.54535916208,
-      "season_change": 2.91509335449814,
-      "team": "Everton"
+      "rating": 1503.5330758944713,
+      "season_change": -12.598914754971247,
+      "team": "Newcastle"
     },
     {
       "change_5_matches": 15.62477588522529,
@@ -1639,6 +1639,11 @@
         "date": "2026-10-24",
         "rating": 1512.5879736174493,
         "season_start_year": 2026
+      },
+      {
+        "date": "2026-11-02",
+        "rating": 1508.54535916208,
+        "season_start_year": 2026
       }
     ],
     "Fulham": [
@@ -2785,6 +2790,11 @@
         "date": "2026-10-25",
         "rating": 1504.1868012575587,
         "season_start_year": 2026
+      },
+      {
+        "date": "2026-11-02",
+        "rating": 1515.8588959177976,
+        "season_start_year": 2026
       }
     ],
     "Nott'm Forest": [
@@ -3250,8 +3260,8 @@
     ]
   },
   "history_policy": "Every plotted value is an exact leakage-safe pre-match rating. The graph covers the latest three years. Current-season matches are kept individually; earlier months keep the final pre-match snapshot in each calendar month. Same-day results are applied only after all fixtures on that date are frozen.",
-  "history_start_date": "2023-11-01",
-  "latest_match_date": "2026-11-01",
+  "history_start_date": "2023-11-02",
+  "latest_match_date": "2026-11-02",
   "latest_season_start_year": 2026,
   "model": "elo_1x2_v1",
   "parameters": {
