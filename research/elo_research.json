@@ -44,10 +44,10 @@
       "team": "Aston Villa"
     },
     {
-      "change_5_matches": -8.489040650976676,
+      "change_5_matches": -3.031819416551798,
       "rank": 7,
-      "rating": 1535.2216823074289,
-      "season_change": 7.4183654757248405,
+      "rating": 1542.8880161868328,
+      "season_change": 15.084699355128805,
       "team": "Brentford"
     },
     {
@@ -65,18 +65,18 @@
       "team": "Leeds"
     },
     {
-      "change_5_matches": 5.073745208562968,
-      "rank": 10,
-      "rating": 1527.619899029109,
-      "season_change": 21.98963322152713,
-      "team": "Everton"
-    },
-    {
       "change_5_matches": -16.487561174729308,
-      "rank": 11,
+      "rank": 10,
       "rating": 1520.7796343838806,
       "season_change": -4.1666778708438414,
       "team": "Chelsea"
+    },
+    {
+      "change_5_matches": -4.402691242070887,
+      "rank": 11,
+      "rating": 1519.9535651497051,
+      "season_change": 14.323299342123164,
+      "team": "Everton"
     },
     {
       "change_5_matches": -6.738346432965727,
@@ -904,6 +904,11 @@
         "date": "2026-11-08",
         "rating": 1542.1843552203663,
         "season_start_year": 2026
+      },
+      {
+        "date": "2026-11-23",
+        "rating": 1535.2216823074289,
+        "season_start_year": 2026
       }
     ],
     "Brighton": [
@@ -1723,6 +1728,11 @@
       {
         "date": "2026-11-06",
         "rating": 1520.8711791854064,
+        "season_start_year": 2026
+      },
+      {
+        "date": "2026-11-23",
+        "rating": 1527.619899029109,
         "season_start_year": 2026
       }
     ],
@@ -3450,8 +3460,8 @@
     ]
   },
   "history_policy": "Every plotted value is an exact leakage-safe pre-match rating. The graph covers the latest three years. Current-season matches are kept individually; earlier months keep the final pre-match snapshot in each calendar month. Same-day results are applied only after all fixtures on that date are frozen.",
-  "history_start_date": "2023-11-22",
-  "latest_match_date": "2026-11-22",
+  "history_start_date": "2023-11-23",
+  "latest_match_date": "2026-11-23",
   "latest_season_start_year": 2026,
   "model": "elo_1x2_v1",
   "parameters": {
